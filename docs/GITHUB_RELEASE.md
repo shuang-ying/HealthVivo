@@ -2,6 +2,8 @@
 
 本地仓库根目录是 `D:\AgentProject\codex\Application\Android\Health vivo`，一个仓库管理 `android`、`watch`、`orbitv` 三个工程。`HealthVivoWatch` 是正式 watch 目录链接，`HealthVivoWatchDev` 是独立演示副本，不要另建重复仓库。
 
+当前已配置 `origin = https://github.com/shuang-ying/HealthVivo.git`，`main` 已上传并跟踪 `origin/main`。已发布 [v0.12.3 预发布](https://github.com/shuang-ying/HealthVivo/releases/tag/v0.12.3)。当前电脑不用重复初始化、添加 origin 或重复发布这个标签。
+
 ## 首次上传
 
 1. 在 GitHub 新建空仓库，选择公开或私有。不要勾选自动创建 README、.gitignore 或 License，以免与已有本地首次提交冲突。
@@ -14,6 +16,8 @@ git push -u origin main
 ```
 
 首次认证通过 Git Credential Manager 的浏览器登录完成；不要把令牌写进远程地址或提交到文件。若仓库已有提交，先获取和检查历史，再合并，不要强制推送覆盖。
+
+本机 GitHub CLI 已使用浏览器授权 shuang-ying，便携程序在 `.tools/github-cli/bin/gh.exe`；本仓库的认证 helper 指向它，设置仅保存在未上传的 `.git/config`。Git HTTPS 已采用当前 Windows 系统代理；如果以后更换或关闭代理，在本仓库更新／取消 `http.https://github.com/.proxy`，不要关闭 TLS 证书校验。
 
 ## 后续开发
 
@@ -54,6 +58,8 @@ GitHub 会自动提供该标签的源码归档，安装包需额外作为附件�
 ## 可选：GitHub CLI
 
 安装 GitHub CLI 后使用浏览器授权，密钥无需发到聊天中：
+
+本机便携版未加入系统 PATH，可在项目根目录用 `& './.tools/github-cli/bin/gh.exe'` 代替下面的 `gh`。其他电脑安装 GitHub CLI 后正常使用 `gh`。
 
 ```powershell
 gh auth login --hostname github.com --git-protocol https --web

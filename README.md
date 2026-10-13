@@ -2,6 +2,8 @@
 
 GitHub 上传与三套软件的 Release 发布说明见 [GITHUB_RELEASE.md](docs/GITHUB_RELEASE.md)。源码由一个仓库管理，安装包作为 Release 附件上传。
 
+仓库：[shuang-ying/HealthVivo](https://github.com/shuang-ying/HealthVivo)。首个预发布：[v0.12.3](https://github.com/shuang-ying/HealthVivo/releases/tag/v0.12.3)，包含手机 0.12.3、手表 0.5.3、OrbitV 扩展 1.2.0。APK 为调试构建，本版 GT2 数轴实机显示仍待确认。
+
 通过用户录入或选择的食物照片、文字、体重与运动数据，计算热量参考值和记录趋势。手机独立记录、BMI、手动体脂率与 AI 建议继续可用；手表通过 OrbitV 本机扩展程序与蓝牙通道同步，不读取 vivo 健康数据库。
 
 手表看板：iQOO WATCH GT2 / BlueOS 3 显示步数、运动、热量、三餐、体重、目标和手机 AI 建议，并可按天离线查询。只在手机点击“更新到手表”或手表主页底部点击“获取更新”后同步，按日期只更新新增和修改的摘要；保存记录和切换日期不自动同步。需要手机持续本机接口及 OrbitV 扩展程序页面开启，实验 BLE 连接入口已移除。安装与使用说明见 [ORBITV_SYNC.md](docs/ORBITV_SYNC.md)。
