@@ -1,0 +1,2875 @@
+[
+  {
+    "id": "usda-168878",
+    "name": "熟米饭",
+    "aliases": [
+      "米饭",
+      "白米饭"
+    ],
+    "category": "主食",
+    "kcalPer100g": 130.0,
+    "protein": 2.69,
+    "fat": 0.28,
+    "carbs": 28.17,
+    "reference": "USDA SR Legacy 2018 / FDC 168878",
+    "description": "Rice, white, long-grain, regular, enriched, cooked"
+  },
+  {
+    "id": "usda-169704",
+    "name": "熟糙米饭",
+    "aliases": [
+      "糙米饭"
+    ],
+    "category": "主食",
+    "kcalPer100g": 123.0,
+    "protein": 2.74,
+    "fat": 0.97,
+    "carbs": 25.58,
+    "reference": "USDA SR Legacy 2018 / FDC 169704",
+    "description": "Rice, brown, long-grain, cooked (Includes foods for USDA's Food Distribution Program)"
+  },
+  {
+    "id": "usda-168919",
+    "name": "熟鸡蛋面（含盐）",
+    "aliases": [
+      "鸡蛋面"
+    ],
+    "category": "主食",
+    "kcalPer100g": 138.0,
+    "protein": 4.54,
+    "fat": 2.07,
+    "carbs": 25.16,
+    "reference": "USDA SR Legacy 2018 / FDC 168919",
+    "description": "Noodles, egg, cooked, enriched, with added salt"
+  },
+  {
+    "id": "usda-172686",
+    "name": "小麦面包",
+    "aliases": [
+      "面包"
+    ],
+    "category": "主食",
+    "kcalPer100g": 274.0,
+    "protein": 10.67,
+    "fat": 4.53,
+    "carbs": 47.54,
+    "reference": "USDA SR Legacy 2018 / FDC 172686",
+    "description": "Bread, wheat"
+  },
+  {
+    "id": "usda-173424",
+    "name": "水煮鸡蛋",
+    "aliases": [
+      "鸡蛋",
+      "煮鸡蛋"
+    ],
+    "category": "肉蛋鱼",
+    "kcalPer100g": 155.0,
+    "protein": 12.58,
+    "fat": 10.61,
+    "carbs": 1.12,
+    "reference": "USDA SR Legacy 2018 / FDC 173424",
+    "description": "Egg, whole, cooked, hard-boiled"
+  },
+  {
+    "id": "usda-171287",
+    "name": "生鸡蛋",
+    "aliases": [],
+    "category": "肉蛋鱼",
+    "kcalPer100g": 143.0,
+    "protein": 12.56,
+    "fat": 9.51,
+    "carbs": 0.72,
+    "reference": "USDA SR Legacy 2018 / FDC 171287",
+    "description": "Egg, whole, raw, fresh"
+  },
+  {
+    "id": "usda-171265",
+    "name": "全脂牛奶",
+    "aliases": [
+      "牛奶"
+    ],
+    "category": "乳制品",
+    "kcalPer100g": 61.0,
+    "protein": 3.15,
+    "fat": 3.25,
+    "carbs": 4.8,
+    "reference": "USDA SR Legacy 2018 / FDC 171265",
+    "description": "Milk, whole, 3.25% milkfat, with added vitamin D"
+  },
+  {
+    "id": "usda-171284",
+    "name": "原味全脂酸奶",
+    "aliases": [
+      "原味酸奶"
+    ],
+    "category": "乳制品",
+    "kcalPer100g": 61.0,
+    "protein": 3.47,
+    "fat": 3.25,
+    "carbs": 4.66,
+    "reference": "USDA SR Legacy 2018 / FDC 171284",
+    "description": "Yogurt, plain, whole milk"
+  },
+  {
+    "id": "usda-170886",
+    "name": "原味低脂酸奶",
+    "aliases": [
+      "低脂酸奶"
+    ],
+    "category": "乳制品",
+    "kcalPer100g": 63.0,
+    "protein": 5.25,
+    "fat": 1.55,
+    "carbs": 7.04,
+    "reference": "USDA SR Legacy 2018 / FDC 170886",
+    "description": "Yogurt, plain, low fat"
+  },
+  {
+    "id": "usda-171477",
+    "name": "烤鸡胸肉（去皮）",
+    "aliases": [
+      "熟鸡胸肉"
+    ],
+    "category": "肉蛋鱼",
+    "kcalPer100g": 165.0,
+    "protein": 31.02,
+    "fat": 3.57,
+    "carbs": 0.0,
+    "reference": "USDA SR Legacy 2018 / FDC 171477",
+    "description": "Chicken, broilers or fryers, breast, meat only, cooked, roasted"
+  },
+  {
+    "id": "usda-168250",
+    "name": "烤猪里脊（瘦肉）",
+    "aliases": [
+      "熟猪里脊"
+    ],
+    "category": "肉蛋鱼",
+    "kcalPer100g": 143.0,
+    "protein": 26.17,
+    "fat": 3.51,
+    "carbs": 0.0,
+    "reference": "USDA SR Legacy 2018 / FDC 168250",
+    "description": "Pork, fresh, loin, tenderloin, separable lean only, cooked, roasted"
+  },
+  {
+    "id": "usda-174031",
+    "name": "烤牛肉饼（90%瘦肉）",
+    "aliases": [
+      "牛肉饼"
+    ],
+    "category": "肉蛋鱼",
+    "kcalPer100g": 217.0,
+    "protein": 26.11,
+    "fat": 11.75,
+    "carbs": 0.0,
+    "reference": "USDA SR Legacy 2018 / FDC 174031",
+    "description": "Beef, ground, 90% lean meat / 10% fat, patty, cooked, broiled"
+  },
+  {
+    "id": "usda-175168",
+    "name": "熟三文鱼（养殖，干热）",
+    "aliases": [
+      "熟三文鱼"
+    ],
+    "category": "肉蛋鱼",
+    "kcalPer100g": 206.0,
+    "protein": 22.1,
+    "fat": 12.35,
+    "carbs": 0.0,
+    "reference": "USDA SR Legacy 2018 / FDC 175168",
+    "description": "Fish, salmon, Atlantic, farmed, cooked, dry heat"
+  },
+  {
+    "id": "usda-175180",
+    "name": "熟虾",
+    "aliases": [
+      "虾"
+    ],
+    "category": "肉蛋鱼",
+    "kcalPer100g": 99.0,
+    "protein": 23.98,
+    "fat": 0.28,
+    "carbs": 0.2,
+    "reference": "USDA SR Legacy 2018 / FDC 175180",
+    "description": "Crustaceans, shrimp, cooked"
+  },
+  {
+    "id": "usda-172476",
+    "name": "普通豆腐（未烹调）",
+    "aliases": [
+      "豆腐"
+    ],
+    "category": "豆类",
+    "kcalPer100g": 76.0,
+    "protein": 8.08,
+    "fat": 4.78,
+    "carbs": 1.87,
+    "reference": "USDA SR Legacy 2018 / FDC 172476",
+    "description": "Tofu, raw, regular, prepared with calcium sulfate"
+  },
+  {
+    "id": "usda-172448",
+    "name": "硬豆腐（未烹调）",
+    "aliases": [
+      "硬豆腐"
+    ],
+    "category": "豆类",
+    "kcalPer100g": 78.0,
+    "protein": 9.04,
+    "fat": 4.17,
+    "carbs": 2.85,
+    "reference": "USDA SR Legacy 2018 / FDC 172448",
+    "description": "Tofu, firm, prepared with calcium sulfate and magnesium chloride (nigari)"
+  },
+  {
+    "id": "usda-171688",
+    "name": "苹果（带皮）",
+    "aliases": [
+      "苹果"
+    ],
+    "category": "水果",
+    "kcalPer100g": 52.0,
+    "protein": 0.26,
+    "fat": 0.17,
+    "carbs": 13.81,
+    "reference": "USDA SR Legacy 2018 / FDC 171688",
+    "description": "Apples, raw, with skin (Includes foods for USDA's Food Distribution Program)"
+  },
+  {
+    "id": "usda-173944",
+    "name": "香蕉（去皮可食部）",
+    "aliases": [
+      "香蕉"
+    ],
+    "category": "水果",
+    "kcalPer100g": 89.0,
+    "protein": 1.09,
+    "fat": 0.33,
+    "carbs": 22.84,
+    "reference": "USDA SR Legacy 2018 / FDC 173944",
+    "description": "Bananas, raw"
+  },
+  {
+    "id": "usda-169097",
+    "name": "橙子（可食部）",
+    "aliases": [
+      "橙子"
+    ],
+    "category": "水果",
+    "kcalPer100g": 47.0,
+    "protein": 0.94,
+    "fat": 0.12,
+    "carbs": 11.75,
+    "reference": "USDA SR Legacy 2018 / FDC 169097",
+    "description": "Oranges, raw, all commercial varieties"
+  },
+  {
+    "id": "usda-174683",
+    "name": "葡萄",
+    "aliases": [
+      "葡萄"
+    ],
+    "category": "水果",
+    "kcalPer100g": 69.0,
+    "protein": 0.72,
+    "fat": 0.16,
+    "carbs": 18.1,
+    "reference": "USDA SR Legacy 2018 / FDC 174683",
+    "description": "Grapes, red or green (European type, such as Thompson seedless), raw"
+  },
+  {
+    "id": "usda-167762",
+    "name": "草莓",
+    "aliases": [
+      "草莓"
+    ],
+    "category": "水果",
+    "kcalPer100g": 32.0,
+    "protein": 0.67,
+    "fat": 0.3,
+    "carbs": 7.68,
+    "reference": "USDA SR Legacy 2018 / FDC 167762",
+    "description": "Strawberries, raw"
+  },
+  {
+    "id": "usda-168153",
+    "name": "绿心猕猴桃",
+    "aliases": [
+      "猕猴桃"
+    ],
+    "category": "水果",
+    "kcalPer100g": 61.0,
+    "protein": 1.14,
+    "fat": 0.52,
+    "carbs": 14.66,
+    "reference": "USDA SR Legacy 2018 / FDC 168153",
+    "description": "Kiwifruit, green, raw"
+  },
+  {
+    "id": "usda-167765",
+    "name": "西瓜（果肉）",
+    "aliases": [
+      "西瓜"
+    ],
+    "category": "水果",
+    "kcalPer100g": 30.0,
+    "protein": 0.61,
+    "fat": 0.15,
+    "carbs": 7.55,
+    "reference": "USDA SR Legacy 2018 / FDC 167765",
+    "description": "Watermelon, raw"
+  },
+  {
+    "id": "usda-169118",
+    "name": "梨（可食部）",
+    "aliases": [
+      "梨"
+    ],
+    "category": "水果",
+    "kcalPer100g": 57.0,
+    "protein": 0.36,
+    "fat": 0.14,
+    "carbs": 15.23,
+    "reference": "USDA SR Legacy 2018 / FDC 169118",
+    "description": "Pears, raw"
+  },
+  {
+    "id": "usda-171705",
+    "name": "牛油果（果肉）",
+    "aliases": [
+      "牛油果"
+    ],
+    "category": "水果",
+    "kcalPer100g": 160.0,
+    "protein": 2.0,
+    "fat": 14.66,
+    "carbs": 8.53,
+    "reference": "USDA SR Legacy 2018 / FDC 171705",
+    "description": "Avocados, raw, all commercial varieties"
+  },
+  {
+    "id": "usda-170379",
+    "name": "生西兰花",
+    "aliases": [
+      "西兰花"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 34.0,
+    "protein": 2.82,
+    "fat": 0.37,
+    "carbs": 6.64,
+    "reference": "USDA SR Legacy 2018 / FDC 170379",
+    "description": "Broccoli, raw"
+  },
+  {
+    "id": "usda-170457",
+    "name": "生番茄",
+    "aliases": [
+      "番茄",
+      "西红柿"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 18.0,
+    "protein": 0.88,
+    "fat": 0.2,
+    "carbs": 3.89,
+    "reference": "USDA SR Legacy 2018 / FDC 170457",
+    "description": "Tomatoes, red, ripe, raw, year round average"
+  },
+  {
+    "id": "usda-168409",
+    "name": "生黄瓜（带皮）",
+    "aliases": [
+      "黄瓜"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 15.0,
+    "protein": 0.65,
+    "fat": 0.11,
+    "carbs": 3.63,
+    "reference": "USDA SR Legacy 2018 / FDC 168409",
+    "description": "Cucumber, with peel, raw"
+  },
+  {
+    "id": "usda-170393",
+    "name": "生胡萝卜",
+    "aliases": [
+      "胡萝卜"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 41.0,
+    "protein": 0.93,
+    "fat": 0.24,
+    "carbs": 9.58,
+    "reference": "USDA SR Legacy 2018 / FDC 170393",
+    "description": "Carrots, raw"
+  },
+  {
+    "id": "usda-168462",
+    "name": "生菠菜",
+    "aliases": [
+      "菠菜"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 23.0,
+    "protein": 2.86,
+    "fat": 0.39,
+    "carbs": 3.63,
+    "reference": "USDA SR Legacy 2018 / FDC 168462",
+    "description": "Spinach, raw"
+  },
+  {
+    "id": "usda-169975",
+    "name": "生卷心菜",
+    "aliases": [
+      "卷心菜",
+      "包菜"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 25.0,
+    "protein": 1.28,
+    "fat": 0.1,
+    "carbs": 5.8,
+    "reference": "USDA SR Legacy 2018 / FDC 169975",
+    "description": "Cabbage, raw"
+  },
+  {
+    "id": "usda-170440",
+    "name": "水煮土豆（去皮）",
+    "aliases": [
+      "熟土豆"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 86.0,
+    "protein": 1.71,
+    "fat": 0.1,
+    "carbs": 20.01,
+    "reference": "USDA SR Legacy 2018 / FDC 170440",
+    "description": "Potatoes, boiled, cooked without skin, flesh, without salt"
+  },
+  {
+    "id": "usda-168484",
+    "name": "水煮红薯（去皮）",
+    "aliases": [
+      "熟红薯"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 76.0,
+    "protein": 1.37,
+    "fat": 0.14,
+    "carbs": 17.72,
+    "reference": "USDA SR Legacy 2018 / FDC 168484",
+    "description": "Sweet potato, cooked, boiled, without skin"
+  },
+  {
+    "id": "usda-169999",
+    "name": "水煮甜玉米（无盐）",
+    "aliases": [
+      "熟玉米"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 96.0,
+    "protein": 3.41,
+    "fat": 1.5,
+    "carbs": 20.98,
+    "reference": "USDA SR Legacy 2018 / FDC 169999",
+    "description": "Corn, sweet, yellow, cooked, boiled, drained, without salt"
+  },
+  {
+    "id": "usda-169251",
+    "name": "生白蘑菇",
+    "aliases": [
+      "白蘑菇"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 22.0,
+    "protein": 3.09,
+    "fat": 0.34,
+    "carbs": 3.26,
+    "reference": "USDA SR Legacy 2018 / FDC 169251",
+    "description": "Mushrooms, white, raw"
+  },
+  {
+    "id": "usda-169283",
+    "name": "水煮毛豆（无盐）",
+    "aliases": [
+      "熟毛豆"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 141.0,
+    "protein": 12.35,
+    "fat": 6.4,
+    "carbs": 11.05,
+    "reference": "USDA SR Legacy 2018 / FDC 169283",
+    "description": "Soybeans, green, cooked, boiled, drained, without salt"
+  },
+  {
+    "id": "usda-173757",
+    "name": "水煮鹰嘴豆（无盐）",
+    "aliases": [
+      "熟鹰嘴豆"
+    ],
+    "category": "豆类",
+    "kcalPer100g": 164.0,
+    "protein": 8.86,
+    "fat": 2.59,
+    "carbs": 27.42,
+    "reference": "USDA SR Legacy 2018 / FDC 173757",
+    "description": "Chickpeas (garbanzo beans, bengal gram), mature seeds, cooked, boiled, without salt"
+  },
+  {
+    "id": "usda-172421",
+    "name": "水煮扁豆（无盐）",
+    "aliases": [
+      "熟扁豆"
+    ],
+    "category": "豆类",
+    "kcalPer100g": 116.0,
+    "protein": 9.02,
+    "fat": 0.38,
+    "carbs": 20.13,
+    "reference": "USDA SR Legacy 2018 / FDC 172421",
+    "description": "Lentils, mature seeds, cooked, boiled, without salt"
+  },
+  {
+    "id": "usda-172430",
+    "name": "生花生仁",
+    "aliases": [
+      "花生仁"
+    ],
+    "category": "坚果",
+    "kcalPer100g": 567.0,
+    "protein": 25.8,
+    "fat": 49.24,
+    "carbs": 16.13,
+    "reference": "USDA SR Legacy 2018 / FDC 172430",
+    "description": "Peanuts, all types, raw"
+  },
+  {
+    "id": "usda-170567",
+    "name": "杏仁",
+    "aliases": [
+      "杏仁"
+    ],
+    "category": "坚果",
+    "kcalPer100g": 579.0,
+    "protein": 21.15,
+    "fat": 49.93,
+    "carbs": 21.55,
+    "reference": "USDA SR Legacy 2018 / FDC 170567",
+    "description": "Nuts, almonds"
+  },
+  {
+    "id": "usda-170150",
+    "name": "芝麻（干）",
+    "aliases": [
+      "芝麻"
+    ],
+    "category": "坚果",
+    "kcalPer100g": 573.0,
+    "protein": 17.73,
+    "fat": 49.67,
+    "carbs": 23.45,
+    "reference": "USDA SR Legacy 2018 / FDC 170150",
+    "description": "Seeds, sesame seeds, whole, dried"
+  },
+  {
+    "id": "usda-171413",
+    "name": "橄榄油",
+    "aliases": [
+      "橄榄油"
+    ],
+    "category": "油脂调味",
+    "kcalPer100g": 884.0,
+    "protein": 0.0,
+    "fat": 100.0,
+    "carbs": 0.0,
+    "reference": "USDA SR Legacy 2018 / FDC 171413",
+    "description": "Oil, olive, salad or cooking"
+  },
+  {
+    "id": "usda-171411",
+    "name": "大豆油",
+    "aliases": [
+      "大豆油"
+    ],
+    "category": "油脂调味",
+    "kcalPer100g": 884.0,
+    "protein": 0.0,
+    "fat": 100.0,
+    "carbs": 0.0,
+    "reference": "USDA SR Legacy 2018 / FDC 171411",
+    "description": "Oil, soybean, salad or cooking"
+  },
+  {
+    "id": "usda-169655",
+    "name": "白砂糖",
+    "aliases": [
+      "白糖"
+    ],
+    "category": "零食",
+    "kcalPer100g": 387.0,
+    "protein": 0.0,
+    "fat": 0.0,
+    "carbs": 99.98,
+    "reference": "USDA SR Legacy 2018 / FDC 169655",
+    "description": "Sugars, granulated"
+  },
+  {
+    "id": "usda-169640",
+    "name": "蜂蜜",
+    "aliases": [
+      "蜂蜜"
+    ],
+    "category": "零食",
+    "kcalPer100g": 304.0,
+    "protein": 0.3,
+    "fat": 0.0,
+    "carbs": 82.4,
+    "reference": "USDA SR Legacy 2018 / FDC 169640",
+    "description": "Honey"
+  },
+  {
+    "id": "usda-173904",
+    "name": "干燕麦片",
+    "aliases": [
+      "燕麦片"
+    ],
+    "category": "主食",
+    "kcalPer100g": 379.0,
+    "protein": 13.15,
+    "fat": 6.52,
+    "carbs": 67.7,
+    "reference": "USDA SR Legacy 2018 / FDC 173904",
+    "description": "Cereals, oats, regular and quick, not fortified, dry"
+  },
+  {
+    "id": "usda-173905",
+    "name": "水煮燕麦粥（无盐）",
+    "aliases": [
+      "燕麦粥"
+    ],
+    "category": "主食",
+    "kcalPer100g": 71.0,
+    "protein": 2.54,
+    "fat": 1.52,
+    "carbs": 12.0,
+    "reference": "USDA SR Legacy 2018 / FDC 173905",
+    "description": "Cereals, oats, regular and quick, unenriched, cooked with water (includes boiling and microwaving), without salt"
+  },
+  {
+    "id": "usda-168872",
+    "name": "生燕麦麸",
+    "aliases": [
+      "燕麦麸"
+    ],
+    "category": "主食",
+    "kcalPer100g": 246.0,
+    "protein": 17.3,
+    "fat": 7.03,
+    "carbs": 66.22,
+    "reference": "USDA SR Legacy 2018 / FDC 168872",
+    "description": "Oat bran, raw"
+  },
+  {
+    "id": "usda-168874",
+    "name": "生藜麦",
+    "aliases": [],
+    "category": "主食",
+    "kcalPer100g": 368.0,
+    "protein": 14.12,
+    "fat": 6.07,
+    "carbs": 64.16,
+    "reference": "USDA SR Legacy 2018 / FDC 168874",
+    "description": "Quinoa, uncooked"
+  },
+  {
+    "id": "usda-168917",
+    "name": "熟藜麦",
+    "aliases": [
+      "藜麦"
+    ],
+    "category": "主食",
+    "kcalPer100g": 120.0,
+    "protein": 4.4,
+    "fat": 1.92,
+    "carbs": 21.3,
+    "reference": "USDA SR Legacy 2018 / FDC 168917",
+    "description": "Quinoa, cooked"
+  },
+  {
+    "id": "usda-169702",
+    "name": "生小米",
+    "aliases": [],
+    "category": "主食",
+    "kcalPer100g": 378.0,
+    "protein": 11.02,
+    "fat": 4.22,
+    "carbs": 72.85,
+    "reference": "USDA SR Legacy 2018 / FDC 169702",
+    "description": "Millet, raw"
+  },
+  {
+    "id": "usda-168871",
+    "name": "熟小米",
+    "aliases": [],
+    "category": "主食",
+    "kcalPer100g": 119.0,
+    "protein": 3.51,
+    "fat": 1.0,
+    "carbs": 23.67,
+    "reference": "USDA SR Legacy 2018 / FDC 168871",
+    "description": "Millet, cooked"
+  },
+  {
+    "id": "usda-170284",
+    "name": "生珍珠大麦",
+    "aliases": [],
+    "category": "主食",
+    "kcalPer100g": 352.0,
+    "protein": 9.91,
+    "fat": 1.16,
+    "carbs": 77.72,
+    "reference": "USDA SR Legacy 2018 / FDC 170284",
+    "description": "Barley, pearled, raw"
+  },
+  {
+    "id": "usda-170285",
+    "name": "熟珍珠大麦",
+    "aliases": [
+      "大麦饭"
+    ],
+    "category": "主食",
+    "kcalPer100g": 123.0,
+    "protein": 2.26,
+    "fat": 0.44,
+    "carbs": 28.22,
+    "reference": "USDA SR Legacy 2018 / FDC 170285",
+    "description": "Barley, pearled, cooked"
+  },
+  {
+    "id": "usda-170686",
+    "name": "熟烤荞麦粒",
+    "aliases": [
+      "熟荞麦"
+    ],
+    "category": "主食",
+    "kcalPer100g": 92.0,
+    "protein": 3.38,
+    "fat": 0.62,
+    "carbs": 19.94,
+    "reference": "USDA SR Legacy 2018 / FDC 170686",
+    "description": "Buckwheat groats, roasted, cooked"
+  },
+  {
+    "id": "usda-168877",
+    "name": "生长粒白米",
+    "aliases": [
+      "生大米"
+    ],
+    "category": "主食",
+    "kcalPer100g": 365.0,
+    "protein": 7.13,
+    "fat": 0.66,
+    "carbs": 79.95,
+    "reference": "USDA SR Legacy 2018 / FDC 168877",
+    "description": "Rice, white, long-grain, regular, raw, enriched"
+  },
+  {
+    "id": "usda-169703",
+    "name": "生糙米",
+    "aliases": [],
+    "category": "主食",
+    "kcalPer100g": 367.0,
+    "protein": 7.54,
+    "fat": 3.2,
+    "carbs": 76.25,
+    "reference": "USDA SR Legacy 2018 / FDC 169703",
+    "description": "Rice, brown, long-grain, raw (Includes foods for USDA's Food Distribution Program)"
+  },
+  {
+    "id": "usda-169711",
+    "name": "熟糯米饭",
+    "aliases": [
+      "糯米饭"
+    ],
+    "category": "主食",
+    "kcalPer100g": 97.0,
+    "protein": 2.02,
+    "fat": 0.19,
+    "carbs": 21.09,
+    "reference": "USDA SR Legacy 2018 / FDC 169711",
+    "description": "Rice, white, glutinous, unenriched, cooked"
+  },
+  {
+    "id": "usda-168883",
+    "name": "生糯米",
+    "aliases": [],
+    "category": "主食",
+    "kcalPer100g": 370.0,
+    "protein": 6.81,
+    "fat": 0.55,
+    "carbs": 81.68,
+    "reference": "USDA SR Legacy 2018 / FDC 168883",
+    "description": "Rice, white, glutinous, unenriched, uncooked"
+  },
+  {
+    "id": "usda-168914",
+    "name": "熟米粉",
+    "aliases": [
+      "米粉"
+    ],
+    "category": "主食",
+    "kcalPer100g": 108.0,
+    "protein": 1.79,
+    "fat": 0.2,
+    "carbs": 24.01,
+    "reference": "USDA SR Legacy 2018 / FDC 168914",
+    "description": "Rice noodles, cooked"
+  },
+  {
+    "id": "usda-169742",
+    "name": "干米粉",
+    "aliases": [],
+    "category": "主食",
+    "kcalPer100g": 364.0,
+    "protein": 5.95,
+    "fat": 0.56,
+    "carbs": 80.18,
+    "reference": "USDA SR Legacy 2018 / FDC 169742",
+    "description": "Rice noodles, dry"
+  },
+  {
+    "id": "usda-168907",
+    "name": "熟荞麦面",
+    "aliases": [
+      "荞麦面"
+    ],
+    "category": "主食",
+    "kcalPer100g": 99.0,
+    "protein": 5.06,
+    "fat": 0.1,
+    "carbs": 21.44,
+    "reference": "USDA SR Legacy 2018 / FDC 168907",
+    "description": "Noodles, japanese, soba, cooked"
+  },
+  {
+    "id": "usda-168906",
+    "name": "干荞麦面",
+    "aliases": [],
+    "category": "主食",
+    "kcalPer100g": 336.0,
+    "protein": 14.38,
+    "fat": 0.71,
+    "carbs": 74.62,
+    "reference": "USDA SR Legacy 2018 / FDC 168906",
+    "description": "Noodles, japanese, soba, dry"
+  },
+  {
+    "id": "usda-168909",
+    "name": "熟素面",
+    "aliases": [
+      "素面"
+    ],
+    "category": "主食",
+    "kcalPer100g": 131.0,
+    "protein": 4.0,
+    "fat": 0.18,
+    "carbs": 27.54,
+    "reference": "USDA SR Legacy 2018 / FDC 168909",
+    "description": "Noodles, japanese, somen, cooked"
+  },
+  {
+    "id": "usda-168928",
+    "name": "熟意大利面（无盐）",
+    "aliases": [
+      "意大利面"
+    ],
+    "category": "主食",
+    "kcalPer100g": 158.0,
+    "protein": 5.8,
+    "fat": 0.93,
+    "carbs": 30.86,
+    "reference": "USDA SR Legacy 2018 / FDC 168928",
+    "description": "Pasta, cooked, unenriched, without added salt"
+  },
+  {
+    "id": "usda-168910",
+    "name": "熟全麦意大利面",
+    "aliases": [
+      "全麦意大利面"
+    ],
+    "category": "主食",
+    "kcalPer100g": 149.0,
+    "protein": 5.99,
+    "fat": 1.71,
+    "carbs": 30.07,
+    "reference": "USDA SR Legacy 2018 / FDC 168910",
+    "description": "Pasta, whole-wheat, cooked (Includes foods for USDA's Food Distribution Program)"
+  },
+  {
+    "id": "usda-172688",
+    "name": "全麦面包",
+    "aliases": [],
+    "category": "主食",
+    "kcalPer100g": 252.0,
+    "protein": 12.45,
+    "fat": 3.5,
+    "carbs": 42.71,
+    "reference": "USDA SR Legacy 2018 / FDC 172688",
+    "description": "Bread, whole-wheat, commercially prepared"
+  },
+  {
+    "id": "usda-172684",
+    "name": "黑麦面包",
+    "aliases": [],
+    "category": "主食",
+    "kcalPer100g": 259.0,
+    "protein": 8.5,
+    "fat": 3.3,
+    "carbs": 48.3,
+    "reference": "USDA SR Legacy 2018 / FDC 172684",
+    "description": "Bread, rye"
+  },
+  {
+    "id": "usda-174899",
+    "name": "原味贝果",
+    "aliases": [
+      "贝果"
+    ],
+    "category": "主食",
+    "kcalPer100g": 264.0,
+    "protein": 10.56,
+    "fat": 1.32,
+    "carbs": 52.38,
+    "reference": "USDA SR Legacy 2018 / FDC 174899",
+    "description": "Bagels, plain, enriched, with calcium propionate (includes onion, poppy, sesame)"
+  },
+  {
+    "id": "usda-168893",
+    "name": "全麦面粉",
+    "aliases": [],
+    "category": "主食",
+    "kcalPer100g": 340.0,
+    "protein": 13.21,
+    "fat": 2.5,
+    "carbs": 71.97,
+    "reference": "USDA SR Legacy 2018 / FDC 168893",
+    "description": "Wheat flour, whole-grain (Includes foods for USDA's Food Distribution Program)"
+  },
+  {
+    "id": "usda-168894",
+    "name": "通用小麦面粉",
+    "aliases": [
+      "面粉"
+    ],
+    "category": "主食",
+    "kcalPer100g": 364.0,
+    "protein": 10.33,
+    "fat": 0.98,
+    "carbs": 76.31,
+    "reference": "USDA SR Legacy 2018 / FDC 168894",
+    "description": "Wheat flour, white, all-purpose, enriched, bleached"
+  },
+  {
+    "id": "usda-169697",
+    "name": "全谷黄玉米粉",
+    "aliases": [
+      "玉米粉"
+    ],
+    "category": "主食",
+    "kcalPer100g": 362.0,
+    "protein": 8.12,
+    "fat": 3.59,
+    "carbs": 76.89,
+    "reference": "USDA SR Legacy 2018 / FDC 169697",
+    "description": "Cornmeal, whole-grain, yellow"
+  },
+  {
+    "id": "usda-169700",
+    "name": "熟库斯库斯",
+    "aliases": [],
+    "category": "主食",
+    "kcalPer100g": 112.0,
+    "protein": 3.79,
+    "fat": 0.16,
+    "carbs": 23.22,
+    "reference": "USDA SR Legacy 2018 / FDC 169700",
+    "description": "Couscous, cooked"
+  },
+  {
+    "id": "usda-172183",
+    "name": "生鸡蛋蛋白",
+    "aliases": [
+      "蛋白"
+    ],
+    "category": "肉蛋鱼",
+    "kcalPer100g": 52.0,
+    "protein": 10.9,
+    "fat": 0.17,
+    "carbs": 0.73,
+    "reference": "USDA SR Legacy 2018 / FDC 172183",
+    "description": "Egg, white, raw, fresh"
+  },
+  {
+    "id": "usda-172184",
+    "name": "生鸡蛋蛋黄",
+    "aliases": [
+      "蛋黄"
+    ],
+    "category": "肉蛋鱼",
+    "kcalPer100g": 322.0,
+    "protein": 15.86,
+    "fat": 26.54,
+    "carbs": 3.59,
+    "reference": "USDA SR Legacy 2018 / FDC 172184",
+    "description": "Egg, yolk, raw, fresh"
+  },
+  {
+    "id": "usda-170872",
+    "name": "低脂牛奶（1%脂肪）",
+    "aliases": [
+      "低脂牛奶"
+    ],
+    "category": "乳制品",
+    "kcalPer100g": 42.0,
+    "protein": 3.37,
+    "fat": 0.97,
+    "carbs": 4.99,
+    "reference": "USDA SR Legacy 2018 / FDC 170872",
+    "description": "Milk, lowfat, fluid, 1% milkfat, with added vitamin A and vitamin D"
+  },
+  {
+    "id": "usda-170870",
+    "name": "减脂牛奶（2%脂肪）",
+    "aliases": [],
+    "category": "乳制品",
+    "kcalPer100g": 51.0,
+    "protein": 3.48,
+    "fat": 1.92,
+    "carbs": 4.97,
+    "reference": "USDA SR Legacy 2018 / FDC 170870",
+    "description": "Milk, reduced fat, fluid, 2% milkfat, with added nonfat milk solids and vitamin A and vitamin D"
+  },
+  {
+    "id": "usda-171269",
+    "name": "脱脂牛奶",
+    "aliases": [],
+    "category": "乳制品",
+    "kcalPer100g": 34.0,
+    "protein": 3.37,
+    "fat": 0.08,
+    "carbs": 4.96,
+    "reference": "USDA SR Legacy 2018 / FDC 171269",
+    "description": "Milk, nonfat, fluid, with added vitamin A and vitamin D (fat free or skim)"
+  },
+  {
+    "id": "usda-170887",
+    "name": "原味脱脂酸奶",
+    "aliases": [
+      "脱脂酸奶"
+    ],
+    "category": "乳制品",
+    "kcalPer100g": 56.0,
+    "protein": 5.73,
+    "fat": 0.18,
+    "carbs": 7.68,
+    "reference": "USDA SR Legacy 2018 / FDC 170887",
+    "description": "Yogurt, plain, skim milk"
+  },
+  {
+    "id": "usda-170894",
+    "name": "原味脱脂希腊酸奶",
+    "aliases": [
+      "脱脂希腊酸奶"
+    ],
+    "category": "乳制品",
+    "kcalPer100g": 59.0,
+    "protein": 10.19,
+    "fat": 0.39,
+    "carbs": 3.6,
+    "reference": "USDA SR Legacy 2018 / FDC 170894",
+    "description": "Yogurt, Greek, plain, nonfat (Includes foods for USDA's Food Distribution Program)"
+  },
+  {
+    "id": "usda-170903",
+    "name": "原味低脂希腊酸奶",
+    "aliases": [
+      "低脂希腊酸奶"
+    ],
+    "category": "乳制品",
+    "kcalPer100g": 73.0,
+    "protein": 9.95,
+    "fat": 1.92,
+    "carbs": 3.94,
+    "reference": "USDA SR Legacy 2018 / FDC 170903",
+    "description": "Yogurt, Greek, plain, lowfat"
+  },
+  {
+    "id": "usda-171304",
+    "name": "原味全脂希腊酸奶",
+    "aliases": [
+      "希腊酸奶"
+    ],
+    "category": "乳制品",
+    "kcalPer100g": 97.0,
+    "protein": 9.0,
+    "fat": 5.0,
+    "carbs": 3.98,
+    "reference": "USDA SR Legacy 2018 / FDC 171304",
+    "description": "Yogurt, Greek, plain, whole milk"
+  },
+  {
+    "id": "usda-173414",
+    "name": "切达奶酪",
+    "aliases": [],
+    "category": "乳制品",
+    "kcalPer100g": 403.0,
+    "protein": 22.87,
+    "fat": 33.31,
+    "carbs": 3.37,
+    "reference": "USDA SR Legacy 2018 / FDC 173414",
+    "description": "Cheese, cheddar (Includes foods for USDA's Food Distribution Program)"
+  },
+  {
+    "id": "usda-170845",
+    "name": "全脂马苏里拉奶酪",
+    "aliases": [
+      "马苏里拉"
+    ],
+    "category": "乳制品",
+    "kcalPer100g": 299.0,
+    "protein": 22.17,
+    "fat": 22.14,
+    "carbs": 2.4,
+    "reference": "USDA SR Legacy 2018 / FDC 170845",
+    "description": "Cheese, mozzarella, whole milk"
+  },
+  {
+    "id": "usda-170848",
+    "name": "硬质帕尔马奶酪",
+    "aliases": [
+      "帕尔马奶酪"
+    ],
+    "category": "乳制品",
+    "kcalPer100g": 392.0,
+    "protein": 35.75,
+    "fat": 25.0,
+    "carbs": 3.22,
+    "reference": "USDA SR Legacy 2018 / FDC 170848",
+    "description": "Cheese, parmesan, hard"
+  },
+  {
+    "id": "usda-172179",
+    "name": "奶油茅屋奶酪",
+    "aliases": [
+      "茅屋奶酪"
+    ],
+    "category": "乳制品",
+    "kcalPer100g": 98.0,
+    "protein": 11.12,
+    "fat": 4.3,
+    "carbs": 3.38,
+    "reference": "USDA SR Legacy 2018 / FDC 172179",
+    "description": "Cheese, cottage, creamed, large or small curd"
+  },
+  {
+    "id": "usda-172446",
+    "name": "豆乳（原味或香草，未强化）",
+    "aliases": [
+      "豆乳"
+    ],
+    "category": "豆类",
+    "kcalPer100g": 54.0,
+    "protein": 3.27,
+    "fat": 1.75,
+    "carbs": 6.28,
+    "reference": "USDA SR Legacy 2018 / FDC 172446",
+    "description": "Soymilk, original and vanilla, unfortified"
+  },
+  {
+    "id": "usda-173768",
+    "name": "无糖轻脂强化豆乳",
+    "aliases": [
+      "无糖豆乳"
+    ],
+    "category": "豆类",
+    "kcalPer100g": 34.0,
+    "protein": 2.62,
+    "fat": 0.85,
+    "carbs": 3.85,
+    "reference": "USDA SR Legacy 2018 / FDC 173768",
+    "description": "Soymilk, original and vanilla, light, unsweetened, with added calcium, vitamins A and D"
+  },
+  {
+    "id": "usda-174832",
+    "name": "无糖杏仁奶",
+    "aliases": [
+      "杏仁奶"
+    ],
+    "category": "饮品",
+    "kcalPer100g": 15.0,
+    "protein": 0.4,
+    "fat": 0.96,
+    "carbs": 1.31,
+    "reference": "USDA SR Legacy 2018 / FDC 174832",
+    "description": "Beverages, almond milk, unsweetened, shelf stable"
+  },
+  {
+    "id": "usda-171077",
+    "name": "生去皮鸡胸肉",
+    "aliases": [
+      "生鸡胸肉"
+    ],
+    "category": "肉蛋鱼",
+    "kcalPer100g": 120.0,
+    "protein": 22.5,
+    "fat": 2.62,
+    "carbs": 0.0,
+    "reference": "USDA SR Legacy 2018 / FDC 171077",
+    "description": "Chicken, broiler or fryers, breast, skinless, boneless, meat only, raw"
+  },
+  {
+    "id": "usda-172388",
+    "name": "烤鸡腿肉（去皮）",
+    "aliases": [
+      "熟鸡腿肉"
+    ],
+    "category": "肉蛋鱼",
+    "kcalPer100g": 179.0,
+    "protein": 24.76,
+    "fat": 8.15,
+    "carbs": 0.0,
+    "reference": "USDA SR Legacy 2018 / FDC 172388",
+    "description": "Chicken, broilers or fryers, thigh, meat only, cooked, roasted"
+  },
+  {
+    "id": "usda-172392",
+    "name": "烤鸡翅肉（去皮）",
+    "aliases": [
+      "熟鸡翅肉"
+    ],
+    "category": "肉蛋鱼",
+    "kcalPer100g": 203.0,
+    "protein": 30.46,
+    "fat": 8.13,
+    "carbs": 0.0,
+    "reference": "USDA SR Legacy 2018 / FDC 172392",
+    "description": "Chicken, broilers or fryers, wing, meat only, cooked, roasted"
+  },
+  {
+    "id": "usda-173632",
+    "name": "生鸡翅肉（去皮）",
+    "aliases": [],
+    "category": "肉蛋鱼",
+    "kcalPer100g": 126.0,
+    "protein": 21.97,
+    "fat": 3.54,
+    "carbs": 0.0,
+    "reference": "USDA SR Legacy 2018 / FDC 173632",
+    "description": "Chicken, broilers or fryers, wing, meat only, raw"
+  },
+  {
+    "id": "usda-172410",
+    "name": "生鸭肉（去皮）",
+    "aliases": [
+      "生鸭肉"
+    ],
+    "category": "肉蛋鱼",
+    "kcalPer100g": 135.0,
+    "protein": 18.28,
+    "fat": 5.95,
+    "carbs": 0.94,
+    "reference": "USDA SR Legacy 2018 / FDC 172410",
+    "description": "Duck, domesticated, meat only, raw"
+  },
+  {
+    "id": "usda-172411",
+    "name": "烤鸭肉（去皮）",
+    "aliases": [
+      "熟鸭肉"
+    ],
+    "category": "肉蛋鱼",
+    "kcalPer100g": 201.0,
+    "protein": 23.48,
+    "fat": 11.2,
+    "carbs": 0.0,
+    "reference": "USDA SR Legacy 2018 / FDC 172411",
+    "description": "Duck, domesticated, meat only, cooked, roasted"
+  },
+  {
+    "id": "usda-168249",
+    "name": "生猪里脊（瘦肉）",
+    "aliases": [
+      "生猪里脊"
+    ],
+    "category": "肉蛋鱼",
+    "kcalPer100g": 109.0,
+    "protein": 20.95,
+    "fat": 2.17,
+    "carbs": 0.0,
+    "reference": "USDA SR Legacy 2018 / FDC 168249",
+    "description": "Pork, fresh, loin, tenderloin, separable lean only, raw"
+  },
+  {
+    "id": "usda-167812",
+    "name": "生五花肉",
+    "aliases": [
+      "五花肉"
+    ],
+    "category": "肉蛋鱼",
+    "kcalPer100g": 518.0,
+    "protein": 9.34,
+    "fat": 53.01,
+    "carbs": 0.0,
+    "reference": "USDA SR Legacy 2018 / FDC 167812",
+    "description": "Pork, fresh, belly, raw"
+  },
+  {
+    "id": "usda-168224",
+    "name": "生猪后腿肉（瘦肉）",
+    "aliases": [],
+    "category": "肉蛋鱼",
+    "kcalPer100g": 136.0,
+    "protein": 20.48,
+    "fat": 5.41,
+    "carbs": 0.0,
+    "reference": "USDA SR Legacy 2018 / FDC 168224",
+    "description": "Pork, fresh, leg (ham), whole, separable lean only, raw"
+  },
+  {
+    "id": "usda-168225",
+    "name": "烤猪后腿肉（瘦肉）",
+    "aliases": [],
+    "category": "肉蛋鱼",
+    "kcalPer100g": 211.0,
+    "protein": 29.41,
+    "fat": 9.44,
+    "carbs": 0.0,
+    "reference": "USDA SR Legacy 2018 / FDC 168225",
+    "description": "Pork, fresh, leg (ham), whole, separable lean only, cooked, roasted"
+  },
+  {
+    "id": "usda-168649",
+    "name": "烤牛后腿排（瘦肉）",
+    "aliases": [
+      "熟瘦牛肉"
+    ],
+    "category": "肉蛋鱼",
+    "kcalPer100g": 162.0,
+    "protein": 30.09,
+    "fat": 3.77,
+    "carbs": 0.0,
+    "reference": "USDA SR Legacy 2018 / FDC 168649",
+    "description": "Beef, round, top round steak, boneless, separable lean only, trimmed to 0\" fat, all grades, cooked, grilled"
+  },
+  {
+    "id": "usda-175167",
+    "name": "生三文鱼（养殖）",
+    "aliases": [
+      "生三文鱼"
+    ],
+    "category": "肉蛋鱼",
+    "kcalPer100g": 208.0,
+    "protein": 20.42,
+    "fat": 13.42,
+    "carbs": 0.0,
+    "reference": "USDA SR Legacy 2018 / FDC 175167",
+    "description": "Fish, salmon, Atlantic, farmed, raw"
+  },
+  {
+    "id": "usda-171955",
+    "name": "生大西洋鳕鱼",
+    "aliases": [
+      "生鳕鱼"
+    ],
+    "category": "肉蛋鱼",
+    "kcalPer100g": 82.0,
+    "protein": 17.81,
+    "fat": 0.67,
+    "carbs": 0.0,
+    "reference": "USDA SR Legacy 2018 / FDC 171955",
+    "description": "Fish, cod, Atlantic, raw"
+  },
+  {
+    "id": "usda-171956",
+    "name": "熟大西洋鳕鱼（干热）",
+    "aliases": [
+      "熟鳕鱼"
+    ],
+    "category": "肉蛋鱼",
+    "kcalPer100g": 105.0,
+    "protein": 22.83,
+    "fat": 0.86,
+    "carbs": 0.0,
+    "reference": "USDA SR Legacy 2018 / FDC 171956",
+    "description": "Fish, cod, Atlantic, cooked, dry heat"
+  },
+  {
+    "id": "usda-175176",
+    "name": "生罗非鱼",
+    "aliases": [],
+    "category": "肉蛋鱼",
+    "kcalPer100g": 96.0,
+    "protein": 20.08,
+    "fat": 1.7,
+    "carbs": 0.0,
+    "reference": "USDA SR Legacy 2018 / FDC 175176",
+    "description": "Fish, tilapia, raw"
+  },
+  {
+    "id": "usda-175177",
+    "name": "熟罗非鱼（干热）",
+    "aliases": [],
+    "category": "肉蛋鱼",
+    "kcalPer100g": 128.0,
+    "protein": 26.15,
+    "fat": 2.65,
+    "carbs": 0.0,
+    "reference": "USDA SR Legacy 2018 / FDC 175177",
+    "description": "Fish, tilapia, cooked, dry heat"
+  },
+  {
+    "id": "usda-175179",
+    "name": "生虾（可食部）",
+    "aliases": [
+      "生虾"
+    ],
+    "category": "肉蛋鱼",
+    "kcalPer100g": 85.0,
+    "protein": 20.1,
+    "fat": 0.51,
+    "carbs": 0.0,
+    "reference": "USDA SR Legacy 2018 / FDC 175179",
+    "description": "Crustaceans, shrimp, raw"
+  },
+  {
+    "id": "usda-174223",
+    "name": "生鱿鱼",
+    "aliases": [],
+    "category": "肉蛋鱼",
+    "kcalPer100g": 92.0,
+    "protein": 15.58,
+    "fat": 1.38,
+    "carbs": 3.08,
+    "reference": "USDA SR Legacy 2018 / FDC 174223",
+    "description": "Mollusks, squid, mixed species, raw"
+  },
+  {
+    "id": "usda-174214",
+    "name": "生蛤蜊肉",
+    "aliases": [],
+    "category": "肉蛋鱼",
+    "kcalPer100g": 86.0,
+    "protein": 14.67,
+    "fat": 0.96,
+    "carbs": 3.57,
+    "reference": "USDA SR Legacy 2018 / FDC 174214",
+    "description": "Mollusks, clam, mixed species, raw"
+  },
+  {
+    "id": "usda-171975",
+    "name": "熟蛤蜊肉（湿热）",
+    "aliases": [
+      "熟蛤蜊"
+    ],
+    "category": "肉蛋鱼",
+    "kcalPer100g": 148.0,
+    "protein": 25.55,
+    "fat": 1.95,
+    "carbs": 5.13,
+    "reference": "USDA SR Legacy 2018 / FDC 171975",
+    "description": "Mollusks, clam, mixed species, cooked, moist heat"
+  },
+  {
+    "id": "usda-174219",
+    "name": "生太平洋牡蛎",
+    "aliases": [
+      "生牡蛎"
+    ],
+    "category": "肉蛋鱼",
+    "kcalPer100g": 81.0,
+    "protein": 9.45,
+    "fat": 2.3,
+    "carbs": 4.95,
+    "reference": "USDA SR Legacy 2018 / FDC 174219",
+    "description": "Mollusks, oyster, Pacific, raw"
+  },
+  {
+    "id": "usda-174250",
+    "name": "熟太平洋牡蛎（湿热）",
+    "aliases": [
+      "熟牡蛎"
+    ],
+    "category": "肉蛋鱼",
+    "kcalPer100g": 163.0,
+    "protein": 18.9,
+    "fat": 4.6,
+    "carbs": 9.9,
+    "reference": "USDA SR Legacy 2018 / FDC 174250",
+    "description": "Mollusks, oyster, Pacific, cooked, moist heat"
+  },
+  {
+    "id": "usda-173709",
+    "name": "水浸金枪鱼罐头（沥干）",
+    "aliases": [
+      "水浸金枪鱼"
+    ],
+    "category": "肉蛋鱼",
+    "kcalPer100g": 86.0,
+    "protein": 19.44,
+    "fat": 0.96,
+    "carbs": 0.0,
+    "reference": "USDA SR Legacy 2018 / FDC 173709",
+    "description": "Fish, tuna, light, canned in water, drained solids (Includes foods for USDA's Food Distribution Program)"
+  },
+  {
+    "id": "usda-173708",
+    "name": "油浸金枪鱼罐头（沥干）",
+    "aliases": [
+      "油浸金枪鱼"
+    ],
+    "category": "肉蛋鱼",
+    "kcalPer100g": 198.0,
+    "protein": 29.13,
+    "fat": 8.21,
+    "carbs": 0.0,
+    "reference": "USDA SR Legacy 2018 / FDC 173708",
+    "description": "Fish, tuna, light, canned in oil, drained solids"
+  },
+  {
+    "id": "usda-175119",
+    "name": "生大西洋鲭鱼",
+    "aliases": [],
+    "category": "肉蛋鱼",
+    "kcalPer100g": 205.0,
+    "protein": 18.6,
+    "fat": 13.89,
+    "carbs": 0.0,
+    "reference": "USDA SR Legacy 2018 / FDC 175119",
+    "description": "Fish, mackerel, Atlantic, raw"
+  },
+  {
+    "id": "usda-175120",
+    "name": "熟大西洋鲭鱼（干热）",
+    "aliases": [],
+    "category": "肉蛋鱼",
+    "kcalPer100g": 262.0,
+    "protein": 23.85,
+    "fat": 17.81,
+    "carbs": 0.0,
+    "reference": "USDA SR Legacy 2018 / FDC 175120",
+    "description": "Fish, mackerel, Atlantic, cooked, dry heat"
+  },
+  {
+    "id": "usda-175139",
+    "name": "油浸沙丁鱼罐头（含骨，沥干）",
+    "aliases": [
+      "沙丁鱼罐头"
+    ],
+    "category": "肉蛋鱼",
+    "kcalPer100g": 208.0,
+    "protein": 24.62,
+    "fat": 11.45,
+    "carbs": 0.0,
+    "reference": "USDA SR Legacy 2018 / FDC 175139",
+    "description": "Fish, sardine, Atlantic, canned in oil, drained solids with bone"
+  },
+  {
+    "id": "usda-173728",
+    "name": "水煮赤小豆（无盐）",
+    "aliases": [
+      "熟红豆"
+    ],
+    "category": "豆类",
+    "kcalPer100g": 128.0,
+    "protein": 7.52,
+    "fat": 0.1,
+    "carbs": 24.77,
+    "reference": "USDA SR Legacy 2018 / FDC 173728",
+    "description": "Beans, adzuki, mature seeds, cooked, boiled, without salt"
+  },
+  {
+    "id": "usda-173735",
+    "name": "水煮黑豆（无盐）",
+    "aliases": [
+      "熟黑豆"
+    ],
+    "category": "豆类",
+    "kcalPer100g": 132.0,
+    "protein": 8.86,
+    "fat": 0.54,
+    "carbs": 23.71,
+    "reference": "USDA SR Legacy 2018 / FDC 173735",
+    "description": "Beans, black, mature seeds, cooked, boiled, without salt"
+  },
+  {
+    "id": "usda-175194",
+    "name": "水煮红芸豆（无盐）",
+    "aliases": [
+      "熟红芸豆"
+    ],
+    "category": "豆类",
+    "kcalPer100g": 127.0,
+    "protein": 8.67,
+    "fat": 0.5,
+    "carbs": 22.8,
+    "reference": "USDA SR Legacy 2018 / FDC 175194",
+    "description": "Beans, kidney, red, mature seeds, cooked, boiled, without salt"
+  },
+  {
+    "id": "usda-175200",
+    "name": "水煮斑豆（无盐）",
+    "aliases": [
+      "熟斑豆"
+    ],
+    "category": "豆类",
+    "kcalPer100g": 143.0,
+    "protein": 9.01,
+    "fat": 0.65,
+    "carbs": 26.22,
+    "reference": "USDA SR Legacy 2018 / FDC 175200",
+    "description": "Beans, pinto, mature seeds, cooked, boiled, without salt"
+  },
+  {
+    "id": "usda-175203",
+    "name": "水煮白豆（无盐）",
+    "aliases": [
+      "熟白豆"
+    ],
+    "category": "豆类",
+    "kcalPer100g": 139.0,
+    "protein": 9.73,
+    "fat": 0.35,
+    "carbs": 25.09,
+    "reference": "USDA SR Legacy 2018 / FDC 175203",
+    "description": "Beans, white, mature seeds, cooked, boiled, without salt"
+  },
+  {
+    "id": "usda-174270",
+    "name": "生黄豆",
+    "aliases": [
+      "黄豆"
+    ],
+    "category": "豆类",
+    "kcalPer100g": 446.0,
+    "protein": 36.49,
+    "fat": 19.94,
+    "carbs": 30.16,
+    "reference": "USDA SR Legacy 2018 / FDC 174270",
+    "description": "Soybeans, mature seeds, raw"
+  },
+  {
+    "id": "usda-174266",
+    "name": "顺滑花生酱（含盐）",
+    "aliases": [
+      "花生酱"
+    ],
+    "category": "豆类",
+    "kcalPer100g": 598.0,
+    "protein": 22.21,
+    "fat": 51.36,
+    "carbs": 22.31,
+    "reference": "USDA SR Legacy 2018 / FDC 174266",
+    "description": "Peanut butter, smooth style, with salt (Includes foods for USDA's Food Distribution Program)"
+  },
+  {
+    "id": "usda-172470",
+    "name": "顺滑花生酱（无盐）",
+    "aliases": [
+      "无盐花生酱"
+    ],
+    "category": "豆类",
+    "kcalPer100g": 598.0,
+    "protein": 22.21,
+    "fat": 51.36,
+    "carbs": 22.31,
+    "reference": "USDA SR Legacy 2018 / FDC 172470",
+    "description": "Peanut butter, smooth style, without salt"
+  },
+  {
+    "id": "usda-171697",
+    "name": "杏（可食部）",
+    "aliases": [
+      "杏"
+    ],
+    "category": "水果",
+    "kcalPer100g": 48.0,
+    "protein": 1.4,
+    "fat": 0.39,
+    "carbs": 11.12,
+    "reference": "USDA SR Legacy 2018 / FDC 171697",
+    "description": "Apricots, raw"
+  },
+  {
+    "id": "usda-171711",
+    "name": "蓝莓",
+    "aliases": [],
+    "category": "水果",
+    "kcalPer100g": 57.0,
+    "protein": 0.74,
+    "fat": 0.33,
+    "carbs": 14.49,
+    "reference": "USDA SR Legacy 2018 / FDC 171711",
+    "description": "Blueberries, raw"
+  },
+  {
+    "id": "usda-171719",
+    "name": "甜樱桃",
+    "aliases": [
+      "樱桃"
+    ],
+    "category": "水果",
+    "kcalPer100g": 63.0,
+    "protein": 1.06,
+    "fat": 0.2,
+    "carbs": 16.01,
+    "reference": "USDA SR Legacy 2018 / FDC 171719",
+    "description": "Cherries, sweet, raw"
+  },
+  {
+    "id": "usda-173021",
+    "name": "鲜无花果",
+    "aliases": [
+      "无花果"
+    ],
+    "category": "水果",
+    "kcalPer100g": 74.0,
+    "protein": 0.75,
+    "fat": 0.3,
+    "carbs": 19.18,
+    "reference": "USDA SR Legacy 2018 / FDC 173021",
+    "description": "Figs, raw"
+  },
+  {
+    "id": "usda-174673",
+    "name": "粉红或红葡萄柚",
+    "aliases": [
+      "葡萄柚"
+    ],
+    "category": "水果",
+    "kcalPer100g": 42.0,
+    "protein": 0.77,
+    "fat": 0.14,
+    "carbs": 10.66,
+    "reference": "USDA SR Legacy 2018 / FDC 174673",
+    "description": "Grapefruit, raw, pink and red, all areas"
+  },
+  {
+    "id": "usda-167746",
+    "name": "柠檬（去皮）",
+    "aliases": [
+      "柠檬"
+    ],
+    "category": "水果",
+    "kcalPer100g": 29.0,
+    "protein": 1.1,
+    "fat": 0.3,
+    "carbs": 9.32,
+    "reference": "USDA SR Legacy 2018 / FDC 167746",
+    "description": "Lemons, raw, without peel"
+  },
+  {
+    "id": "usda-169086",
+    "name": "荔枝（可食部）",
+    "aliases": [
+      "荔枝"
+    ],
+    "category": "水果",
+    "kcalPer100g": 66.0,
+    "protein": 0.83,
+    "fat": 0.44,
+    "carbs": 16.53,
+    "reference": "USDA SR Legacy 2018 / FDC 169086",
+    "description": "Litchis, raw"
+  },
+  {
+    "id": "usda-169089",
+    "name": "龙眼（可食部）",
+    "aliases": [
+      "龙眼",
+      "桂圆"
+    ],
+    "category": "水果",
+    "kcalPer100g": 60.0,
+    "protein": 1.31,
+    "fat": 0.1,
+    "carbs": 15.14,
+    "reference": "USDA SR Legacy 2018 / FDC 169089",
+    "description": "Longans, raw"
+  },
+  {
+    "id": "usda-169910",
+    "name": "芒果（可食部）",
+    "aliases": [
+      "芒果"
+    ],
+    "category": "水果",
+    "kcalPer100g": 60.0,
+    "protein": 0.82,
+    "fat": 0.38,
+    "carbs": 14.98,
+    "reference": "USDA SR Legacy 2018 / FDC 169910",
+    "description": "Mangos, raw"
+  },
+  {
+    "id": "usda-169105",
+    "name": "橘子（可食部）",
+    "aliases": [
+      "橘子",
+      "柑橘"
+    ],
+    "category": "水果",
+    "kcalPer100g": 53.0,
+    "protein": 0.81,
+    "fat": 0.31,
+    "carbs": 13.34,
+    "reference": "USDA SR Legacy 2018 / FDC 169105",
+    "description": "Tangerines, (mandarin oranges), raw"
+  },
+  {
+    "id": "usda-169926",
+    "name": "木瓜（可食部）",
+    "aliases": [
+      "木瓜"
+    ],
+    "category": "水果",
+    "kcalPer100g": 43.0,
+    "protein": 0.47,
+    "fat": 0.26,
+    "carbs": 10.82,
+    "reference": "USDA SR Legacy 2018 / FDC 169926",
+    "description": "Papayas, raw"
+  },
+  {
+    "id": "usda-169928",
+    "name": "黄桃（鲜）",
+    "aliases": [
+      "鲜黄桃"
+    ],
+    "category": "水果",
+    "kcalPer100g": 39.0,
+    "protein": 0.91,
+    "fat": 0.25,
+    "carbs": 9.54,
+    "reference": "USDA SR Legacy 2018 / FDC 169928",
+    "description": "Peaches, yellow, raw"
+  },
+  {
+    "id": "usda-169941",
+    "name": "鲜柿子",
+    "aliases": [
+      "柿子"
+    ],
+    "category": "水果",
+    "kcalPer100g": 70.0,
+    "protein": 0.58,
+    "fat": 0.19,
+    "carbs": 18.59,
+    "reference": "USDA SR Legacy 2018 / FDC 169941",
+    "description": "Persimmons, japanese, raw"
+  },
+  {
+    "id": "usda-169124",
+    "name": "菠萝（可食部）",
+    "aliases": [
+      "菠萝",
+      "凤梨"
+    ],
+    "category": "水果",
+    "kcalPer100g": 50.0,
+    "protein": 0.54,
+    "fat": 0.12,
+    "carbs": 13.12,
+    "reference": "USDA SR Legacy 2018 / FDC 169124",
+    "description": "Pineapple, raw, all varieties"
+  },
+  {
+    "id": "usda-169949",
+    "name": "鲜李子",
+    "aliases": [
+      "李子"
+    ],
+    "category": "水果",
+    "kcalPer100g": 46.0,
+    "protein": 0.7,
+    "fat": 0.28,
+    "carbs": 11.42,
+    "reference": "USDA SR Legacy 2018 / FDC 169949",
+    "description": "Plums, raw"
+  },
+  {
+    "id": "usda-169134",
+    "name": "石榴（可食部）",
+    "aliases": [
+      "石榴"
+    ],
+    "category": "水果",
+    "kcalPer100g": 83.0,
+    "protein": 1.67,
+    "fat": 1.17,
+    "carbs": 18.7,
+    "reference": "USDA SR Legacy 2018 / FDC 169134",
+    "description": "Pomegranates, raw"
+  },
+  {
+    "id": "usda-167755",
+    "name": "覆盆子",
+    "aliases": [
+      "树莓"
+    ],
+    "category": "水果",
+    "kcalPer100g": 52.0,
+    "protein": 1.2,
+    "fat": 0.65,
+    "carbs": 11.94,
+    "reference": "USDA SR Legacy 2018 / FDC 167755",
+    "description": "Raspberries, raw"
+  },
+  {
+    "id": "usda-168162",
+    "name": "西梅干",
+    "aliases": [],
+    "category": "水果",
+    "kcalPer100g": 240.0,
+    "protein": 2.18,
+    "fat": 0.38,
+    "carbs": 63.88,
+    "reference": "USDA SR Legacy 2018 / FDC 168162",
+    "description": "Plums, dried (prunes), uncooked"
+  },
+  {
+    "id": "usda-171726",
+    "name": "椰枣（Deglet Noor）",
+    "aliases": [
+      "椰枣"
+    ],
+    "category": "水果",
+    "kcalPer100g": 282.0,
+    "protein": 2.45,
+    "fat": 0.39,
+    "carbs": 75.03,
+    "reference": "USDA SR Legacy 2018 / FDC 171726",
+    "description": "Dates, deglet noor"
+  },
+  {
+    "id": "usda-168191",
+    "name": "椰枣（Medjool）",
+    "aliases": [
+      "Medjool椰枣"
+    ],
+    "category": "水果",
+    "kcalPer100g": 277.0,
+    "protein": 1.81,
+    "fat": 0.15,
+    "carbs": 74.97,
+    "reference": "USDA SR Legacy 2018 / FDC 168191",
+    "description": "Dates, medjool"
+  },
+  {
+    "id": "usda-168389",
+    "name": "生芦笋",
+    "aliases": [
+      "芦笋"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 20.0,
+    "protein": 2.2,
+    "fat": 0.12,
+    "carbs": 3.88,
+    "reference": "USDA SR Legacy 2018 / FDC 168389",
+    "description": "Asparagus, raw"
+  },
+  {
+    "id": "usda-168390",
+    "name": "水煮芦笋",
+    "aliases": [
+      "熟芦笋"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 22.0,
+    "protein": 2.4,
+    "fat": 0.22,
+    "carbs": 4.11,
+    "reference": "USDA SR Legacy 2018 / FDC 168390",
+    "description": "Asparagus, cooked, boiled, drained"
+  },
+  {
+    "id": "usda-169210",
+    "name": "生竹笋",
+    "aliases": [
+      "竹笋"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 27.0,
+    "protein": 2.6,
+    "fat": 0.3,
+    "carbs": 5.2,
+    "reference": "USDA SR Legacy 2018 / FDC 169210",
+    "description": "Bamboo shoots, raw"
+  },
+  {
+    "id": "usda-169961",
+    "name": "生四季豆",
+    "aliases": [
+      "四季豆"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 31.0,
+    "protein": 1.83,
+    "fat": 0.22,
+    "carbs": 6.97,
+    "reference": "USDA SR Legacy 2018 / FDC 169961",
+    "description": "Beans, snap, green, raw"
+  },
+  {
+    "id": "usda-169141",
+    "name": "水煮四季豆（无盐）",
+    "aliases": [
+      "熟四季豆"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 35.0,
+    "protein": 1.89,
+    "fat": 0.28,
+    "carbs": 7.88,
+    "reference": "USDA SR Legacy 2018 / FDC 169141",
+    "description": "Beans, snap, green, cooked, boiled, drained, without salt"
+  },
+  {
+    "id": "usda-170390",
+    "name": "生小白菜",
+    "aliases": [
+      "小白菜",
+      "青菜"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 13.0,
+    "protein": 1.5,
+    "fat": 0.2,
+    "carbs": 2.18,
+    "reference": "USDA SR Legacy 2018 / FDC 170390",
+    "description": "Cabbage, chinese (pak-choi), raw"
+  },
+  {
+    "id": "usda-170391",
+    "name": "水煮小白菜（无盐）",
+    "aliases": [
+      "熟小白菜"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 12.0,
+    "protein": 1.56,
+    "fat": 0.16,
+    "carbs": 1.78,
+    "reference": "USDA SR Legacy 2018 / FDC 170391",
+    "description": "Cabbage, chinese (pak-choi), cooked, boiled, drained, without salt"
+  },
+  {
+    "id": "usda-169979",
+    "name": "生大白菜",
+    "aliases": [
+      "大白菜"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 16.0,
+    "protein": 1.2,
+    "fat": 0.2,
+    "carbs": 3.23,
+    "reference": "USDA SR Legacy 2018 / FDC 169979",
+    "description": "Cabbage, chinese (pe-tsai), raw"
+  },
+  {
+    "id": "usda-169980",
+    "name": "水煮大白菜（无盐）",
+    "aliases": [
+      "熟大白菜"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 14.0,
+    "protein": 1.5,
+    "fat": 0.17,
+    "carbs": 2.41,
+    "reference": "USDA SR Legacy 2018 / FDC 169980",
+    "description": "Cabbage, chinese (pe-tsai), cooked, boiled, drained, without salt"
+  },
+  {
+    "id": "usda-169986",
+    "name": "生花椰菜",
+    "aliases": [
+      "花椰菜",
+      "菜花"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 25.0,
+    "protein": 1.92,
+    "fat": 0.28,
+    "carbs": 4.97,
+    "reference": "USDA SR Legacy 2018 / FDC 169986",
+    "description": "Cauliflower, raw"
+  },
+  {
+    "id": "usda-169988",
+    "name": "生芹菜",
+    "aliases": [
+      "芹菜"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 14.0,
+    "protein": 0.69,
+    "fat": 0.17,
+    "carbs": 2.97,
+    "reference": "USDA SR Legacy 2018 / FDC 169988",
+    "description": "Celery, raw"
+  },
+  {
+    "id": "usda-169228",
+    "name": "生茄子",
+    "aliases": [
+      "茄子"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 25.0,
+    "protein": 0.98,
+    "fat": 0.18,
+    "carbs": 5.88,
+    "reference": "USDA SR Legacy 2018 / FDC 169228",
+    "description": "Eggplant, raw"
+  },
+  {
+    "id": "usda-169230",
+    "name": "生大蒜",
+    "aliases": [
+      "大蒜"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 149.0,
+    "protein": 6.36,
+    "fat": 0.5,
+    "carbs": 33.06,
+    "reference": "USDA SR Legacy 2018 / FDC 169230",
+    "description": "Garlic, raw"
+  },
+  {
+    "id": "usda-169231",
+    "name": "生姜",
+    "aliases": [
+      "姜"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 80.0,
+    "protein": 1.82,
+    "fat": 0.75,
+    "carbs": 17.77,
+    "reference": "USDA SR Legacy 2018 / FDC 169231",
+    "description": "Ginger root, raw"
+  },
+  {
+    "id": "usda-168421",
+    "name": "生羽衣甘蓝",
+    "aliases": [
+      "羽衣甘蓝"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 35.0,
+    "protein": 2.92,
+    "fat": 1.49,
+    "carbs": 4.42,
+    "reference": "USDA SR Legacy 2018 / FDC 168421",
+    "description": "Kale, raw"
+  },
+  {
+    "id": "usda-169242",
+    "name": "生香菇",
+    "aliases": [
+      "香菇"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 34.0,
+    "protein": 2.24,
+    "fat": 0.49,
+    "carbs": 6.79,
+    "reference": "USDA SR Legacy 2018 / FDC 169242",
+    "description": "Mushrooms, shiitake, raw"
+  },
+  {
+    "id": "usda-168436",
+    "name": "干香菇",
+    "aliases": [],
+    "category": "蔬菜",
+    "kcalPer100g": 296.0,
+    "protein": 9.58,
+    "fat": 0.99,
+    "carbs": 75.37,
+    "reference": "USDA SR Legacy 2018 / FDC 168436",
+    "description": "Mushrooms, shiitake, dried"
+  },
+  {
+    "id": "usda-168437",
+    "name": "熟香菇（无盐）",
+    "aliases": [
+      "熟香菇"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 56.0,
+    "protein": 1.56,
+    "fat": 0.22,
+    "carbs": 14.39,
+    "reference": "USDA SR Legacy 2018 / FDC 168437",
+    "description": "Mushrooms, shiitake, cooked, without salt"
+  },
+  {
+    "id": "usda-168580",
+    "name": "生平菇",
+    "aliases": [
+      "平菇"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 33.0,
+    "protein": 3.31,
+    "fat": 0.41,
+    "carbs": 6.09,
+    "reference": "USDA SR Legacy 2018 / FDC 168580",
+    "description": "Mushrooms, oyster, raw"
+  },
+  {
+    "id": "usda-169247",
+    "name": "生罗马生菜",
+    "aliases": [
+      "罗马生菜"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 17.0,
+    "protein": 1.23,
+    "fat": 0.3,
+    "carbs": 3.29,
+    "reference": "USDA SR Legacy 2018 / FDC 169247",
+    "description": "Lettuce, cos or romaine, raw"
+  },
+  {
+    "id": "usda-169248",
+    "name": "生球生菜",
+    "aliases": [
+      "球生菜"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 14.0,
+    "protein": 0.9,
+    "fat": 0.14,
+    "carbs": 2.97,
+    "reference": "USDA SR Legacy 2018 / FDC 169248",
+    "description": "Lettuce, iceberg (includes crisphead types), raw"
+  },
+  {
+    "id": "usda-169249",
+    "name": "生绿叶生菜",
+    "aliases": [
+      "生菜"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 15.0,
+    "protein": 1.36,
+    "fat": 0.15,
+    "carbs": 2.87,
+    "reference": "USDA SR Legacy 2018 / FDC 169249",
+    "description": "Lettuce, green leaf, raw"
+  },
+  {
+    "id": "usda-170000",
+    "name": "生洋葱",
+    "aliases": [
+      "洋葱"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 40.0,
+    "protein": 1.1,
+    "fat": 0.1,
+    "carbs": 9.34,
+    "reference": "USDA SR Legacy 2018 / FDC 170000",
+    "description": "Onions, raw"
+  },
+  {
+    "id": "usda-170419",
+    "name": "生豌豆",
+    "aliases": [
+      "豌豆"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 81.0,
+    "protein": 5.42,
+    "fat": 0.4,
+    "carbs": 14.45,
+    "reference": "USDA SR Legacy 2018 / FDC 170419",
+    "description": "Peas, green, raw"
+  },
+  {
+    "id": "usda-170420",
+    "name": "水煮豌豆（无盐）",
+    "aliases": [
+      "熟豌豆"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 84.0,
+    "protein": 5.36,
+    "fat": 0.22,
+    "carbs": 15.63,
+    "reference": "USDA SR Legacy 2018 / FDC 170420",
+    "description": "Peas, green, cooked, boiled, drained, without salt"
+  },
+  {
+    "id": "usda-170427",
+    "name": "生青甜椒",
+    "aliases": [
+      "青椒"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 20.0,
+    "protein": 0.86,
+    "fat": 0.17,
+    "carbs": 4.64,
+    "reference": "USDA SR Legacy 2018 / FDC 170427",
+    "description": "Peppers, sweet, green, raw"
+  },
+  {
+    "id": "usda-170108",
+    "name": "生红甜椒",
+    "aliases": [
+      "红甜椒"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 26.0,
+    "protein": 0.99,
+    "fat": 0.3,
+    "carbs": 6.03,
+    "reference": "USDA SR Legacy 2018 / FDC 170108",
+    "description": "Peppers, sweet, red, raw"
+  },
+  {
+    "id": "usda-169383",
+    "name": "生黄甜椒",
+    "aliases": [
+      "黄甜椒"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 27.0,
+    "protein": 1.0,
+    "fat": 0.21,
+    "carbs": 6.32,
+    "reference": "USDA SR Legacy 2018 / FDC 169383",
+    "description": "Peppers, sweet, yellow, raw"
+  },
+  {
+    "id": "usda-168448",
+    "name": "生南瓜",
+    "aliases": [
+      "南瓜"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 26.0,
+    "protein": 1.0,
+    "fat": 0.1,
+    "carbs": 6.5,
+    "reference": "USDA SR Legacy 2018 / FDC 168448",
+    "description": "Pumpkin, raw"
+  },
+  {
+    "id": "usda-168449",
+    "name": "水煮南瓜（无盐）",
+    "aliases": [
+      "熟南瓜"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 20.0,
+    "protein": 0.72,
+    "fat": 0.07,
+    "carbs": 4.9,
+    "reference": "USDA SR Legacy 2018 / FDC 168449",
+    "description": "Pumpkin, cooked, boiled, drained, without salt"
+  },
+  {
+    "id": "usda-168451",
+    "name": "生白萝卜",
+    "aliases": [
+      "白萝卜"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 18.0,
+    "protein": 0.6,
+    "fat": 0.1,
+    "carbs": 4.1,
+    "reference": "USDA SR Legacy 2018 / FDC 168451",
+    "description": "Radishes, oriental, raw"
+  },
+  {
+    "id": "usda-168452",
+    "name": "水煮白萝卜（无盐）",
+    "aliases": [
+      "熟白萝卜"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 17.0,
+    "protein": 0.67,
+    "fat": 0.24,
+    "carbs": 3.43,
+    "reference": "USDA SR Legacy 2018 / FDC 168452",
+    "description": "Radishes, oriental, cooked, boiled, drained, without salt"
+  },
+  {
+    "id": "usda-168463",
+    "name": "水煮菠菜（无盐）",
+    "aliases": [
+      "熟菠菜"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 23.0,
+    "protein": 2.97,
+    "fat": 0.26,
+    "carbs": 3.75,
+    "reference": "USDA SR Legacy 2018 / FDC 168463",
+    "description": "Spinach, cooked, boiled, drained, without salt"
+  },
+  {
+    "id": "usda-169291",
+    "name": "生西葫芦（带皮）",
+    "aliases": [
+      "西葫芦"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 17.0,
+    "protein": 1.21,
+    "fat": 0.32,
+    "carbs": 3.11,
+    "reference": "USDA SR Legacy 2018 / FDC 169291",
+    "description": "Squash, summer, zucchini, includes skin, raw"
+  },
+  {
+    "id": "usda-170026",
+    "name": "生土豆（带皮）",
+    "aliases": [
+      "生土豆"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 77.0,
+    "protein": 2.05,
+    "fat": 0.09,
+    "carbs": 17.49,
+    "reference": "USDA SR Legacy 2018 / FDC 170026",
+    "description": "Potatoes, flesh and skin, raw"
+  },
+  {
+    "id": "usda-170093",
+    "name": "烤土豆（带皮，无盐）",
+    "aliases": [
+      "烤土豆"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 93.0,
+    "protein": 2.5,
+    "fat": 0.13,
+    "carbs": 21.15,
+    "reference": "USDA SR Legacy 2018 / FDC 170093",
+    "description": "Potatoes, baked, flesh and skin, without salt"
+  },
+  {
+    "id": "usda-168457",
+    "name": "生海带",
+    "aliases": [
+      "海带"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 43.0,
+    "protein": 1.68,
+    "fat": 0.56,
+    "carbs": 9.57,
+    "reference": "USDA SR Legacy 2018 / FDC 168457",
+    "description": "Seaweed, kelp, raw"
+  },
+  {
+    "id": "usda-170496",
+    "name": "生裙带菜",
+    "aliases": [
+      "裙带菜"
+    ],
+    "category": "蔬菜",
+    "kcalPer100g": 45.0,
+    "protein": 3.03,
+    "fat": 0.64,
+    "carbs": 9.14,
+    "reference": "USDA SR Legacy 2018 / FDC 170496",
+    "description": "Seaweed, wakame, raw"
+  },
+  {
+    "id": "usda-170162",
+    "name": "生腰果",
+    "aliases": [
+      "腰果"
+    ],
+    "category": "坚果",
+    "kcalPer100g": 553.0,
+    "protein": 18.22,
+    "fat": 43.85,
+    "carbs": 30.19,
+    "reference": "USDA SR Legacy 2018 / FDC 170162",
+    "description": "Nuts, cashew nuts, raw"
+  },
+  {
+    "id": "usda-170187",
+    "name": "核桃仁",
+    "aliases": [
+      "核桃"
+    ],
+    "category": "坚果",
+    "kcalPer100g": 654.0,
+    "protein": 15.23,
+    "fat": 65.21,
+    "carbs": 13.71,
+    "reference": "USDA SR Legacy 2018 / FDC 170187",
+    "description": "Nuts, walnuts, english"
+  },
+  {
+    "id": "usda-170184",
+    "name": "生开心果仁",
+    "aliases": [
+      "开心果"
+    ],
+    "category": "坚果",
+    "kcalPer100g": 560.0,
+    "protein": 20.16,
+    "fat": 45.32,
+    "carbs": 27.17,
+    "reference": "USDA SR Legacy 2018 / FDC 170184",
+    "description": "Nuts, pistachio nuts, raw"
+  },
+  {
+    "id": "usda-170581",
+    "name": "榛子仁",
+    "aliases": [
+      "榛子"
+    ],
+    "category": "坚果",
+    "kcalPer100g": 628.0,
+    "protein": 14.95,
+    "fat": 60.75,
+    "carbs": 16.7,
+    "reference": "USDA SR Legacy 2018 / FDC 170581",
+    "description": "Nuts, hazelnuts or filberts"
+  },
+  {
+    "id": "usda-170178",
+    "name": "生夏威夷果仁",
+    "aliases": [
+      "夏威夷果"
+    ],
+    "category": "坚果",
+    "kcalPer100g": 718.0,
+    "protein": 7.91,
+    "fat": 75.77,
+    "carbs": 13.82,
+    "reference": "USDA SR Legacy 2018 / FDC 170178",
+    "description": "Nuts, macadamia nuts, raw"
+  },
+  {
+    "id": "usda-170169",
+    "name": "鲜椰子肉",
+    "aliases": [
+      "椰子肉"
+    ],
+    "category": "坚果",
+    "kcalPer100g": 354.0,
+    "protein": 3.33,
+    "fat": 33.49,
+    "carbs": 15.23,
+    "reference": "USDA SR Legacy 2018 / FDC 170169",
+    "description": "Nuts, coconut meat, raw"
+  },
+  {
+    "id": "usda-170554",
+    "name": "干奇亚籽",
+    "aliases": [
+      "奇亚籽"
+    ],
+    "category": "坚果",
+    "kcalPer100g": 486.0,
+    "protein": 16.54,
+    "fat": 30.74,
+    "carbs": 42.12,
+    "reference": "USDA SR Legacy 2018 / FDC 170554",
+    "description": "Seeds, chia seeds, dried"
+  },
+  {
+    "id": "usda-169414",
+    "name": "亚麻籽",
+    "aliases": [],
+    "category": "坚果",
+    "kcalPer100g": 534.0,
+    "protein": 18.29,
+    "fat": 42.16,
+    "carbs": 28.88,
+    "reference": "USDA SR Legacy 2018 / FDC 169414",
+    "description": "Seeds, flaxseed"
+  },
+  {
+    "id": "usda-170556",
+    "name": "干南瓜籽仁",
+    "aliases": [
+      "南瓜籽"
+    ],
+    "category": "坚果",
+    "kcalPer100g": 559.0,
+    "protein": 30.23,
+    "fat": 49.05,
+    "carbs": 10.71,
+    "reference": "USDA SR Legacy 2018 / FDC 170556",
+    "description": "Seeds, pumpkin and squash seed kernels, dried"
+  },
+  {
+    "id": "usda-170562",
+    "name": "干葵花籽仁",
+    "aliases": [
+      "葵花籽"
+    ],
+    "category": "坚果",
+    "kcalPer100g": 584.0,
+    "protein": 20.78,
+    "fat": 51.46,
+    "carbs": 20.0,
+    "reference": "USDA SR Legacy 2018 / FDC 170562",
+    "description": "Seeds, sunflower seed kernels, dried"
+  },
+  {
+    "id": "usda-168589",
+    "name": "熟日本栗子（水煮或蒸）",
+    "aliases": [
+      "熟栗子"
+    ],
+    "category": "坚果",
+    "kcalPer100g": 56.0,
+    "protein": 0.82,
+    "fat": 0.19,
+    "carbs": 12.64,
+    "reference": "USDA SR Legacy 2018 / FDC 168589",
+    "description": "Nuts, chestnuts, japanese, boiled and steamed"
+  },
+  {
+    "id": "usda-171016",
+    "name": "芝麻油",
+    "aliases": [
+      "香油"
+    ],
+    "category": "油脂调味",
+    "kcalPer100g": 884.0,
+    "protein": 0.0,
+    "fat": 100.0,
+    "carbs": 0.0,
+    "reference": "USDA SR Legacy 2018 / FDC 171016",
+    "description": "Oil, sesame, salad or cooking"
+  },
+  {
+    "id": "usda-171410",
+    "name": "花生油",
+    "aliases": [],
+    "category": "油脂调味",
+    "kcalPer100g": 884.0,
+    "protein": 0.0,
+    "fat": 100.0,
+    "carbs": 0.0,
+    "reference": "USDA SR Legacy 2018 / FDC 171410",
+    "description": "Oil, peanut, salad or cooking"
+  },
+  {
+    "id": "usda-172336",
+    "name": "菜籽油（Canola）",
+    "aliases": [
+      "菜籽油"
+    ],
+    "category": "油脂调味",
+    "kcalPer100g": 884.0,
+    "protein": 0.0,
+    "fat": 100.0,
+    "carbs": 0.0,
+    "reference": "USDA SR Legacy 2018 / FDC 172336",
+    "description": "Oil, canola"
+  },
+  {
+    "id": "usda-173430",
+    "name": "无盐黄油",
+    "aliases": [
+      "黄油"
+    ],
+    "category": "乳制品",
+    "kcalPer100g": 717.0,
+    "protein": 0.85,
+    "fat": 81.11,
+    "carbs": 0.06,
+    "reference": "USDA SR Legacy 2018 / FDC 173430",
+    "description": "Butter, without salt"
+  },
+  {
+    "id": "usda-174277",
+    "name": "日式酱油（大豆小麦）",
+    "aliases": [
+      "日式酱油"
+    ],
+    "category": "豆类",
+    "kcalPer100g": 53.0,
+    "protein": 8.14,
+    "fat": 0.57,
+    "carbs": 4.93,
+    "reference": "USDA SR Legacy 2018 / FDC 174277",
+    "description": "Soy sauce made from soy and wheat (shoyu)"
+  },
+  {
+    "id": "usda-172473",
+    "name": "低钠日式酱油",
+    "aliases": [],
+    "category": "豆类",
+    "kcalPer100g": 57.0,
+    "protein": 9.05,
+    "fat": 0.3,
+    "carbs": 5.59,
+    "reference": "USDA SR Legacy 2018 / FDC 172473",
+    "description": "Soy sauce made from soy and wheat (shoyu), low sodium"
+  },
+  {
+    "id": "usda-171890",
+    "name": "无糖黑咖啡（冲煮）",
+    "aliases": [
+      "黑咖啡"
+    ],
+    "category": "饮品",
+    "kcalPer100g": 1.0,
+    "protein": 0.12,
+    "fat": 0.02,
+    "carbs": 0.0,
+    "reference": "USDA SR Legacy 2018 / FDC 171890",
+    "description": "Beverages, coffee, brewed, prepared with tap water"
+  },
+  {
+    "id": "usda-171891",
+    "name": "无糖浓缩咖啡",
+    "aliases": [
+      "浓缩咖啡"
+    ],
+    "category": "饮品",
+    "kcalPer100g": 9.0,
+    "protein": 0.12,
+    "fat": 0.18,
+    "carbs": 1.67,
+    "reference": "USDA SR Legacy 2018 / FDC 171891",
+    "description": "Beverages, coffee, brewed, espresso, restaurant-prepared"
+  },
+  {
+    "id": "usda-171917",
+    "name": "无糖绿茶（冲泡）",
+    "aliases": [
+      "绿茶"
+    ],
+    "category": "饮品",
+    "kcalPer100g": 1.0,
+    "protein": 0.22,
+    "fat": 0.0,
+    "carbs": 0.0,
+    "reference": "USDA SR Legacy 2018 / FDC 171917",
+    "description": "Beverages, tea, green, brewed, regular"
+  },
+  {
+    "id": "usda-173227",
+    "name": "无糖红茶（冲泡）",
+    "aliases": [
+      "红茶"
+    ],
+    "category": "饮品",
+    "kcalPer100g": 1.0,
+    "protein": 0.0,
+    "fat": 0.0,
+    "carbs": 0.3,
+    "reference": "USDA SR Legacy 2018 / FDC 173227",
+    "description": "Beverages, tea, black, brewed, prepared with tap water"
+  },
+  {
+    "id": "usda-173647",
+    "name": "饮用水",
+    "aliases": [
+      "水"
+    ],
+    "category": "饮品",
+    "kcalPer100g": 0.0,
+    "protein": 0.0,
+    "fat": 0.0,
+    "carbs": 0.0,
+    "reference": "USDA SR Legacy 2018 / FDC 173647",
+    "description": "Beverages, water, tap, drinking"
+  },
+  {
+    "id": "usda-169098",
+    "name": "鲜橙汁",
+    "aliases": [
+      "橙汁"
+    ],
+    "category": "水果",
+    "kcalPer100g": 45.0,
+    "protein": 0.7,
+    "fat": 0.2,
+    "carbs": 10.4,
+    "reference": "USDA SR Legacy 2018 / FDC 169098",
+    "description": "Orange juice, raw (Includes foods for USDA's Food Distribution Program)"
+  },
+  {
+    "id": "usda-169593",
+    "name": "无糖可可粉",
+    "aliases": [
+      "可可粉"
+    ],
+    "category": "零食",
+    "kcalPer100g": 228.0,
+    "protein": 19.6,
+    "fat": 13.7,
+    "carbs": 57.9,
+    "reference": "USDA SR Legacy 2018 / FDC 169593",
+    "description": "Cocoa, dry powder, unsweetened"
+  },
+  {
+    "id": "usda-170273",
+    "name": "黑巧克力（70–85%可可）",
+    "aliases": [
+      "黑巧克力"
+    ],
+    "category": "零食",
+    "kcalPer100g": 598.0,
+    "protein": 7.79,
+    "fat": 42.63,
+    "carbs": 45.9,
+    "reference": "USDA SR Legacy 2018 / FDC 170273",
+    "description": "Chocolate, dark, 70-85% cacao solids"
+  },
+  {
+    "id": "usda-169677",
+    "name": "原味薯片（含盐）",
+    "aliases": [
+      "薯片"
+    ],
+    "category": "其他",
+    "kcalPer100g": 532.0,
+    "protein": 6.39,
+    "fat": 33.98,
+    "carbs": 53.83,
+    "reference": "USDA SR Legacy 2018 / FDC 169677",
+    "description": "Snacks, potato chips, plain, salted"
+  },
+  {
+    "id": "usda-170246",
+    "name": "无盐空气爆米花",
+    "aliases": [
+      "无盐爆米花"
+    ],
+    "category": "其他",
+    "kcalPer100g": 382.0,
+    "protein": 12.0,
+    "fat": 4.2,
+    "carbs": 77.9,
+    "reference": "USDA SR Legacy 2018 / FDC 170246",
+    "description": "Snacks, popcorn, air-popped (Unsalted)"
+  }
+]

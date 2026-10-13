@@ -1,0 +1,78 @@
+# Git 管理与 GitHub 发布
+
+本地仓库根目录是 `D:\AgentProject\codex\Application\Android\Health vivo`，一个仓库管理 `android`、`watch`、`orbitv` 三个工程。`HealthVivoWatch` 是正式 watch 目录链接，`HealthVivoWatchDev` 是独立演示副本，不要另建重复仓库。
+
+## 首次上传
+
+1. 在 GitHub 新建空仓库，选择公开或私有。不要勾选自动创建 README、.gitignore 或 License，以免与已有本地首次提交冲突。
+2. 在项目根目录运行以下命令，将占位地址换成自己的仓库地址：
+
+```powershell
+Set-Location -LiteralPath 'D:\AgentProject\codex\Application\Android\Health vivo'
+git remote add origin https://github.com/你的用户名/你的仓库名.git
+git push -u origin main
+```
+
+首次认证通过 Git Credential Manager 的浏览器登录完成；不要把令牌写进远程地址或提交到文件。若仓库已有提交，先获取和检查历史，再合并，不要强制推送覆盖。
+
+## 后续开发
+
+```powershell
+git status
+git add android watch orbitv scripts docs README.md .gitignore .gitattributes
+git diff --cached --stat
+git commit -m "Describe the change"
+git push
+```
+
+本地私钥、SDK 配置、API 设置、健康数据、缓存、历史试验目录和安装包已设置为忽略。不要使用 `git add -f` 加入这些文件。首次上传前检查的是最终 Git 文件清单，并非整个电脑目录。
+
+## 准备 Release 附件
+
+三套软件版本独立，仓库以手机版本作为套件标签，例如 `v0.12.3`。每次发布说明列出当次配套的手机、手表和扩展版本。
+
+```powershell
+./scripts/prepare-release.ps1
+```
+
+脚本只整理已构建的三个安装包、安装说明和 SHA256 校验值，不自动上传、安装或运行测试。附件输出至被 Git 忽略的 `artifacts/releases/v0.12.3`。需要重新构建时先运行三个 build 脚本。
+
+当前手机 APK 是调试签名版本，首版建议勾选 **This is a pre-release**。正式发行应使用受保护的固定签名密钥构建不含 debug 入口的发布 APK；不要直接换签名并卸载旧 App，卸载会删除本机记录。保留密钥用于以后覆盖更新，密钥不能上传到 Git。
+
+## 网页发布
+
+源码推送成功后：仓库页面 → **Releases** → **Draft a new release**。
+
+1. 创建标签 `v0.12.3`，Target 选择 `main`，确认它指向准备本次附件的提交。
+2. 标题填写“活力记录 v0.12.3 · 预发布”。
+3. 复制 `docs/releases/v0.12.3.md` 的内容。
+4. 上传整理目录中的三个安装包、`SHA256SUMS.txt` 和 `INSTALL.md`。
+5. 勾选预发布，可先 **Save draft** 检查附件，再 **Publish release**。
+
+GitHub 会自动提供该标签的源码归档，安装包需额外作为附件上传。不要把整个 artifacts 文件夹上传，其中还包含本机诊断与历史报告。
+
+## 可选：GitHub CLI
+
+安装 GitHub CLI 后使用浏览器授权，密钥无需发到聊天中：
+
+```powershell
+gh auth login --hostname github.com --git-protocol https --web
+```
+
+若远程已配置并推送，可使用生成的 `RELEASE_NOTES.md` 和附件建立草稿。标签先通过 `git tag -a v0.12.3 -m "Vitality suite v0.12.3"` 创建，再 `git push origin v0.12.3`。不要重复创建已有标签或移动已发布标签。
+
+```powershell
+gh release create v0.12.3 `
+  artifacts/releases/v0.12.3/vitality-phone-0.12.3.apk `
+  artifacts/releases/v0.12.3/health-vivo-watch-0.5.3.rpk `
+  artifacts/releases/v0.12.3/vitality-orbitv-1.2.0.ovpkg `
+  artifacts/releases/v0.12.3/SHA256SUMS.txt `
+  artifacts/releases/v0.12.3/INSTALL.md `
+  --verify-tag --draft --prerelease `
+  --title "活力记录 v0.12.3 · 预发布" `
+  --notes-file artifacts/releases/v0.12.3/RELEASE_NOTES.md
+```
+
+确认草稿附件后再发布。源码公开不自动赋予他人开源授权；如需要开源，可另行选择许可证。第三方 SDK 和数据源按其各自条款处理。
+
+来源：[上传本地源码](https://docs.github.com/en/migrations/importing-source-code/using-the-command-line-to-import-source-code/adding-locally-hosted-code-to-github)、[管理 Releases](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository)、[GitHub CLI release create](https://cli.github.com/manual/gh_release_create)。

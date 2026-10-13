@@ -1,0 +1,3 @@
+# Copy to vivo-sdk.local.properties and fill locally. Never commit the real file.
+appId=
+sdkKey=

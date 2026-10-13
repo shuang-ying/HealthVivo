@@ -1,0 +1,918 @@
+[
+  {
+    "code": "17190",
+    "met": 3.8,
+    "name": "步行（约 4.5–5.5 km/h）",
+    "aliases": [
+      "步行",
+      "走路",
+      "散步"
+    ],
+    "category": "aerobic",
+    "group": "步行跑步",
+    "distanceKind": "walk",
+    "countsSteps": true,
+    "reference": "https://pacompendium.com/walking/"
+  },
+  {
+    "code": "17200",
+    "met": 4.8,
+    "name": "快走（约 5.6–6.3 km/h）",
+    "aliases": [
+      "快走"
+    ],
+    "category": "aerobic",
+    "group": "步行跑步",
+    "distanceKind": "walk",
+    "countsSteps": true,
+    "reference": "https://pacompendium.com/walking/"
+  },
+  {
+    "code": "12020",
+    "met": 7.5,
+    "name": "慢跑（自选速度）",
+    "aliases": [
+      "慢跑"
+    ],
+    "category": "aerobic",
+    "group": "步行跑步",
+    "distanceKind": "run",
+    "countsSteps": true,
+    "reference": "https://pacompendium.com/running/"
+  },
+  {
+    "code": "12030",
+    "met": 8.5,
+    "name": "跑步（约 8 km/h）",
+    "aliases": [
+      "跑步"
+    ],
+    "category": "aerobic",
+    "group": "步行跑步",
+    "distanceKind": "run",
+    "countsSteps": true,
+    "reference": "https://pacompendium.com/running/"
+  },
+  {
+    "code": "02054",
+    "met": 3.5,
+    "name": "力量训练（一般）",
+    "aliases": [
+      "力量训练"
+    ],
+    "category": "anaerobic",
+    "group": "力量训练",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/conditioning-exercise/"
+  },
+  {
+    "code": "02175",
+    "met": 2.3,
+    "name": "瑜伽（一般）",
+    "aliases": [
+      "瑜伽"
+    ],
+    "category": "aerobic",
+    "group": "舒展体能",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/conditioning-exercise/"
+  },
+  {
+    "code": "17151",
+    "met": 2.3,
+    "name": "慢速散步（低于 3.2 km/h）",
+    "aliases": [
+      "慢速散步"
+    ],
+    "category": "aerobic",
+    "group": "步行跑步",
+    "distanceKind": "walk",
+    "countsSteps": true,
+    "reference": "https://pacompendium.com/walking/"
+  },
+  {
+    "code": "17170",
+    "met": 3.0,
+    "name": "步行（约 4 km/h）",
+    "aliases": [],
+    "category": "aerobic",
+    "group": "步行跑步",
+    "distanceKind": "walk",
+    "countsSteps": true,
+    "reference": "https://pacompendium.com/walking/"
+  },
+  {
+    "code": "17220",
+    "met": 5.5,
+    "name": "快速步行（约 6.4–7.1 km/h）",
+    "aliases": [],
+    "category": "aerobic",
+    "group": "步行跑步",
+    "distanceKind": "walk",
+    "countsSteps": true,
+    "reference": "https://pacompendium.com/walking/"
+  },
+  {
+    "code": "17080",
+    "met": 6.0,
+    "name": "越野徒步（一般）",
+    "aliases": [
+      "徒步"
+    ],
+    "category": "aerobic",
+    "group": "步行跑步",
+    "distanceKind": "",
+    "countsSteps": true,
+    "reference": "https://pacompendium.com/walking/"
+  },
+  {
+    "code": "17082",
+    "met": 5.3,
+    "name": "丘陵徒步（正常速度，无负重）",
+    "aliases": [],
+    "category": "aerobic",
+    "group": "步行跑步",
+    "distanceKind": "",
+    "countsSteps": true,
+    "reference": "https://pacompendium.com/walking/"
+  },
+  {
+    "code": "17131",
+    "met": 6.8,
+    "name": "上楼梯（一般）",
+    "aliases": [
+      "爬楼梯",
+      "上楼梯"
+    ],
+    "category": "aerobic",
+    "group": "步行跑步",
+    "distanceKind": "",
+    "countsSteps": true,
+    "reference": "https://pacompendium.com/walking/"
+  },
+  {
+    "code": "17133",
+    "met": 4.5,
+    "name": "慢速上楼梯",
+    "aliases": [],
+    "category": "aerobic",
+    "group": "步行跑步",
+    "distanceKind": "",
+    "countsSteps": true,
+    "reference": "https://pacompendium.com/walking/"
+  },
+  {
+    "code": "17070",
+    "met": 3.5,
+    "name": "下楼梯",
+    "aliases": [],
+    "category": "aerobic",
+    "group": "步行跑步",
+    "distanceKind": "",
+    "countsSteps": true,
+    "reference": "https://pacompendium.com/walking/"
+  },
+  {
+    "code": "17165",
+    "met": 3.0,
+    "name": "遛狗步行",
+    "aliases": [
+      "遛狗"
+    ],
+    "category": "aerobic",
+    "group": "步行跑步",
+    "distanceKind": "walk",
+    "countsSteps": true,
+    "reference": "https://pacompendium.com/walking/"
+  },
+  {
+    "code": "12010",
+    "met": 6.0,
+    "name": "跑走交替（跑步段少于 10 分钟）",
+    "aliases": [
+      "跑走交替"
+    ],
+    "category": "aerobic",
+    "group": "步行跑步",
+    "distanceKind": "",
+    "countsSteps": true,
+    "reference": "https://pacompendium.com/running/"
+  },
+  {
+    "code": "12025",
+    "met": 4.8,
+    "name": "原地慢跑",
+    "aliases": [],
+    "category": "aerobic",
+    "group": "步行跑步",
+    "distanceKind": "",
+    "countsSteps": true,
+    "reference": "https://pacompendium.com/running/"
+  },
+  {
+    "code": "12050",
+    "met": 9.3,
+    "name": "跑步（约 9.7–10.1 km/h）",
+    "aliases": [],
+    "category": "aerobic",
+    "group": "步行跑步",
+    "distanceKind": "run",
+    "countsSteps": true,
+    "reference": "https://pacompendium.com/running/"
+  },
+  {
+    "code": "12070",
+    "met": 11.0,
+    "name": "跑步（约 11.3 km/h）",
+    "aliases": [],
+    "category": "aerobic",
+    "group": "步行跑步",
+    "distanceKind": "run",
+    "countsSteps": true,
+    "reference": "https://pacompendium.com/running/"
+  },
+  {
+    "code": "12140",
+    "met": 9.3,
+    "name": "越野跑",
+    "aliases": [],
+    "category": "aerobic",
+    "group": "步行跑步",
+    "distanceKind": "",
+    "countsSteps": true,
+    "reference": "https://pacompendium.com/running/"
+  },
+  {
+    "code": "02050",
+    "met": 6.0,
+    "name": "力量训练（高强度）",
+    "aliases": [],
+    "category": "anaerobic",
+    "group": "力量训练",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/conditioning-exercise/"
+  },
+  {
+    "code": "02052",
+    "met": 5.0,
+    "name": "深蹲或硬拉（负重训练）",
+    "aliases": [
+      "负重深蹲",
+      "硬拉"
+    ],
+    "category": "anaerobic",
+    "group": "力量训练",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/conditioning-exercise/"
+  },
+  {
+    "code": "02056",
+    "met": 3.0,
+    "name": "徒手力量训练（一般）",
+    "aliases": [
+      "徒手训练",
+      "俯卧撑",
+      "徒手深蹲"
+    ],
+    "category": "anaerobic",
+    "group": "力量训练",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/conditioning-exercise/"
+  },
+  {
+    "code": "02057",
+    "met": 6.5,
+    "name": "徒手力量训练（高强度）",
+    "aliases": [],
+    "category": "anaerobic",
+    "group": "力量训练",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/conditioning-exercise/"
+  },
+  {
+    "code": "02024",
+    "met": 2.8,
+    "name": "核心训练（轻强度）",
+    "aliases": [
+      "平板支撑",
+      "卷腹"
+    ],
+    "category": "anaerobic",
+    "group": "力量训练",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/conditioning-exercise/"
+  },
+  {
+    "code": "02032",
+    "met": 6.0,
+    "name": "徒手循环训练",
+    "aliases": [],
+    "category": "anaerobic",
+    "group": "力量训练",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/conditioning-exercise/"
+  },
+  {
+    "code": "02035",
+    "met": 5.0,
+    "name": "循环训练（中等强度）",
+    "aliases": [],
+    "category": "anaerobic",
+    "group": "力量训练",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/conditioning-exercise/"
+  },
+  {
+    "code": "02058",
+    "met": 9.8,
+    "name": "壶铃摆动",
+    "aliases": [],
+    "category": "anaerobic",
+    "group": "力量训练",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/conditioning-exercise/"
+  },
+  {
+    "code": "02048",
+    "met": 5.0,
+    "name": "椭圆机（中等强度）",
+    "aliases": [
+      "椭圆机"
+    ],
+    "category": "aerobic",
+    "group": "舒展体能",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/conditioning-exercise/"
+  },
+  {
+    "code": "02049",
+    "met": 9.0,
+    "name": "椭圆机（高强度）",
+    "aliases": [],
+    "category": "aerobic",
+    "group": "舒展体能",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/conditioning-exercise/"
+  },
+  {
+    "code": "02071",
+    "met": 5.0,
+    "name": "划船机（低于 100 W）",
+    "aliases": [
+      "划船机"
+    ],
+    "category": "aerobic",
+    "group": "舒展体能",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/conditioning-exercise/"
+  },
+  {
+    "code": "02072",
+    "met": 7.5,
+    "name": "划船机（100–149 W）",
+    "aliases": [],
+    "category": "aerobic",
+    "group": "舒展体能",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/conditioning-exercise/"
+  },
+  {
+    "code": "02065",
+    "met": 9.3,
+    "name": "登阶机（一般）",
+    "aliases": [
+      "登阶机"
+    ],
+    "category": "aerobic",
+    "group": "舒展体能",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/conditioning-exercise/"
+  },
+  {
+    "code": "02101",
+    "met": 2.3,
+    "name": "轻度拉伸",
+    "aliases": [
+      "拉伸"
+    ],
+    "category": "aerobic",
+    "group": "舒展体能",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/conditioning-exercise/"
+  },
+  {
+    "code": "02103",
+    "met": 1.8,
+    "name": "垫上普拉提",
+    "aliases": [
+      "普拉提"
+    ],
+    "category": "aerobic",
+    "group": "舒展体能",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/conditioning-exercise/"
+  },
+  {
+    "code": "02160",
+    "met": 4.0,
+    "name": "力量瑜伽",
+    "aliases": [],
+    "category": "aerobic",
+    "group": "舒展体能",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/conditioning-exercise/"
+  },
+  {
+    "code": "02210",
+    "met": 7.0,
+    "name": "间歇训练（中等强度）",
+    "aliases": [
+      "中等间歇训练"
+    ],
+    "category": "aerobic",
+    "group": "舒展体能",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/conditioning-exercise/"
+  },
+  {
+    "code": "02214",
+    "met": 11.0,
+    "name": "HIIT（高强度）",
+    "aliases": [
+      "HIIT",
+      "波比跳"
+    ],
+    "category": "aerobic",
+    "group": "舒展体能",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/conditioning-exercise/"
+  },
+  {
+    "code": "01010",
+    "met": 4.0,
+    "name": "休闲骑行（低于 16 km/h）",
+    "aliases": [
+      "休闲骑行"
+    ],
+    "category": "aerobic",
+    "group": "骑行",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/bicycling/"
+  },
+  {
+    "code": "01014",
+    "met": 7.0,
+    "name": "骑行（一般）",
+    "aliases": [
+      "骑行",
+      "骑自行车"
+    ],
+    "category": "aerobic",
+    "group": "骑行",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/bicycling/"
+  },
+  {
+    "code": "01020",
+    "met": 6.8,
+    "name": "骑行（约 16–19 km/h）",
+    "aliases": [],
+    "category": "aerobic",
+    "group": "骑行",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/bicycling/"
+  },
+  {
+    "code": "01030",
+    "met": 8.0,
+    "name": "骑行（约 19–22 km/h）",
+    "aliases": [],
+    "category": "aerobic",
+    "group": "骑行",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/bicycling/"
+  },
+  {
+    "code": "01040",
+    "met": 10.0,
+    "name": "骑行（约 23–26 km/h）",
+    "aliases": [],
+    "category": "aerobic",
+    "group": "骑行",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/bicycling/"
+  },
+  {
+    "code": "01009",
+    "met": 8.5,
+    "name": "山地骑行（一般）",
+    "aliases": [
+      "山地骑行"
+    ],
+    "category": "aerobic",
+    "group": "骑行",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/bicycling/"
+  },
+  {
+    "code": "01214",
+    "met": 4.0,
+    "name": "健身车（50 W）",
+    "aliases": [],
+    "category": "aerobic",
+    "group": "骑行",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/bicycling/"
+  },
+  {
+    "code": "01220",
+    "met": 6.0,
+    "name": "健身车（90–100 W）",
+    "aliases": [],
+    "category": "aerobic",
+    "group": "骑行",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/bicycling/"
+  },
+  {
+    "code": "01200",
+    "met": 6.8,
+    "name": "健身车（一般）",
+    "aliases": [
+      "健身车"
+    ],
+    "category": "aerobic",
+    "group": "骑行",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/bicycling/"
+  },
+  {
+    "code": "01270",
+    "met": 9.0,
+    "name": "动感单车课程",
+    "aliases": [
+      "动感单车"
+    ],
+    "category": "aerobic",
+    "group": "骑行",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/bicycling/"
+  },
+  {
+    "code": "18240",
+    "met": 5.8,
+    "name": "自由泳（休闲慢速）",
+    "aliases": [
+      "自由泳"
+    ],
+    "category": "aerobic",
+    "group": "游泳",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/water-activities/"
+  },
+  {
+    "code": "18230",
+    "met": 9.8,
+    "name": "自由泳（快速高强度）",
+    "aliases": [],
+    "category": "aerobic",
+    "group": "游泳",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/water-activities/"
+  },
+  {
+    "code": "18265",
+    "met": 5.3,
+    "name": "蛙泳（休闲）",
+    "aliases": [
+      "蛙泳"
+    ],
+    "category": "aerobic",
+    "group": "游泳",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/water-activities/"
+  },
+  {
+    "code": "18260",
+    "met": 10.3,
+    "name": "蛙泳（训练或比赛）",
+    "aliases": [],
+    "category": "aerobic",
+    "group": "游泳",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/water-activities/"
+  },
+  {
+    "code": "18255",
+    "met": 4.8,
+    "name": "仰泳（休闲）",
+    "aliases": [
+      "仰泳"
+    ],
+    "category": "aerobic",
+    "group": "游泳",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/water-activities/"
+  },
+  {
+    "code": "18270",
+    "met": 13.8,
+    "name": "蝶泳（一般）",
+    "aliases": [
+      "蝶泳"
+    ],
+    "category": "aerobic",
+    "group": "游泳",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/water-activities/"
+  },
+  {
+    "code": "18310",
+    "met": 6.0,
+    "name": "休闲游泳（非泳道）",
+    "aliases": [
+      "游泳"
+    ],
+    "category": "aerobic",
+    "group": "游泳",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/water-activities/"
+  },
+  {
+    "code": "15030",
+    "met": 5.5,
+    "name": "羽毛球（休闲单打或双打）",
+    "aliases": [
+      "羽毛球"
+    ],
+    "category": "aerobic",
+    "group": "球类运动",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/sports/"
+  },
+  {
+    "code": "15020",
+    "met": 7.0,
+    "name": "羽毛球（竞技）",
+    "aliases": [],
+    "category": "aerobic",
+    "group": "球类运动",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/sports/"
+  },
+  {
+    "code": "15040",
+    "met": 8.0,
+    "name": "篮球（比赛）",
+    "aliases": [
+      "篮球"
+    ],
+    "category": "aerobic",
+    "group": "球类运动",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/sports/"
+  },
+  {
+    "code": "15070",
+    "met": 5.0,
+    "name": "篮球投篮练习",
+    "aliases": [],
+    "category": "aerobic",
+    "group": "球类运动",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/sports/"
+  },
+  {
+    "code": "15610",
+    "met": 7.0,
+    "name": "足球（休闲）",
+    "aliases": [
+      "足球"
+    ],
+    "category": "aerobic",
+    "group": "球类运动",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/sports/"
+  },
+  {
+    "code": "15660",
+    "met": 4.0,
+    "name": "乒乓球",
+    "aliases": [],
+    "category": "aerobic",
+    "group": "球类运动",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/sports/"
+  },
+  {
+    "code": "15675",
+    "met": 6.8,
+    "name": "网球（一般）",
+    "aliases": [
+      "网球"
+    ],
+    "category": "aerobic",
+    "group": "球类运动",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/sports/"
+  },
+  {
+    "code": "15720",
+    "met": 3.0,
+    "name": "排球（休闲，6–9人队伍）",
+    "aliases": [
+      "排球"
+    ],
+    "category": "aerobic",
+    "group": "球类运动",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/sports/"
+  },
+  {
+    "code": "15551",
+    "met": 11.8,
+    "name": "跳绳（中等速度，100–120 次/分）",
+    "aliases": [
+      "跳绳"
+    ],
+    "category": "aerobic",
+    "group": "舒展体能",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/sports/"
+  },
+  {
+    "code": "15110",
+    "met": 5.8,
+    "name": "拳击沙袋训练",
+    "aliases": [
+      "拳击沙袋"
+    ],
+    "category": "aerobic",
+    "group": "舒展体能",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/sports/"
+  },
+  {
+    "code": "15533",
+    "met": 8.0,
+    "name": "攀岩或登山（一般）",
+    "aliases": [
+      "攀岩"
+    ],
+    "category": "aerobic",
+    "group": "舒展体能",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/sports/"
+  },
+  {
+    "code": "03028",
+    "met": 5.5,
+    "name": "广场舞（普通编舞）",
+    "aliases": [
+      "广场舞"
+    ],
+    "category": "aerobic",
+    "group": "舞蹈",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/dancing/"
+  },
+  {
+    "code": "03029",
+    "met": 7.3,
+    "name": "广场舞（有氧编舞）",
+    "aliases": [],
+    "category": "aerobic",
+    "group": "舞蹈",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/dancing/"
+  },
+  {
+    "code": "03010",
+    "met": 5.0,
+    "name": "芭蕾或现代舞课程",
+    "aliases": [
+      "芭蕾"
+    ],
+    "category": "aerobic",
+    "group": "舞蹈",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/dancing/"
+  },
+  {
+    "code": "03078",
+    "met": 4.5,
+    "name": "爵士舞（一般）",
+    "aliases": [
+      "爵士舞"
+    ],
+    "category": "aerobic",
+    "group": "舞蹈",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/dancing/"
+  },
+  {
+    "code": "02310",
+    "met": 6.5,
+    "name": "尊巴团体课程",
+    "aliases": [
+      "尊巴",
+      "Zumba"
+    ],
+    "category": "aerobic",
+    "group": "舞蹈",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/conditioning-exercise/"
+  },
+  {
+    "code": "19030",
+    "met": 7.0,
+    "name": "滑冰（一般）",
+    "aliases": [
+      "滑冰"
+    ],
+    "category": "aerobic",
+    "group": "冰雪运动",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/winter-activities/"
+  },
+  {
+    "code": "19075",
+    "met": 7.0,
+    "name": "滑雪（一般）",
+    "aliases": [
+      "滑雪"
+    ],
+    "category": "aerobic",
+    "group": "冰雪运动",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/winter-activities/"
+  },
+  {
+    "code": "19160",
+    "met": 6.3,
+    "name": "高山滑雪或单板（中等，仅活动时间）",
+    "aliases": [
+      "单板滑雪"
+    ],
+    "category": "aerobic",
+    "group": "冰雪运动",
+    "distanceKind": "",
+    "countsSteps": false,
+    "reference": "https://pacompendium.com/winter-activities/"
+  }
+]

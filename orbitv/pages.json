@@ -1,0 +1,4 @@
+{
+  "globalStyle": { "navigationStyle": "default", "backgroundColor": "#F5F3FA", "navigationBarBackgroundColor": "#F5F3FA", "navigationBarTextStyle": "auto" },
+  "pages": [{ "path": "pages/index/index", "style": { "navigationBarTitleText": "活力记录同步" } }]
+}

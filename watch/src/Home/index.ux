@@ -1,0 +1,210 @@
+<template>
+  <list id="dashboard-list" class="page">
+    <list-item type="header" class="header">
+      <text class="eyebrow">VITALITY · 活力记录</text>
+      <text class="title">{{pageTitle}}</text>
+      <div class="date-row">
+        <input class="date-arrow" type="button" value="‹" onclick="previousDay" />
+        <input class="date-value" type="button" value="{{dayText}}" onclick="dates" />
+        <input class="date-arrow" type="button" value="›" onclick="nextDay" />
+      </div>
+      <text class="caption">{{savedText}}</text>
+    </list-item>
+    <list-item type="navigation" class="navigation" if="{{detail}}">
+      <input class="back" type="button" value="{{backLabel}}" onclick="back" />
+    </list-item>
+    <list-item for="{{card in items}}" type="{{card.scale ? 'body-scale' : 'record'}}" class="card" onclick="select(card.action)">
+      <text class="label">{{card.title}}</text>
+      <text class="metric" if="{{card.highlight}}">{{card.body}}</text>
+      <text class="body" if="{{!card.highlight}}">{{card.body}}</text>
+      <div class="reference-scale" if="{{card.scale}}">
+        <div class="scale-marker-row">
+          <text class="scale-marker" if="{{card.scale.hasMarker}}" style="left: {{card.scale.markerLeft}}px;">▼</text>
+        </div>
+        <div class="scale-bar">
+          <div for="{{band in card.scale.bands}}" class="scale-band" style="width: {{band.width}}px; background-color: {{band.color}};"></div>
+        </div>
+        <div class="scale-ticks">
+          <text for="{{tick in card.scale.ticks}}" class="scale-tick" style="left: {{tick.left}}px;">{{tick.text}}</text>
+        </div>
+        <div class="scale-labels">
+          <text for="{{label in card.scale.labels}}" class="scale-name" style="left: {{label.left}}px;">{{label.text}}</text>
+        </div>
+      </div>
+      <text class="scale-note" if="{{card.scaleNote}}">{{card.scaleNote}}</text>
+      <div class="balance" if="{{card.balance}}" style="background-color: {{card.balanceColor}};">
+        <text class="balance-label">热量剩余</text>
+        <text class="balance-value">{{card.balance}}</text>
+      </div>
+      <text class="hint" if="{{card.action}}">点击查看 ›</text>
+    </list-item>
+    <list-item type="connection" class="footer" if="{{!detail}}">
+      <text class="caption">{{connectionText}}</text>
+      <input class="button" type="button" value="{{updateButton}}" onclick="refresh" />
+      <text class="footnote">活力记录 0.5.3 · 手动同步</text>
+    </list-item>
+  </list>
+</template>
+
+<script>
+import storage from '@blueos.storage.storage'
+import dashboard from '../lib/dashboard.mjs'
+import brightness from '@blueos.hardware.display.brightness'
+import { syncOrbitV } from '../lib/orbitv-sync.mjs'
+import { createOrbitVClient } from '../common/orbitv/index.js'
+import { createArchive } from '../lib/archive.mjs'
+
+function today() { const value = new Date(); return value.getFullYear() + '-' + ('0' + (value.getMonth() + 1)).slice(-2) + '-' + ('0' + value.getDate()).slice(-2) }
+export default {
+  data: { pageTitle: '今日总览', dayText: '', savedText: '', detail: false, items: [], connectionText: '按需获取手机更新', updateButton: '获取更新', backLabel: '‹ 返回总览' },
+  staticData: { runtime: {} },
+  onInit() {
+    this.runtime.day = today(); this.runtime.page = 'home'; this.runtime.visible = false
+    this.runtime.loaded = false; this.runtime.busy = false; this.runtime.checking = false
+    this.runtime.connected = false
+    this.runtime.generation = 0; this.runtime.dayGeneration = 0; this.runtime.timer = null; this.runtime.screenTimer = null
+    this.runtime.snapshot = null; this.runtime.savedAt = 0; this.runtime.archive = createArchive(storage)
+    try { this.runtime.client = createOrbitVClient({ appId: 'com.lrh.healthvivo.watch' }) }
+    catch (_) { this.runtime.client = null; this.connectionText = 'OrbitV SDK 初始化失败，请重新打开' }
+    this.updateDisplay()
+    this.loadArchive()
+  },
+  async loadArchive() {
+    try { await this.runtime.archive.load(); this.runtime.loaded = true; await this.loadDay(); if (this.runtime.visible) this.checkControl() }
+    catch (_) { this.connectionText = '历史缓存不可读，原记录暂不覆盖'; this.runtime.loaded = false }
+  },
+  onReady() { this.runtime.visible = true; this.checkControl() },
+  onShow() { this.runtime.visible = true; if (this.runtime.loaded) this.loadDay(); this.updateDisplay(); this.checkControl() },
+  onHide() { this.release() },
+  onDestroy() { this.release() },
+  onBackPress() { if (this.runtime.page !== 'home') { this.back(); return true }; return false },
+  release() {
+    this.runtime.visible = false; this.runtime.connected = false; this.runtime.generation++
+    if (this.runtime.timer) clearTimeout(this.runtime.timer); this.runtime.timer = null
+    this.releaseScreen()
+  },
+  async loadDay() {
+    const generation = ++this.runtime.dayGeneration; const day = this.runtime.day
+    try {
+      const snapshot = await this.runtime.archive.read(day)
+      if (generation !== this.runtime.dayGeneration) return
+      this.runtime.snapshot = snapshot; this.runtime.savedAt = this.runtime.archive.savedAt(day); this.updateDisplay()
+    } catch (_) { if (generation === this.runtime.dayGeneration) { this.runtime.snapshot = null; this.runtime.savedAt = 0; this.updateDisplay(); this.connectionText = '该日缓存不可读，请获取更新' } }
+  },
+  shiftDay(offset) {
+    const parts = this.runtime.day.split('-'); const value = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]) + offset)
+    const next = value.getFullYear() + '-' + ('0' + (value.getMonth() + 1)).slice(-2) + '-' + ('0' + value.getDate()).slice(-2)
+    if (next > today()) return
+    this.runtime.day = next; this.loadDay()
+  },
+  previousDay() { this.shiftDay(-1) }, nextDay() { this.shiftDay(1) }, dates() { this.select('dates') },
+  back() { this.select(this.runtime.page.indexOf('meal:') === 0 ? 'meals' : 'home') },
+  select(page) {
+    if (!page) return
+    if (page.indexOf('day:') === 0) { this.runtime.day = page.slice(4); this.runtime.page = 'home'; this.loadDay(); return }
+    if (['home', 'energy', 'exercise', 'meals', 'advice', 'dates', 'meal:breakfast', 'meal:lunch', 'meal:dinner', 'meal:snack'].indexOf(page) < 0) return
+    this.runtime.page = page; this.updateDisplay()
+    try { this.$element('dashboard-list').scrollTo({ index: 0 }) } catch (_) {}
+  },
+  updateDisplay() {
+    const titles = { home: '每日总览', energy: '每日能量参考', exercise: '运动记录', meals: '三餐', advice: 'AI 建议', dates: '选择日期', 'meal:breakfast': '早餐', 'meal:lunch': '午餐', 'meal:dinner': '晚餐', 'meal:snack': '加餐' }
+    this.pageTitle = titles[this.runtime.page]; this.detail = this.runtime.page !== 'home'
+    this.backLabel = this.runtime.page.indexOf('meal:') === 0 ? '‹ 返回三餐' : '‹ 返回总览'
+    this.dayText = this.runtime.day + (this.runtime.day === today() ? ' · 今天' : '')
+    this.savedText = this.runtime.savedAt ? '保存于 ' + dashboard.time(this.runtime.savedAt) : '该日暂无已同步记录'
+    if (this.runtime.page === 'dates') this.items = this.runtime.archive.dates().map(day => ({ title: day, body: '查看这一天', action: 'day:' + day, highlight: false }))
+    else this.items = dashboard.rows(this.runtime.snapshot, this.runtime.page)
+  },
+  async checkControl() {
+    if (this.runtime.checking && this.runtime.checkGeneration === this.runtime.generation) return
+    if (this.runtime.timer) clearTimeout(this.runtime.timer); this.runtime.timer = null
+    if (!this.runtime.visible) return
+    const generation = this.runtime.generation
+    try {
+      if (this.runtime.loaded && this.runtime.client && !this.runtime.busy && !this.runtime.checking) {
+        this.runtime.checking = true
+        this.runtime.checkGeneration = generation
+        // Control polling contains only the user's explicit update command; it never reads health records.
+        const response = await this.runtime.client.http.request('/api/control', { method: 'POST', data: JSON.stringify({ version: '0.5.3' }), header: { 'Content-Type': 'application/json' }, responseType: 'json', timeout: 4000, retries: 0 })
+        if (this.runtime.visible && generation === this.runtime.generation) {
+          if (response.data.transportReady === false) { this.runtime.connected = false; this.connectionText = '蓝牙通道未就绪，请在 OrbitV 连接手表'; return }
+          if (!this.runtime.connected) this.connectionText = '手机已连接 · 等待手动更新'
+          this.runtime.connected = true
+          if (Number.isSafeInteger(response.data.requestId) && response.data.requestId > this.runtime.archive.command()) await this.refresh()
+        }
+      }
+    } catch (error) {
+      if (this.runtime.visible && generation === this.runtime.generation) { this.runtime.connected = false; this.connectionText = this.connectionError(error) + ' · 重连中' }
+    } finally {
+      if (this.runtime.checkGeneration === generation) this.runtime.checking = false
+      if (this.runtime.visible && generation === this.runtime.generation) this.runtime.timer = setTimeout(() => this.checkControl(), 3000)
+    }
+  },
+  async refresh() {
+    if (!this.runtime.visible || !this.runtime.loaded || this.runtime.busy) return
+    if (!this.runtime.client) { this.connectionText = 'OrbitV SDK 初始化失败，请重新打开'; return }
+    const generation = this.runtime.generation
+    this.runtime.busy = true; this.updateButton = '正在更新…'; this.connectionText = '正在获取新增与修改的日期'
+    this.holdScreen()
+    try {
+      const result = await syncOrbitV(this.runtime.client, this.runtime.archive, {
+        current: () => this.runtime.visible && generation === this.runtime.generation,
+        progress: count => { this.connectionText = '已保存 ' + count + ' 个更新日期' }
+      })
+      if (result && generation === this.runtime.generation) {
+        await this.loadDay(); this.connectionText = result.changed ? '已更新 ' + result.changed + ' 个日期 · 确认已回传' : '数据已是最新 · 确认已回传'
+      }
+    } catch (error) {
+      if (generation === this.runtime.generation) this.connectionText = this.connectionError(error)
+    } finally { this.runtime.busy = false; this.updateButton = '获取更新'; this.releaseScreen(); if (this.runtime.visible && this.runtime.loaded) this.loadDay() }
+  },
+  connectionError(error) {
+    if (error.code === 'APP_PAGE_NOT_OPEN') return '请在手机打开活力记录同步扩展程序'
+    if (error.code === 'PHONE_SESSION_CLOSED') return '请在手机 App 开启持续连接'
+    if (error.code === 'WATCH_TRANSPORT_NOT_READY') return '请在 OrbitV 连接 GT2 蓝牙通道'
+    return error.message || '手机连接不可用，请保持扩展程序打开'
+  },
+  holdScreen() {
+    this.releaseScreen(); try { brightness.setKeepScreenOn({ keepScreenOn: true }) } catch (_) {}
+    this.runtime.screenTimer = setTimeout(() => this.releaseScreen(), 150000)
+  },
+  releaseScreen() {
+    if (this.runtime.screenTimer) clearTimeout(this.runtime.screenTimer); this.runtime.screenTimer = null
+    try { brightness.setKeepScreenOn({ keepScreenOn: false }) } catch (_) {}
+  }
+}
+</script>
+
+<style>
+.page { width: 432px; height: 100%; background-color: #111018; }
+.header { width: 396px; flex-direction: column; align-items: center; margin: 0px 18px; padding: 22px 0px 10px; }
+.eyebrow { width: 396px; text-align: center; font-size: 17px; color: #BFAEFF; }
+.title { width: 396px; text-align: center; font-size: 34px; color: #FFFFFF; font-weight: bold; margin-top: 8px; }
+.caption { width: 360px; text-align: center; font-size: 19px; color: #B9B3CA; margin-top: 8px; }
+.date-row { width: 396px; margin-top: 12px; flex-direction: row; align-items: center; justify-content: center; }
+.date-arrow { width: 46px; height: 50px; background-color: #252032; color: #D6C9FF; border-radius: 16px; font-size: 28px; }
+.date-value { width: 296px; height: 50px; margin: 0px 4px; background-color: #211D2E; color: #D6C9FF; border-radius: 16px; font-size: 20px; }
+.navigation { width: 396px; margin: 4px 18px; justify-content: center; }
+.back { width: 396px; height: 54px; background-color: #252032; border-radius: 18px; color: #D6C9FF; font-size: 22px; }
+.card { width: 396px; flex-direction: column; align-items: center; padding: 18px; margin: 6px 18px; border-radius: 24px; background-color: #211D2E; }
+.label { width: 360px; text-align: center; font-size: 22px; color: #D4CADE; }
+.metric { width: 360px; text-align: center; font-size: 29px; line-height: 38px; color: #CCB8FF; margin-top: 10px; font-weight: bold; }
+.body { width: 360px; text-align: center; font-size: 22px; line-height: 32px; color: #F0EBF8; margin-top: 10px; }
+.balance { width: 360px; flex-direction: column; align-items: center; padding: 14px; margin-top: 14px; border-radius: 18px; }
+.balance-label { width: 332px; text-align: center; font-size: 19px; color: #FFFFFF; }
+.balance-value { width: 332px; text-align: center; font-size: 30px; color: #FFFFFF; font-weight: bold; margin-top: 6px; }
+.hint { width: 360px; text-align: center; font-size: 18px; color: #A99ABC; margin-top: 12px; }
+.footer { width: 396px; flex-direction: column; align-items: center; margin: 8px 18px 24px; padding: 10px 0px; }
+.button { width: 396px; height: 64px; background-color: #7955D8; color: #FFFFFF; border-radius: 22px; font-size: 24px; margin-top: 14px; }
+.footnote { width: 396px; text-align: center; font-size: 17px; color: #8F879F; margin-top: 16px; }
+.reference-scale { width: 300px; height: 96px; flex-direction: column; margin-top: 8px; }
+.scale-marker-row { width: 300px; height: 24px; position: relative; }
+.scale-marker { position: absolute; width: 20px; height: 24px; font-size: 18px; text-align: center; color: #CCB8FF; }
+.scale-bar { width: 300px; height: 14px; flex-direction: row; }
+.scale-band { height: 14px; }
+.scale-ticks { width: 300px; height: 24px; position: relative; margin-top: 5px; }
+.scale-tick { position: absolute; width: 44px; font-size: 14px; text-align: center; color: #B9B3CA; }
+.scale-labels { width: 300px; height: 26px; position: relative; }
+.scale-name { position: absolute; width: 60px; font-size: 15px; text-align: center; color: #D4CADE; }
+.scale-note { width: 300px; font-size: 18px; line-height: 26px; text-align: center; color: #B9B3CA; margin-top: 10px; }
+</style>

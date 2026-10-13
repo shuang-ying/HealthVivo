@@ -1,0 +1,10 @@
+{
+  "name": "health-vivo-watch",
+  "version": "0.5.3",
+  "private": true,
+  "scripts": {
+    "test": "node --test test/*.test.cjs",
+    "build": "node node_modules/blueos-pack/bin/index.js build --device-type watch-square --debug"
+  },
+  "devDependencies": { "blueos-pack": "1.0.12-beta.13" }
+}

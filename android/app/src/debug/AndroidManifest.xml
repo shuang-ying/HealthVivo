@@ -1,0 +1,8 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <activity android:name=".debug.OrbitBridgeProbeActivity" android:exported="true" />
+        <activity android:name=".debug.PreviewActivity" android:exported="true" />
+        <activity android:name=".debug.WatchDiagnosticsActivity" android:exported="true" />
+        <activity android:name=".debug.ClassicSppProbeActivity" android:exported="true" />
+    </application>
+</manifest>
