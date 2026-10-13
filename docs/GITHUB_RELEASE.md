@@ -39,7 +39,7 @@ git push
 ./scripts/prepare-release.ps1
 ```
 
-脚本只整理已构建的三个安装包、安装说明和 SHA256 校验值，不自动上传、安装或运行测试。附件输出至被 Git 忽略的 `artifacts/releases/v0.12.3`。需要重新构建时先运行三个 build 脚本。
+脚本只整理已构建的三个安装包、安装说明、SHA256 校验值和许可证说明，不自动上传、安装或运行测试。附件输出至被 Git 忽略的 `artifacts/releases/v0.12.3`。需要重新构建时先运行三个 build 脚本。
 
 当前手机 APK 是调试签名版本，首版建议勾选 **This is a pre-release**。正式发行应使用受保护的固定签名密钥构建不含 debug 入口的发布 APK；不要直接换签名并卸载旧 App，卸载会删除本机记录。保留密钥用于以后覆盖更新，密钥不能上传到 Git。
 
@@ -50,7 +50,7 @@ git push
 1. 创建标签 `v0.12.3`，Target 选择 `main`，确认它指向准备本次附件的提交。
 2. 标题填写“活力记录 v0.12.3 · 预发布”。
 3. 复制 `docs/releases/v0.12.3.md` 的内容。
-4. 上传整理目录中的三个安装包、`SHA256SUMS.txt` 和 `INSTALL.md`。
+4. 上传整理目录中的三个安装包、`SHA256SUMS.txt`、`INSTALL.md`、`LICENSE` 和 `THIRD_PARTY_NOTICES.md`。
 5. 勾选预发布，可先 **Save draft** 检查附件，再 **Publish release**。
 
 GitHub 会自动提供该标签的源码归档，安装包需额外作为附件上传。不要把整个 artifacts 文件夹上传，其中还包含本机诊断与历史报告。
@@ -74,11 +74,13 @@ gh release create v0.12.3 `
   artifacts/releases/v0.12.3/vitality-orbitv-1.2.0.ovpkg `
   artifacts/releases/v0.12.3/SHA256SUMS.txt `
   artifacts/releases/v0.12.3/INSTALL.md `
+  artifacts/releases/v0.12.3/LICENSE `
+  artifacts/releases/v0.12.3/THIRD_PARTY_NOTICES.md `
   --verify-tag --draft --prerelease `
   --title "活力记录 v0.12.3 · 预发布" `
   --notes-file artifacts/releases/v0.12.3/RELEASE_NOTES.md
 ```
 
-确认草稿附件后再发布。源码公开不自动赋予他人开源授权；如需要开源，可另行选择许可证。第三方 SDK 和数据源按其各自条款处理。
+确认草稿附件后再发布。项目原创代码已采用根目录 `LICENSE` 中的 MIT 许可证；第三方 SDK、模板、依赖和数据保留各自条款，详见 `THIRD_PARTY_NOTICES.md`。准备 Release 时一并附上这两个文件；它们不代表重新授权第三方材料。
 
 来源：[上传本地源码](https://docs.github.com/en/migrations/importing-source-code/using-the-command-line-to-import-source-code/adding-locally-hosted-code-to-github)、[管理 Releases](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository)、[GitHub CLI release create](https://cli.github.com/manual/gh_release_create)。

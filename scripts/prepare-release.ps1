@@ -42,5 +42,8 @@ APK 为调试签名构建，包含开发入口；本版 GT2 数轴仍需实机�
 "@
 [System.IO.File]::WriteAllText((Join-Path $destination 'INSTALL.md'), $install, $utf8)
 Copy-Item -LiteralPath $notesPath -Destination (Join-Path $destination 'RELEASE_NOTES.md') -Force
+foreach ($notice in @('LICENSE', 'THIRD_PARTY_NOTICES.md')) {
+    Copy-Item -LiteralPath (Join-Path $projectRoot $notice) -Destination (Join-Path $destination $notice) -Force
+}
 Write-Output "Release files prepared: $destination"
 Write-Output 'No upload performed. Review the package set and notes before publishing.'

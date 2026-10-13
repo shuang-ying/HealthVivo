@@ -2,6 +2,7 @@
   "name": "com-lrh-healthvivo-watch-orbitv-extension",
   "private": true,
   "version": "1.2.0",
+  "license": "MIT",
   "type": "module",
   "engines": {
     "node": ">=20.19.0"
