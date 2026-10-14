@@ -308,7 +308,10 @@ open class MainActivity : ComponentActivity() {
                         3 -> {
                             Panel("体重趋势") {
                                 WeightBmi(weight, data.profile) { showWeight = true }
-                                val weights = data.weights.filter { it.day <= dayString }
+                                // The whole series, not the days up to the one being viewed: the selected
+                                // day only decides which period the chart opens on, so a later record
+                                // must not disappear when an earlier day is selected.
+                                val weights = data.weights
                                 if (weights.isEmpty()) Text("记录体重后，会在这里显示变化。", color = muted)
                                 else {
                                     // The same calendar navigation as the energy charts, on a sparse series.
@@ -320,7 +323,7 @@ open class MainActivity : ComponentActivity() {
                                 }
                             }
                             Panel("体脂率趋势") {
-                                val measured = data.bodyFats.filter { it.day <= dayString }
+                                val measured = data.bodyFats
                                 Button(onClick = { showBodyFat = true }) { Text("记录 / 更新体脂率") }
                                 if (measured.isEmpty()) Text("手动记录体脂率后显示趋势。", color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 else {

@@ -100,8 +100,18 @@ object CalorieCalculator {
             workouts.size - eligible.size, total, workoutSteps, recordedSteps,
             total != null && attributedSum > total)
     }
-    fun weightAt(data: FitnessData, day: String): Double? = data.weights.filter { it.day <= day }.maxByOrNull { it.day }?.kg
-        ?: data.profile?.weightKg?.takeIf { day >= LocalDate.now().toString() }
+    /**
+     * The weight in effect on [day]: the most recent one recorded on or before it, carried forward
+     * unchanged until the next record. A weight recorded on the 10th therefore covers the 10th and
+     * every later day; a second record on the 20th takes over from the 20th itself, and the days
+     * before the 20th keep the old value. Days before the first record have no weight at all - the
+     * profile's own figure is what the user typed at setup, not a measurement of that day, so it is
+     * never used to invent a metabolism.
+     *
+     * [sorted] is [FitnessData.weights] ordered by day; callers that walk many days sort once.
+     */
+    fun weightOn(sorted: List<WeightEntry>, day: String): Double? = sorted.lastOrNull { it.day <= day }?.kg
+    fun weightAt(data: FitnessData, day: String): Double? = weightOn(data.weights.sortedBy { it.day }, day)
     /**
      * The last [days] days ending at [day], oldest first, for the intake / activity / remaining charts.
      * Days with no records contribute zero activity and zero intake rather than being dropped, so the

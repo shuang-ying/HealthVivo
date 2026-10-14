@@ -15,10 +15,15 @@ class FitnessRepository(private val database: FitnessDatabase) {
     }
     suspend fun saveProfile(value: Profile, bodyFatPercent: Double? = null) {
         value.validate()
-        val bodyFat = bodyFatPercent?.let { BodyFatEntry(LocalDate.now().toString(), it, value.updatedAt).also { entry -> entry.validate() } }
+        val day = LocalDate.now().toString()
+        val bodyFat = bodyFatPercent?.let { BodyFatEntry(day, it, value.updatedAt).also { entry -> entry.validate() } }
         database.withTransaction {
             dao.profile(value)
-            dao.weight(WeightEntry(LocalDate.now().toString(), value.weightKg, value.updatedAt))
+            // Only a changed figure is a new measurement. Each weight record starts a new step in the
+            // carried-forward weight, so saving the same value again - or editing the target weight -
+            // must not write one; the step would change nothing but would still show up in the history.
+            if(CalorieCalculator.weightOn(dao.weights().first().sortedBy { it.day }, day) != value.weightKg)
+                dao.weight(WeightEntry(day, value.weightKg, value.updatedAt))
             // Editing unrelated profile fields must not manufacture a new measurement.
             if(bodyFat != null && dao.bodyFats().first().firstOrNull { it.day <= bodyFat.day }?.percent != bodyFat.percent) dao.bodyFat(bodyFat)
         }

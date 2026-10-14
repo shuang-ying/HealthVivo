@@ -162,6 +162,48 @@ class TrendsTest {
         assertEquals(1648.75, Trends.energy(weighed, Trends.period("2026-10-14", TrendScale.Week), today)[2].referenceKcal!!, 0.001)
     }
 
+    @Test fun aWeightCarriesForwardUntilTheNextRecordAndStartsOnItsOwnDay() {
+        // The three examples: a lone record covers everything after it; a second record takes over from
+        // its own day; a third narrows the middle step. Days before the first record have no weight.
+        val data = FitnessData(profile(), weights = listOf(
+            WeightEntry("2026-10-10", 100.0, 1), WeightEntry("2026-10-20", 99.0, 2), WeightEntry("2026-10-25", 98.0, 3)))
+        assertNull(CalorieCalculator.weightAt(data, "2026-10-09"))
+        assertEquals(100.0, CalorieCalculator.weightAt(data, "2026-10-10")!!, 0.001)
+        assertEquals(100.0, CalorieCalculator.weightAt(data, "2026-10-19")!!, 0.001)
+        assertEquals(99.0, CalorieCalculator.weightAt(data, "2026-10-20")!!, 0.001)
+        assertEquals(99.0, CalorieCalculator.weightAt(data, "2026-10-24")!!, 0.001)
+        assertEquals(98.0, CalorieCalculator.weightAt(data, "2026-10-25")!!, 0.001)
+        assertEquals(98.0, CalorieCalculator.weightAt(data, "2026-12-31")!!, 0.001)
+        // The profile's own figure is what was typed at setup, never a measurement of a day.
+        assertNull(CalorieCalculator.weightAt(FitnessData(profile()), "2026-10-14"))
+    }
+
+    @Test fun aLaterWeightRecordOnlyAffectsItsOwnDayAndThoseAfterIt() {
+        val meals = listOf(meal("a", "2026-10-10", 100.0), meal("b", "2026-10-13", 100.0))
+        val before = FitnessData(profile(), weights = listOf(WeightEntry("2026-10-10", 100.0, 1)), meals = meals)
+        val after = FitnessData(profile(), weights = listOf(
+            WeightEntry("2026-10-10", 100.0, 1), WeightEntry("2026-10-13", 99.0, 2)), meals = meals)
+        val period = Trends.period("2026-10-14", TrendScale.Month)
+        val old = Trends.energy(before, period, today)
+        val new = Trends.energy(after, period, today)
+        // Mifflin-St Jeor at 175 cm and 30 years: 1948.75 kg at 100 kg, 1938.75 at 99.
+        assertEquals(1948.75, old[9].referenceKcal!!, 0.001)
+        assertEquals(1948.75, new[9].referenceKcal!!, 0.001)     // 10-10 keeps the weight it recorded
+        assertEquals(1948.75, old[12].referenceKcal!!, 0.001)
+        assertEquals(1938.75, new[12].referenceKcal!!, 0.001)    // 10-13 was updated, so it is recomputed
+    }
+
+    @Test fun theAnchorOnlyPicksThePeriodAndNeverHidesLaterReadings() {
+        // Selecting the 12th must not drop the reading made on the 14th: the anchor decides which period
+        // the chart opens on, nothing more.
+        val values = mapOf("2026-10-12" to 100.0, "2026-10-14" to 99.0)
+        val week = Trends.measure(values, Trends.period("2026-10-12", TrendScale.Week), today)
+        assertEquals(100.0, week[0].value!!, 0.001)
+        assertEquals(99.0, week[2].value!!, 0.001)
+        assertEquals("一", week[0].label)
+        assertEquals("三", week[2].label)
+    }
+
     @Test fun aSparseMeasurementKeepsItsGapsAndAYearTakesTheMonthEnd() {
         val values = mapOf("2026-01-05" to 80.0, "2026-01-20" to 78.0, "2026-03-02" to 77.0, "2025-12-31" to 81.0)
         val year = Trends.measure(values, Trends.period("2026-10-14", TrendScale.Year), today)

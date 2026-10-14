@@ -130,9 +130,9 @@ object Trends {
                 val hasRecord = mealsByDay[key] != null || workoutsByDay[key] != null || stepsByDay[key] != null
                 if (hasRecord) {
                     recorded = true
-                    // The weight has to be one the user recorded. The profile's own weight is a default
-                    // filled in at setup, not a measurement, so it cannot stand in for a day's burn.
-                    val weight = weights.lastOrNull { it.day <= key }?.kg
+                    // The weight has to be one the user recorded, carried forward from its own day; the
+                    // figure kept in the profile is a default filled in at setup, not a measurement.
+                    val weight = CalorieCalculator.weightOn(weights, key)
                     val dayActivity = CalorieCalculator.activities(stepsByDay[key], workoutsByDay[key] ?: emptyList(), weight)
                     intake += mealsByDay[key]?.sumOf { it.kcal } ?: 0.0
                     activity += dayActivity.kcal ?: 0.0
