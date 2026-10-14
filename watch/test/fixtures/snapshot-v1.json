@@ -1,0 +1,235 @@
+{
+  "schema": 2,
+  "targetWeightKg": 65,
+  "trend": [
+    {
+      "activityKcal": 0,
+      "referenceKcal": null,
+      "intakeKcal": 0,
+      "day": "2026-09-29"
+    },
+    {
+      "activityKcal": 0,
+      "referenceKcal": null,
+      "intakeKcal": 0,
+      "day": "2026-09-30"
+    },
+    {
+      "activityKcal": 0,
+      "referenceKcal": null,
+      "intakeKcal": 0,
+      "day": "2026-10-01"
+    },
+    {
+      "activityKcal": 0,
+      "referenceKcal": null,
+      "intakeKcal": 0,
+      "day": "2026-10-02"
+    },
+    {
+      "activityKcal": 0,
+      "referenceKcal": null,
+      "intakeKcal": 0,
+      "day": "2026-10-03"
+    },
+    {
+      "activityKcal": 0,
+      "referenceKcal": null,
+      "intakeKcal": 0,
+      "day": "2026-10-04"
+    },
+    {
+      "activityKcal": 0,
+      "referenceKcal": null,
+      "intakeKcal": 0,
+      "day": "2026-10-05"
+    },
+    {
+      "activityKcal": 0,
+      "referenceKcal": null,
+      "intakeKcal": 0,
+      "day": "2026-10-06"
+    },
+    {
+      "activityKcal": 0,
+      "referenceKcal": null,
+      "intakeKcal": 0,
+      "day": "2026-10-07"
+    },
+    {
+      "activityKcal": 0,
+      "referenceKcal": null,
+      "intakeKcal": 0,
+      "day": "2026-10-08"
+    },
+    {
+      "activityKcal": 0,
+      "referenceKcal": null,
+      "intakeKcal": 0,
+      "day": "2026-10-09"
+    },
+    {
+      "activityKcal": 0,
+      "referenceKcal": null,
+      "intakeKcal": 0,
+      "day": "2026-10-10"
+    },
+    {
+      "activityKcal": 0,
+      "referenceKcal": null,
+      "intakeKcal": 0,
+      "day": "2026-10-11"
+    },
+    {
+      "activityKcal": 613.375,
+      "referenceKcal": 2262.125,
+      "intakeKcal": 422.5,
+      "day": "2026-10-12"
+    }
+  ],
+  "advice": null,
+  "workoutSteps": 3000,
+  "body": {
+    "fatStatus": "参考偏高",
+    "bmiStatus": "正常",
+    "fatPercent": 21.5,
+    "fatScale": {
+      "unit": "%",
+      "min": 0,
+      "breaks": [
+        8,
+        20
+      ],
+      "max": 50,
+      "value": 21.5,
+      "colors": [
+        "#E9B748",
+        "#42AC81",
+        "#E16B73"
+      ],
+      "labels": [
+        "偏低",
+        "正常",
+        "偏高"
+      ]
+    },
+    "fatDay": "2026-10-12",
+    "bmiScale": {
+      "unit": "",
+      "min": 12,
+      "breaks": [
+        18.5,
+        24,
+        28
+      ],
+      "max": 36,
+      "value": 22.9,
+      "colors": [
+        "#E9B748",
+        "#42AC81",
+        "#E9B748",
+        "#E16B73"
+      ],
+      "labels": [
+        "偏低",
+        "正常",
+        "超重",
+        "肥胖"
+      ]
+    },
+    "bmi": 22.9
+  },
+  "steps": 10000,
+  "revision": 7,
+  "exercises": [
+    {
+      "kcal": 350,
+      "includedInSteps": true,
+      "reps": null,
+      "sets": null,
+      "minutes": 32,
+      "loadKg": null,
+      "name": "跑步",
+      "estimated": false,
+      "distanceKm": null,
+      "category": "aerobic",
+      "net": true
+    },
+    {
+      "kcal": 91.875,
+      "includedInSteps": false,
+      "reps": 10,
+      "sets": 4,
+      "minutes": 30,
+      "loadKg": 40,
+      "name": "力量训练",
+      "estimated": false,
+      "distanceKm": null,
+      "category": "anaerobic",
+      "net": true
+    }
+  ],
+  "exerciseCount": 2,
+  "generatedAt": 1760000000000,
+  "client": "com.lrh.healthvivo.watch",
+  "omittedExercises": 0,
+  "day": "2026-10-12",
+  "recordedSteps": 7000,
+  "weightKg": 70,
+  "energy": {
+    "activityKcal": 613.375,
+    "pendingCount": 0,
+    "referenceKcal": 2262.125,
+    "mealKcal": [
+      175,
+      247.5,
+      0,
+      0
+    ],
+    "restingKcal": 1648.75,
+    "stepsKcal": 171.5,
+    "intakeKcal": 422.5,
+    "overlapHandled": true,
+    "workoutKcal": 441.875
+  },
+  "meals": [
+    {
+      "kcal": 175,
+      "foods": [{
+        "kcal": 175,
+        "name": "燕麦粥",
+        "estimated": false,
+        "grams": 250
+      }],
+      "kind": "breakfast",
+      "count": 1,
+      "omitted": 0
+    },
+    {
+      "kcal": 247.5,
+      "foods": [{
+        "kcal": 247.5,
+        "name": "鸡胸肉",
+        "estimated": false,
+        "grams": 150
+      }],
+      "kind": "lunch",
+      "count": 1,
+      "omitted": 0
+    },
+    {
+      "kcal": null,
+      "foods": [],
+      "kind": "dinner",
+      "count": 0,
+      "omitted": 0
+    },
+    {
+      "kcal": null,
+      "foods": [],
+      "kind": "snack",
+      "count": 0,
+      "omitted": 0
+    }
+  ]
+}

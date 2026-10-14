@@ -25,7 +25,7 @@
       <input class="button" type="button" value="确认清除连接" onclick="clearPhone" if="{{confirmDisconnect}}" />
       <input class="settings-button" type="button" value="取消" onclick="cancelClearPhone" if="{{confirmDisconnect}}" />
     </list-item>
-    <list-item for="{{card in items}}" type="{{card.scale ? 'body-scale' : 'record'}}" class="card" onclick="select(card.action)">
+    <list-item for="{{card in items}}" type="{{card.scale ? 'body-scale' : 'record'}}" class="{{card.cardClass}}" onclick="select(card.action)">
       <text class="label">{{card.title}}</text>
       <text class="metric" if="{{card.highlight}}">{{card.body}}</text>
       <text class="body" if="{{!card.highlight}}">{{card.body}}</text>
@@ -48,7 +48,13 @@
         <text class="balance-label">热量剩余</text>
         <text class="balance-value">{{card.balance}}</text>
       </div>
-      <text class="hint" if="{{card.action}}">点击查看 ›</text>
+      <div class="trend-plot" if="{{card.bars}}">
+        <div class="trend-bar" for="{{bar in card.bars}}" style="width: {{bar.width}}px; height: {{bar.height}}px; background-color: {{bar.color}};"></div>
+      </div>
+      <div class="trend-labels" if="{{card.bars}}">
+        <text class="trend-label" for="{{bar in card.bars}}" style="width: {{bar.width}}px;">{{bar.label}}</text>
+      </div>
+      <text class="hint" if="{{card.hint}}">{{card.hint}}</text>
     </list-item>
     <list-item type="connection" class="footer" if="{{!detail}}">
       <text class="caption">{{connectionText}}</text>
@@ -135,20 +141,22 @@ export default {
   select(page) {
     if (!page) return
     if (page.indexOf('day:') === 0) { this.runtime.day = page.slice(4); this.runtime.page = 'home'; this.loadDay(); return }
-    if (['home', 'connection', 'energy', 'exercise', 'meals', 'advice', 'dates', 'meal:breakfast', 'meal:lunch', 'meal:dinner', 'meal:snack'].indexOf(page) < 0) return
+    if (['home', 'connection', 'energy', 'exercise', 'meals', 'advice', 'dates', 'trend:meals', 'trend:exercise', 'trend:balance',
+      'meal:breakfast', 'meal:lunch', 'meal:dinner', 'meal:snack'].indexOf(page) < 0) return
     if (page !== 'connection') this.confirmDisconnect = false
     this.runtime.page = page; this.updateDisplay()
     try { this.$element('dashboard-list').scrollTo({ index: 0 }) } catch (_) {}
   },
   updateDisplay() {
     const titles = { home: '每日总览', connection: '连接管理', energy: '每日能量参考', exercise: '运动记录',
-      meals: '三餐', advice: 'AI 建议', dates: '选择日期', 'meal:breakfast': '早餐', 'meal:lunch': '午餐', 'meal:dinner': '晚餐', 'meal:snack': '加餐' }
+      meals: '三餐', advice: 'AI 建议', dates: '选择日期', 'trend:meals': '饮食趋势', 'trend:exercise': '运动趋势', 'trend:balance': '热量剩余趋势',
+      'meal:breakfast': '早餐', 'meal:lunch': '午餐', 'meal:dinner': '晚餐', 'meal:snack': '加餐' }
     this.pageTitle = titles[this.runtime.page]; this.detail = this.runtime.page !== 'home'; this.pairMode = this.runtime.page === 'connection'
     this.backLabel = this.runtime.page.indexOf('meal:') === 0 ? '‹ 返回三餐' : '‹ 返回总览'
     this.dayText = this.runtime.day + (this.runtime.day === today() ? ' · 今天' : '')
     this.savedText = this.runtime.savedAt ? '保存于 ' + dashboard.time(this.runtime.savedAt) : '该日暂无已同步记录'
     if (this.pairMode) this.items = []
-    else if (this.runtime.page === 'dates') this.items = this.runtime.archive.dates().map(day => ({ title: day, body: '查看这一天', action: 'day:' + day, highlight: false }))
+    else if (this.runtime.page === 'dates') this.items = this.runtime.archive.dates().map(day => ({ title: day, body: '查看这一天', action: 'day:' + day, highlight: false, cardClass: 'card', hint: '点击查看 ›' }))
     else this.items = dashboard.rows(this.runtime.snapshot, this.runtime.page)
   },
   askClearPhone() { this.confirmDisconnect = true },
@@ -206,4 +214,10 @@ export default {
 .scale-name { position: absolute; width: 60px; font-size: 15px; text-align: center; color: #D4CADE; }
 .scale-note { width: 300px; font-size: 18px; line-height: 26px; text-align: center; color: #B9B3CA; margin-top: 10px; }
 .settings-button { width: 360px; height: 56px; margin-top: 12px; border-radius: 18px; background-color: #252032; color: #D6C9FF; font-size: 22px; }
+.trend-plot { width: 360px; height: 120px; flex-direction: row; align-items: flex-end; justify-content: center; margin-top: 16px; }
+.trend-bar { margin-left: 4px; border-radius: 3px; }
+.trend-labels { width: 360px; flex-direction: row; justify-content: center; margin-top: 6px; }
+.trend-label { margin-left: 4px; text-align: center; font-size: 15px; color: #8F879F; }
+.tab-off { width: 396px; flex-direction: column; align-items: center; padding: 14px; margin: 4px 18px; border-radius: 20px; background-color: #252032; }
+.tab-on { width: 396px; flex-direction: column; align-items: center; padding: 14px; margin: 4px 18px; border-radius: 20px; background-color: #7955D8; }
 </style>

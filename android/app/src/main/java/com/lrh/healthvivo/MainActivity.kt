@@ -177,7 +177,12 @@ open class MainActivity : ComponentActivity() {
                 } else {
                     Row(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 20.dp, vertical = 16.dp), verticalAlignment = Alignment.CenterVertically) {
                         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                            Text(listOf("今日", "饮食", "运动", "趋势", "我的")[tab], fontSize = 30.sp, fontWeight = FontWeight.Bold)
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                                Text(listOf("今日", "饮食", "运动", "趋势", "我的")[tab], fontSize = 30.sp, fontWeight = FontWeight.Bold)
+                                // The day's totals sit next to the page title, as the page's own summary card.
+                                if(tab == 1) TotalCard("今日摄入合计", number(intake), "kcal")
+                                else if(tab == 2) TotalCard("今日运动消耗", number(activity.workoutKcal), "kcal")
+                            }
                             Text(if(previewData != null) "演示数据 · 不写入正式记录" else listOf("让记录成为日常", "每一餐，都有迹可循", "记录每一次努力", "关注变化，保持节奏", "活力记录")[tab], fontSize = 12.sp, color = colors.onSurfaceVariant)
                         }
                         if(tab == 2) AddButton("添加运动") { exerciseType = null; editExercise = null; showExercise = true }
@@ -227,9 +232,31 @@ open class MainActivity : ComponentActivity() {
                             if (profile == null) Panel("从个人资料开始") {
                                 Text("填写年龄、身高、体重等信息，计算个人热量参考值。")
                                 Button(onClick = { showProfile = true }) { Text("填写个人资料") }
-                            } else Panel("每日能量参考") {
+                            } else {
+                                var showSpend by remember { mutableStateOf(false) }
+                                var showIntake by remember { mutableStateOf(false) }
+                                Panel("每日能量参考") {
                                 ValueRow("每日消耗参考", number(plan?.maintenanceKcal), "kcal")
+                                TextButton(onClick = { showSpend = !showSpend }) { Text(if(showSpend) "收起消耗来源" else "消耗来源：代谢 + 运动 + 步数") }
+                                if(showSpend) {
+                                    Breakdown("静息代谢估算", plan?.restingKcal, "按年龄、身高、当日体重与性别参数估算")
+                                    Breakdown("运动", activity.workoutKcal, if(dayExercises.isEmpty()) "当天没有运动记录" else "${dayExercises.size} 条运动记录的活动净消耗")
+                                    Breakdown("步数", activity.stepsKcal, when {
+                                        daySteps == null -> "未录入当天步数"
+                                        daySteps.stepLengthCm == null -> "需要填写步长才能计算步数消耗"
+                                        activity.workoutSteps > 0 -> "已扣除运动步数后的 ${activity.recordedSteps ?: 0} 步"
+                                        else -> "全天 ${daySteps.steps} 步" })
+                                    Text("三项相加就是每日消耗参考，不会重复计算同一次步行。", color = muted, fontSize = 12.sp)
+                                }
                                 ValueRow("当天登记摄入", number(intake), "kcal")
+                                TextButton(onClick = { showIntake = !showIntake }) { Text(if(showIntake) "收起摄入来源" else "摄入来源：三餐") }
+                                if(showIntake) {
+                                    listOf("breakfast" to "早餐", "lunch" to "午餐", "dinner" to "晚餐", "snack" to "加餐").forEach { (kind, label) ->
+                                        val rows = dayMeals.filter { it.meal == kind }
+                                        Breakdown(label, rows.sumOf { it.kcal }, if(rows.isEmpty()) "尚未记录" else "${rows.size} 项食物")
+                                    }
+                                    Text("加餐计入合计；同一餐的食物克数乘以每 100g 热量后求和。", color = muted, fontSize = 12.sp)
+                                }
                                 val balance = plan?.let { it.maintenanceKcal - intake }
                                 val positive = balance != null && balance >= 0
                                 Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp), color = if(balance == null) colors.surfaceVariant else if(positive) Color(0xFFDAF4E5) else Color(0xFFFFDFE0)) {
@@ -239,9 +266,11 @@ open class MainActivity : ComponentActivity() {
                                     }
                                 }
                                 if (plan == null) Text("当前资料或当日体重不足以估算静息消耗，请继续记录。", fontSize = 13.sp)
-                                Text("消耗参考＝静息估算＋已记录净活动；差值按已记录饮食计算。", color = muted, fontSize = 12.sp)
-                                if (activity.overlapHandled) Text("已近似去除步数与运动重叠。", color = muted, fontSize = 12.sp)
+                                Text("消耗参考＝静息代谢＋运动＋步数（已按运动步数去重）；剩余＝消耗参考−登记摄入。", color = muted, fontSize = 12.sp)
+                                if (activity.overlapHandled) Text(stepSplitCaption(activity), color = muted, fontSize = 12.sp)
+                                if (activity.stepsExceeded) Text("填写的运动步数超过当天总步数，已按总步数计算；请检查步数与总步数是否填反。", fontSize = 12.sp)
                                 if (activity.pendingCount > 0) Text("${activity.pendingCount} 条运动待估算或热量口径未知，未计入活动合计。", fontSize = 12.sp)
+                                }
                             }
                                 },
                                 HomeModule("quick", "快速记录") {
@@ -263,8 +292,15 @@ open class MainActivity : ComponentActivity() {
                             listOf("breakfast", "lunch", "dinner").forEach { kind ->
                                 MealCard(kind, dayMeals.filter { it.meal == kind }) { meal = kind; showMeal = true }
                             }
+                            val snack = dayMeals.filter { it.meal == "snack" }
+                            Panel("加餐") {
+                                Text(if(snack.isEmpty()) "尚未记录加餐" else "${snack.size} 项 · ${number(snack.sumOf { it.kcal })} 千卡", fontSize = 13.sp)
+                                Text("加餐计入今日摄入合计，但不单独占用首页卡片。", color = muted, fontSize = 12.sp)
+                            }
                         }
                         2 -> {
+                            // The day's steps get their own card and are deliberately not counted as a workout record.
+                            StepsCard(activity, daySteps) { showSteps = true }
                             if(dayExercises.isEmpty()) EmptyRecords("dumbbell", "今天还没有运动记录", "点击右上角＋，添加你的运动")
                             else {
                                 Text("${dayExercises.size} 条运动记录", fontSize = 12.sp, color = colors.onSurfaceVariant)
@@ -292,14 +328,8 @@ open class MainActivity : ComponentActivity() {
                                 BodyFatTrend(entries, data.profile, { showBodyFat = true }, { deletion = "body_fat" to it })
                                 BodyMetricReferences()
                             }
-                            Panel("近 7 天饮食与运动") {
-                                (6L downTo 0L).forEach { offset ->
-                                    val date = day.minusDays(offset).toString()
-                                    val meals = data.meals.filter { it.day == date }; val workouts = data.exercises.filter { it.day == date }
-                                    val net = workouts.filter { it.netCalories }.mapNotNull { it.kcal }.takeIf { it.isNotEmpty() }?.sum()
-                                    Text("${date.substring(5)}  摄入 ${if(meals.isEmpty()) "—" else number(meals.sumOf { it.kcal })} · 运动 ${number(net)} 千卡 · ${data.steps.firstOrNull { it.day == date }?.steps?.toString() ?: "—"} 步", fontSize = 13.sp)
-                                }
-                                Text("空白日期不视为零；运动热量与摄入的差值不代表全天能量平衡。", color = muted, fontSize = 12.sp)
+                            Panel("饮食 · 运动 · 热量剩余趋势") {
+                                TrendCard(CalorieCalculator.trend(data, dayString, 14))
                             }
                         }
                         else -> {
@@ -480,6 +510,29 @@ open class MainActivity : ComponentActivity() {
     @Composable private fun ValueRow(label: String, value: String, unit: String) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) { Text(label, modifier = Modifier.weight(1f), fontSize = 14.sp); Text("$value $unit", fontSize = 14.sp) }
     }
+    /** The page's own total, sitting next to its title. */
+    @Composable private fun TotalCard(caption: String, value: String, unit: String) {
+        Surface(shape = RoundedCornerShape(14.dp), color = MaterialTheme.colorScheme.primaryContainer) {
+            Column(Modifier.padding(horizontal = 12.dp, vertical = 7.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(1.dp)) {
+                Text(caption, fontSize = 9.sp, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                Row(verticalAlignment = Alignment.Bottom) {
+                    Text(value, fontSize = 17.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                    Spacer(Modifier.width(3.dp))
+                    Text(unit, fontSize = 9.sp, color = MaterialTheme.colorScheme.onPrimaryContainer, modifier = Modifier.padding(bottom = 2.dp))
+                }
+            }
+        }
+    }
+    /** One indented line of an expanded energy breakdown. */
+    @Composable private fun Breakdown(label: String, value: Double?, note: String) {
+        Row(Modifier.fillMaxWidth().padding(start = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(label, fontSize = 14.sp)
+                Text(note, fontSize = 11.sp, color = muted)
+            }
+            Text(number(value), fontSize = 15.sp, fontWeight = FontWeight.Medium)
+        }
+    }
     private fun backup(data: FitnessData): String {
         fun meal(value: MealEntry) = JSONObject().put("id", value.id).put("day", value.day).put("meal", value.meal).put("name", value.name).put("grams", value.grams).put("kcalPer100g", value.kcalPer100g)
             .put("proteinPer100g", value.proteinPer100g ?: JSONObject.NULL).put("fatPer100g", value.fatPer100g ?: JSONObject.NULL).put("carbsPer100g", value.carbsPer100g ?: JSONObject.NULL)
@@ -489,7 +542,7 @@ open class MainActivity : ComponentActivity() {
             .put("weights", JSONArray(data.weights.map { JSONObject().put("day", it.day).put("kg", it.kg).put("recordedAt", it.recordedAt) }))
             .put("bodyFats", JSONArray(data.bodyFats.map { JSONObject().put("day", it.day).put("percent", it.percent).put("recordedAt", it.recordedAt) }))
             .put("meals", JSONArray(data.meals.map(::meal)))
-            .put("exercises", JSONArray(data.exercises.map { JSONObject().put("id", it.id).put("day", it.day).put("name", it.name).put("minutes", it.minutes ?: JSONObject.NULL).put("kcal", it.kcal ?: JSONObject.NULL).put("method", it.method).put("weightKg", it.weightKg ?: JSONObject.NULL).put("met", it.met ?: JSONObject.NULL).put("category", it.category).put("inputMode", it.inputMode).put("distanceKm", it.distanceKm ?: JSONObject.NULL).put("sets", it.sets ?: JSONObject.NULL).put("reps", it.reps ?: JSONObject.NULL).put("loadKg", it.loadKg ?: JSONObject.NULL).put("includedInSteps", it.includedInSteps).put("netCalories", it.netCalories).put("estimateNote", it.estimateNote).put("details", it.details).put("recordedAt", it.recordedAt) }))
+            .put("exercises", JSONArray(data.exercises.map { JSONObject().put("id", it.id).put("day", it.day).put("name", it.name).put("minutes", it.minutes ?: JSONObject.NULL).put("kcal", it.kcal ?: JSONObject.NULL).put("method", it.method).put("weightKg", it.weightKg ?: JSONObject.NULL).put("met", it.met ?: JSONObject.NULL).put("category", it.category).put("inputMode", it.inputMode).put("distanceKm", it.distanceKm ?: JSONObject.NULL).put("sets", it.sets ?: JSONObject.NULL).put("reps", it.reps ?: JSONObject.NULL).put("loadKg", it.loadKg ?: JSONObject.NULL).put("includedInSteps", it.includedInSteps).put("steps", it.steps ?: JSONObject.NULL).put("netCalories", it.netCalories).put("estimateNote", it.estimateNote).put("details", it.details).put("recordedAt", it.recordedAt) }))
             .put("steps", JSONArray(data.steps.map { JSONObject().put("day", it.day).put("steps", it.steps).put("stepLengthCm", it.stepLengthCm ?: JSONObject.NULL).put("recordedAt", it.recordedAt) }))
             .put("customFoods", JSONArray(data.customFoods.map { JSONObject().put("id", it.id).put("name", it.name).put("kcalPer100g", it.kcalPer100g) })).toString(2)
     }

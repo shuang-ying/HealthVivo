@@ -8,6 +8,8 @@ import org.json.JSONObject
 /** A display-only daily snapshot. Credentials, photographs and profile details never enter it. */
 object WatchSnapshot {
     const val CLIENT = "com.lrh.healthvivo.watch"
+    /** Days covered by the trend histograms, counted back from the snapshot's own day. */
+    const val TREND_DAYS = 14L
     fun create(data: FitnessData, day: String, revision: Long, saved: SavedAdvice?): JSONObject {
         val meals = data.meals.filter { it.day == day }.sortedWith(compareBy<MealEntry> { it.recordedAt }.thenBy { it.id })
         val workouts = data.exercises.filter { it.day == day }.sortedWith(compareBy<ExerciseEntry> { it.recordedAt }.thenBy { it.id })
@@ -18,20 +20,29 @@ object WatchSnapshot {
         val activity = CalorieCalculator.activities(steps, workouts, weight)
         val plan = data.profile?.takeIf { weight != null }?.copy(weightKg = weight!!)?.let { CalorieCalculator.plan(it, activity.kcal ?: 0.0) }
         fun n(value: Any?) = value ?: JSONObject.NULL
+        // The watch draws the same three histograms as the phone, so it gets the same daily series.
+        val trend = CalorieCalculator.trend(data, day, TREND_DAYS.toInt()).map { point ->
+            JSONObject().put("day", point.day).put("intakeKcal", point.intakeKcal)
+                .put("activityKcal", point.activityKcal).put("referenceKcal", n(point.referenceKcal))
+        }
         fun scale(definition: BodyReferenceScale?, value: Double?): Any = definition?.let {
             JSONObject().put("min", it.min).put("max", it.max).put("breaks", JSONArray(it.breaks)).put("labels", JSONArray(it.labels))
                 .put("colors", JSONArray(it.colors)).put("unit", it.unit).put("value", n(value))
         } ?: JSONObject.NULL
         return JSONObject().put("schema", 2).put("client", CLIENT).put("day", day).put("revision", revision)
             .put("generatedAt", System.currentTimeMillis()).put("steps", n(steps?.steps))
+            .put("workoutSteps", activity.workoutSteps).put("recordedSteps", n(activity.recordedSteps))
             .put("weightKg", n(weight)).put("targetWeightKg", n(data.profile?.targetWeightKg))
             .put("body", JSONObject().put("bmi", n(bmi)).put("bmiStatus", BodyMetrics.bmiStatus(bmi, data.profile).label)
                 .put("fatPercent", n(bodyFat?.percent)).put("fatDay", n(bodyFat?.day)).put("fatStatus", BodyMetrics.fatStatus(bodyFat?.percent, data.profile).label)
                 .put("bmiScale", scale(BodyMetrics.bmiScale(data.profile), bmi)).put("fatScale", scale(BodyMetrics.fatScale(data.profile), bodyFat?.percent)))
             .put("energy", JSONObject().put("intakeKcal", meals.sumOf { it.kcal })
                 .put("restingKcal", n(plan?.restingKcal)).put("activityKcal", n(activity.kcal))
+                .put("stepsKcal", n(activity.stepsKcal)).put("workoutKcal", n(activity.workoutKcal))
+                .put("mealKcal", JSONArray(listOf("breakfast", "lunch", "dinner", "snack").map { kind -> meals.filter { it.meal == kind }.sumOf { it.kcal } }))
                 .put("referenceKcal", n(plan?.maintenanceKcal)).put("pendingCount", activity.pendingCount)
                 .put("overlapHandled", activity.overlapHandled))
+            .put("trend", JSONArray(trend))
             .put("meals", JSONArray(listOf("breakfast", "lunch", "dinner", "snack").map { kind ->
                 val rows = meals.filter { it.meal == kind }
                 JSONObject().put("kind", kind).put("count", rows.size)

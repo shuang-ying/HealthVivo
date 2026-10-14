@@ -37,17 +37,79 @@ class ActivityEstimateTest {
         assertNull(CalorieCalculator.activities(null, emptyList(), 70.0).kcal)
         assertEquals(0.0, CalorieCalculator.activities(DailySteps(day, 0, recordedAt = 1), emptyList(), null).kcal!!, 0.001)
     }
-    @Test fun overlappingRunIsNotAddedOnTopOfItsDailySteps() {
-        val run = pending("跑步").copy(kcal = 350.0, method = "ai", netCalories = true, includedInSteps = true, estimateNote = "估算")
+    @Test fun overlappingRunIsSubtractedFromTheDailyStepsBeforePricingThem() {
+        val run = pending("跑步").copy(kcal = 350.0, method = "ai", netCalories = true, includedInSteps = true, steps = 3000, estimateNote = "估算")
         val strength = pending("力量训练").copy(id = "strength", kcal = 100.0, method = "met", met = 3.5, netCalories = true)
         val result = CalorieCalculator.activities(DailySteps(day, 10000, 70.0, 1), listOf(run, strength), 70.0)
-        assertEquals(245.0, result.stepsKcal!!, 0.001)
-        assertEquals(450.0, result.kcal!!, 0.001)
+        // 10000 - 3000 = 7000 steps at 0.7 m each is 4.9 km, priced as level walking: 70 * 4.9 * 0.5.
+        assertEquals(171.5, result.stepsKcal!!, 0.001)
+        assertEquals(10000, result.totalSteps)
+        assertEquals(3000, result.workoutSteps)
+        assertEquals(7000, result.recordedSteps)
+        // The remainder plus both workouts, with no double count of the run.
+        assertEquals(621.5, result.kcal!!, 0.001)
+        assertEquals(450.0, result.workoutKcal!!, 0.001)
         assertTrue(result.overlapHandled)
+        assertFalse(result.stepsExceeded)
     }
-    @Test fun largerStepEstimateIsRetainedWhenWorkoutIsAlreadyCovered() {
-        val walk = pending("步行").copy(kcal = 100.0, method = "met", met = 3.8, netCalories = true, includedInSteps = true)
-        assertEquals(245.0, CalorieCalculator.activities(DailySteps(day, 10000, 70.0, 1), listOf(walk), 70.0).kcal!!, 0.001)
+    @Test fun aTickWithoutAStepCountIsTreatedAsUnticked() {
+        // The local formulas cannot produce a step count, so there is nothing to subtract.
+        val walk = pending("步行", "distance", null, 5.0).copy(kcal = 175.0, method = "distance", netCalories = true, includedInSteps = true)
+        val result = CalorieCalculator.activities(DailySteps(day, 10000, 70.0, 1), listOf(walk), 70.0)
+        assertEquals(0, result.workoutSteps)
+        assertEquals(10000, result.recordedSteps)
+        assertEquals(245.0, result.stepsKcal!!, 0.001)
+        assertEquals(420.0, result.kcal!!, 0.001)
+        assertFalse(result.overlapHandled)
+    }
+    @Test fun workoutStepsLargerThanTheDailyTotalAreClampedAndFlagged() {
+        val run = pending("跑步").copy(kcal = 350.0, method = "ai", netCalories = true, includedInSteps = true, steps = 12000, estimateNote = "估算")
+        val result = CalorieCalculator.activities(DailySteps(day, 10000, 70.0, 1), listOf(run), 70.0)
+        assertEquals(10000, result.workoutSteps)
+        assertEquals(0, result.recordedSteps)
+        assertEquals(0.0, result.stepsKcal!!, 0.001)
+        assertEquals(350.0, result.kcal!!, 0.001)
+        assertTrue(result.stepsExceeded)
+    }
+    @Test fun stepLengthIsStillRequiredToPriceStepsEvenWhenWorkoutStepsAreKnown() {
+        val run = pending("跑步").copy(kcal = 350.0, method = "ai", netCalories = true, includedInSteps = true, steps = 3000, estimateNote = "估算")
+        val result = CalorieCalculator.activities(DailySteps(day, 10000, recordedAt = 1), listOf(run), 70.0)
+        assertNull(result.stepsKcal)
+        assertEquals(350.0, result.kcal!!, 0.001)
+        assertEquals(7000, result.recordedSteps)
+    }
+    @Test fun anExerciseRecordMustDescribeAtLeastOneOfTimeDistanceOrSets() {
+        try { pending("跑步", "time", null).validate(); fail("A record with no duration, distance or sets was accepted") } catch (_: IllegalArgumentException) {}
+    }
+    @Test fun distanceWinsOverDurationForWalkingAndRunningWhenBothAreGiven() {
+        // The three inputs are independent now, so the formula must not be gated on a chosen mode.
+        val both = pending("跑步", "time", 30.0, 5.0)
+        val estimate = CalorieCalculator.localExercise(both)
+        assertEquals("distance", estimate.method)
+        assertEquals(350.0, estimate.kcal!!, 0.001)
+    }
+    @Test fun anExerciseWithWorkoutStepsOutsideTheDailyTotalRangeIsRejected() {
+        try { pending("跑步").copy(steps = 0).validate(); fail("Zero workout steps accepted") } catch (_: IllegalArgumentException) {}
+        try { pending("跑步").copy(steps = 200001).validate(); fail("Excessive workout steps accepted") } catch (_: IllegalArgumentException) {}
+        pending("跑步").copy(steps = 200000).validate()
+    }
+    @Test fun rowsMigratedFromVersionFourStillValidateAndAreNotTreatedAsCountedInSteps() {
+        // The 4 -> 5 migration only adds a nullable column, so every existing row arrives with
+        // steps == null. None of them may now fail validation or silently start subtracting steps.
+        val legacyRun = ExerciseEntry("legacy-run", day, "跑步", 30.0, 350.0, "ai", weightKg = 70.0, recordedAt = 1,
+            category = "aerobic", inputMode = "time", includedInSteps = true, netCalories = true, estimateNote = "旧 AI 估算")
+        legacyRun.validate()
+        assertNull(legacyRun.steps)
+        assertFalse(legacyRun.countedInSteps)
+        val result = CalorieCalculator.activities(DailySteps(day, 10000, 70.0, 1), listOf(legacyRun), 70.0)
+        assertEquals(0, result.workoutSteps)
+        assertFalse(result.overlapHandled)
+        assertEquals(245.0, result.stepsKcal!!, 0.001)
+        assertEquals(595.0, result.kcal!!, 0.001)
+        // A row from the version 1 migration keeps its unknown-scope calories out of the total.
+        val legacyManual = ExerciseEntry("legacy-manual", day, "旧记录", 30.0, 300.0, "manual", recordedAt = 1)
+        legacyManual.validate()
+        assertEquals(1, CalorieCalculator.activities(null, listOf(legacyManual), 70.0).pendingCount)
     }
     @Test fun pendingAndLegacyUnknownScopeCaloriesAreExcludedFromNetSum() {
         val legacy = ExerciseEntry("old", day, "旧记录", 30.0, 300.0, "manual", recordedAt = 1)

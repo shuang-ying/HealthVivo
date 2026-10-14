@@ -36,7 +36,6 @@ import java.util.UUID
     configureApi: () -> Unit, dismiss: () -> Unit, saving: Boolean, initialType: ExerciseType? = null, save: (ExerciseEntry) -> Unit) {
     var name by remember { mutableStateOf(existing?.name ?: initialType?.name ?: "") }
     var category by remember { mutableStateOf(existing?.category?.takeUnless { it == "unspecified" } ?: initialType?.category ?: "aerobic") }
-    var mode by remember { mutableStateOf(existing?.inputMode ?: "time") }
     var minutes by remember { mutableStateOf(existing?.minutes?.toString() ?: "") }
     var distance by remember { mutableStateOf(existing?.distanceKm?.toString() ?: "") }
     var sets by remember { mutableStateOf(existing?.sets?.toString() ?: "") }
@@ -45,6 +44,9 @@ import java.util.UUID
     var kg by remember { mutableStateOf((existing?.weightKg ?: weight)?.toString() ?: "") }
     var details by remember { mutableStateOf(existing?.details ?: "") }
     var overlap by remember { mutableStateOf(existing?.includedInSteps ?: initialType?.countsSteps ?: false) }
+    // A name or library pick only suggests the default; once the user ticks the box themselves that choice wins.
+    var overlapChosen by remember { mutableStateOf(existing != null) }
+    var overlapSteps by remember { mutableStateOf(existing?.steps?.toString() ?: "") }
     var library by remember { mutableStateOf(false) }
     var estimate by remember { mutableStateOf(existing?.takeIf { it.netCalories }?.let { ExerciseEstimate(it.kcal, it.method, it.met, it.estimateNote) }) }
     var busy by remember { mutableStateOf(false) }
@@ -53,12 +55,17 @@ import java.util.UUID
     fun invalidate() { estimate = null; error = null }
     fun draft(): ExerciseEntry {
         fun optional(text: String, label: String) = if (text.isBlank()) null else text.toDoubleOrNull() ?: error("请填写有效的$label")
+        fun count(text: String, label: String) = if (text.isBlank()) null else text.toIntOrNull() ?: error("${label}需为整数")
+        val minutesValue = optional(minutes, "时长")
+        val distanceValue = optional(distance, "距离")
+        val setsValue = count(sets, "组数")
+        // The three inputs are independent now, so keep the legacy label in step with what was filled.
+        val derived = when { distanceValue != null -> "distance"; minutesValue != null -> "time"; setsValue != null -> "sets"; else -> "time" }
         return ExerciseEntry(existing?.id ?: UUID.randomUUID().toString(), day, name.trim(),
-            if(mode == "distance") null else optional(minutes, "时长"), null, "pending", optional(kg, "体重"), recordedAt = existing?.recordedAt ?: System.currentTimeMillis(),
-            category = category, inputMode = mode, distanceKm = if(mode == "distance") optional(distance, "距离") else null,
-            sets = if(mode == "sets") sets.toIntOrNull() ?: error("请填写整数组数") else null,
-            reps = if(mode == "sets" && reps.isNotBlank()) reps.toIntOrNull() ?: error("每组次数需为整数") else null,
-            loadKg = if(mode == "sets") optional(load, "负重") else null, includedInSteps = overlap, details = details.trim()).also { it.validate() }
+            minutesValue, null, "pending", optional(kg, "体重"), recordedAt = existing?.recordedAt ?: System.currentTimeMillis(),
+            category = category, inputMode = derived, distanceKm = distanceValue,
+            sets = setsValue, reps = count(reps, "每组次数"), loadKg = optional(load, "负重"),
+            includedInSteps = overlap, details = details.trim(), steps = count(overlapSteps, "本次运动步数")).also { it.validate() }
     }
     EntryDialog(if(existing == null) "记录运动 · $day" else "编辑运动", dismiss, {
         runCatching {
@@ -69,24 +76,26 @@ import java.util.UUID
         }.onSuccess(save).onFailure { error = it.message ?: "请检查运动输入" }
     }, saving || busy, error, saveLabel = if(estimate?.kcal != null) "确认并保存" else "保存运动（待估算）") {
         FormSection("运动项目") {
-        OutlinedTextField(name, { name = it; overlap = CalorieCalculator.isStepExercise(it); invalidate() }, label = { Text("运动名称") }, placeholder = { Text("例如跑步、卧推") }, singleLine = true, enabled = !busy && !saving, modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(name, { name = it; if(!overlapChosen) overlap = CalorieCalculator.isStepExercise(it); invalidate() }, label = { Text("运动名称") }, placeholder = { Text("例如跑步、卧推") }, singleLine = true, enabled = !busy && !saving, modifier = Modifier.fillMaxWidth())
         OutlinedButton(onClick = { library = true }, enabled = !busy && !saving, modifier = Modifier.fillMaxWidth()) { AppIcon("book"); Spacer(Modifier.width(8.dp)); Text("从运动库选择") }
         ChoiceRow(listOf("aerobic" to "有氧", "anaerobic" to "无氧 / 力量"), category) { if(!busy && !saving) { category = it; invalidate() } }
         }
-        FormSection("完成了多少") {
-        ChoiceRow(listOf("time" to "时间", "distance" to "距离", "sets" to "组数"), mode) { if(!busy && !saving) { mode = it; invalidate() } }
-        if(mode != "distance") NumberField(if(mode == "sets") "总时长（分钟，可选，含休息）" else "时长（分钟）", minutes) { if(!busy && !saving) { minutes = it; invalidate() } }
-        if(mode == "distance") NumberField("距离（km）", distance) { if(!busy && !saving) { distance = it; invalidate() } }
-        if(mode == "sets") {
-            NumberField("组数", sets) { if(!busy && !saving) { sets = it; invalidate() } }
-            NumberField("每组次数（可选）", reps) { if(!busy && !saving) { reps = it; invalidate() } }
-            NumberField("负重（kg，可选，徒手填 0）", load) { if(!busy && !saving) { load = it; invalidate() } }
-        }
+        FormSection("完成了多少（三项都可留空，按填写的内容计算）") {
+        NumberField("时长（分钟，可选）", minutes) { if(!busy && !saving) { minutes = it; invalidate() } }
+        NumberField("距离（km，可选）", distance) { if(!busy && !saving) { distance = it; invalidate() } }
+        NumberField("组数（可选，力量训练）", sets) { if(!busy && !saving) { sets = it; invalidate() } }
+        NumberField("每组次数（可选）", reps) { if(!busy && !saving) { reps = it; invalidate() } }
+        NumberField("负重（kg，可选，徒手填 0）", load) { if(!busy && !saving) { load = it; invalidate() } }
+        Text("同时填写时长和距离时，步行与跑步优先按距离公式计算。只填组数且没有时长、次数或负重时无法估算。", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         FormSection("估算所需信息") {
         NumberField("当时体重（kg）", kg) { if(!busy && !saving) { kg = it; invalidate() } }
         OutlinedTextField(details, { if(!busy && !saving) { details = it; invalidate() } }, label = { Text("补充说明（可选：速度、休息、坡度等）") }, enabled = !busy && !saving, modifier = Modifier.fillMaxWidth())
-        Row { Checkbox(overlap, { if(!busy && !saving) overlap = it }, enabled = !busy && !saving); Text("本次运动已包含在当天总步数中", modifier = Modifier.padding(top = 10.dp), fontSize = 12.sp) }
+        Row { Checkbox(overlap, { if(!busy && !saving) { overlap = it; overlapChosen = true } }, enabled = !busy && !saving); Text("本次运动已包含在当天总步数中", modifier = Modifier.padding(top = 10.dp), fontSize = 12.sp) }
+        if(overlap) {
+            NumberField("本次运动大约多少步（可选）", overlapSteps) { if(!busy && !saving) overlapSteps = it }
+            Text("填写后会从当天总步数里减去这些步数，只对剩下的步数计算步行消耗，再加回这条运动自己的热量。留空时可点“发送并 AI 估算”由 AI 估算步数；本地公式不产生步数，未填步数时这条运动按未包含处理，不会重复计算。", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
         }
         Text("本地按时长或平地步行 / 跑步距离估算；只有组数时先保存记录。速度、坡度和休息等说明供 AI 参考。", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         OutlinedButton(onClick = { runCatching { CalorieCalculator.localExercise(draft()) }.onSuccess { estimate = it; error = null }.onFailure { error = it.message } }, enabled = !busy && !saving, modifier = Modifier.fillMaxWidth()) { Text("按本地公式计算") }
@@ -98,8 +107,10 @@ import java.util.UUID
                 scope.launch {
                     try {
                         val result = ExerciseAiClient().estimate(api, input)
+                        if(result.steps != null) overlapSteps = result.steps.toString()
                         val range = if(result.netKcal != null) "\nAI 范围：%.0f–%.0f 千卡。".format(result.lowKcal, result.highKcal) else ""
-                        estimate = ExerciseEstimate(result.netKcal, if(result.netKcal == null) "pending" else "ai", note = result.note + range + "\n服务：${Uri.parse(api.endpoint).host} / ${api.model}")
+                        val stepsNote = result.steps?.let { "\nAI 估算本次约 $it 步，已填入“本次运动大约多少步”，可自行修改。" } ?: ""
+                        estimate = ExerciseEstimate(result.netKcal, if(result.netKcal == null) "pending" else "ai", note = result.note + range + stepsNote + "\n服务：${Uri.parse(api.endpoint).host} / ${api.model}")
                     } catch (cancel: CancellationException) { throw cancel }
                     catch (failure: Exception) { error = when(failure) { is IllegalArgumentException -> failure.message; is java.io.IOException -> "运动估算连接失败或超时，请检查网络与 API"; else -> "运动估算响应格式不兼容，请重试或使用本地记录" } }
                     finally { busy = false }
@@ -114,5 +125,5 @@ import java.util.UUID
         if(existing != null && !existing.netCalories && existing.kcal != null) Text("旧记录保留 ${existing.kcal} 千卡，统计口径未确认。本次编辑需重新估算；取消会保留原记录。", fontSize = 12.sp)
         Text("热量均为估计。结果需确认后保存；修改名称或计算条件会清除旧估算。", fontSize = 12.sp)
     }
-    if(library) ExercisePicker({ library = false }) { type -> name = type.name; category = type.category; overlap = type.countsSteps; invalidate(); library = false }
+    if(library) ExercisePicker({ library = false }) { type -> name = type.name; category = type.category; overlap = type.countsSteps; overlapChosen = false; invalidate(); library = false }
 }

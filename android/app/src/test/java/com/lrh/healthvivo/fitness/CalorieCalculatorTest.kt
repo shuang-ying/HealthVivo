@@ -52,6 +52,26 @@ class CalorieCalculatorTest {
         assertEquals(72.0, CalorieCalculator.weightAt(data, "2026-10-10")!!, 0.001)
         assertNull(CalorieCalculator.weightAt(data, "2026-10-01"))
     }
+    @Test fun trendKeepsCalendarSpacingAndPricesOnlyRecordedDays() {
+        val data = FitnessData(profile(),
+            weights = listOf(WeightEntry("2026-10-12", 70.0, 1)),
+            meals = listOf(MealEntry("m", "2026-10-12", "lunch", "米饭", 100.0, 130.0, source = "manual", recordedAt = 1)),
+            exercises = listOf(ExerciseEntry("e", "2026-10-12", "力量训练", 30.0, 91.875, "met", weightKg = 70.0, met = 3.5, recordedAt = 1, netCalories = true)),
+            steps = listOf(DailySteps("2026-10-12", 10000, 70.0, 1)))
+        val points = CalorieCalculator.trend(data, "2026-10-12", 14)
+        assertEquals(14, points.size)
+        assertEquals("2026-09-29", points.first().day)
+        assertEquals("2026-10-12", points.last().day)
+        val last = points.last()
+        assertEquals(130.0, last.intakeKcal, 0.001)
+        // 245 kcal of walking plus the strength estimate, and the two are different bars' worth of data.
+        assertEquals(336.875, last.activityKcal, 0.001)
+        assertNotNull(last.referenceKcal)
+        // A day with no records keeps its slot in the window instead of being dropped.
+        assertEquals(0.0, points.first().intakeKcal, 0.001)
+        assertEquals(0.0, points.first().activityKcal, 0.001)
+        assertNull(points.first().referenceKcal)
+    }
     @Test fun apiSettingsRejectUnencryptedTransportAndEmbeddedSecrets() {
         fun rejects(url: String) { try { ApiSettings(url, "model", "secret").validate(); fail("Invalid URL accepted") } catch (_: IllegalArgumentException) {} }
         rejects("http://example.com/v1/chat/completions")

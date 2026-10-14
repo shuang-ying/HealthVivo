@@ -28,7 +28,7 @@ import kotlinx.coroutines.flow.Flow
     @Query("DELETE FROM weights WHERE day = :day") suspend fun deleteWeight(day: String)
     @Query("DELETE FROM custom_foods WHERE id = :id") suspend fun deleteFood(id: String)
 }
-@Database(entities = [Profile::class, WeightEntry::class, MealEntry::class, ExerciseEntry::class, CustomFood::class, DailySteps::class, BodyFatEntry::class], version = 4, exportSchema = false)
+@Database(entities = [Profile::class, WeightEntry::class, MealEntry::class, ExerciseEntry::class, CustomFood::class, DailySteps::class, BodyFatEntry::class], version = 5, exportSchema = false)
 abstract class FitnessDatabase : RoomDatabase() {
     abstract fun dao(): FitnessDao
     companion object {
@@ -56,6 +56,11 @@ abstract class FitnessDatabase : RoomDatabase() {
                 db.execSQL("CREATE TABLE body_fats (day TEXT NOT NULL PRIMARY KEY, percent REAL NOT NULL, recordedAt INTEGER NOT NULL)")
             }
         }
-        fun create(context: Context) = Room.databaseBuilder(context, FitnessDatabase::class.java, "fitness-local.db").addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4).build()
+        val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE exercises ADD COLUMN steps INTEGER")
+            }
+        }
+        fun create(context: Context) = Room.databaseBuilder(context, FitnessDatabase::class.java, "fitness-local.db").addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5).build()
     }
 }

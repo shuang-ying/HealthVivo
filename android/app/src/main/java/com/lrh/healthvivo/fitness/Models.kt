@@ -43,7 +43,15 @@ data class ExerciseEntry(@PrimaryKey val id: String, val day: String, val name: 
     val category: String = "unspecified", val inputMode: String = "time",
     val distanceKm: Double? = null, val sets: Int? = null, val reps: Int? = null,
     val loadKg: Double? = null, val includedInSteps: Boolean = false,
-    val netCalories: Boolean = false, val estimateNote: String = "", val details: String = "") {
+    val netCalories: Boolean = false, val estimateNote: String = "", val details: String = "",
+    /** Steps this workout contributed, when it is counted inside the daily total. */
+    val steps: Int? = null) {
+    /**
+     * The daily-step total already contains this workout only when the user both ticked the box and
+     * supplied a step count (their own or an AI estimate). A tick without a count is treated as not
+     * ticked: the local formulas cannot produce a step count, so there would be nothing to subtract.
+     */
+    val countedInSteps get() = includedInSteps && steps != null
     fun validate() {
         LocalDate.parse(day); require(id.isNotBlank() && name.isNotBlank())
         require(name.length <= 120)
@@ -60,7 +68,10 @@ data class ExerciseEntry(@PrimaryKey val id: String, val day: String, val name: 
         require(met == null || met.isFinite() && met in 1.0..30.0)
         require(estimateNote.length <= 2000)
         require(details.length <= 1000) { "运动说明最多 1000 字" }
-        when (inputMode) { "time" -> require(minutes != null) { "请填写时长" }; "distance" -> require(distanceKm != null) { "请填写距离" }; "sets" -> require(sets != null) { "请填写组数" } }
+        require(steps == null || steps in 1..200000) { "本次运动步数需在 1–200000 之间" }
+        // Time, distance and sets are three independent optional fields, so only require that the
+        // record says something about the effort.
+        require(minutes != null || distanceKm != null || sets != null) { "请至少填写时长、距离或组数中的一项" }
         if (method == "pending") require(kcal == null)
         else require(kcal != null) { "请先计算或保存为待估算" }
         if (method == "met") require(weightKg != null && met != null && minutes != null)
