@@ -22,7 +22,7 @@ class ClassicSppProbeActivity : Activity() {
     private val report = JSONObject().put("transport", "SPP/RFCOMM").put("bytesSent", 0)
     private fun save() {
         File(cacheDir, "classic-spp-probe.json").writeText(report.toString(2))
-        text.text = "OrbitV 连接方式验证\n\n" + report.toString(2) + "\n\n本次只验证蓝牙串口连接，不发送应用指令或健康记录。"
+        text.text = "经典蓝牙串口连接验证\n\n" + report.toString(2) + "\n\n本次只验证蓝牙串口连接，不发送应用指令或健康记录。"
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

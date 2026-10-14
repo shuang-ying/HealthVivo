@@ -9,9 +9,11 @@
 手机活力记录 → Android 原生 BLE GATT 客户端 → 手表活力记录的 BlueOS 原生 GATT 服务端
 ```
 
-运行时不依赖 OrbitV、ovpkg、vivo 健康、`device-rpc.aar`、SDK 密钥或云端中转。OrbitV 仍可用于把
-RPK 安装到手表，本版没有实现替代的手表安装器。旧扩展工程与旧 `OrbitLocalBridge` 作为历史参考保留，
-不在正式页面启动；手表构建已排除 OrbitV SDK 与 `.local.*` 生成文件。
+运行时不依赖 OrbitV、ovpkg、vivo 健康、`device-rpc.aar`、SDK 密钥或云端中转。第三方 OrbitV 手机应用
+仍可作为把手表 RPK 装到设备上的工具，它不参与运行，本项目也没有实现替代的手表安装器。
+
+旧扩展（`orbitv/` 工程、手机端 `OrbitLocalBridge`、手表端内置 SDK、相关脚本与文档）已整体移出代码树，
+存档在不纳入版本管理的 `archive/orbitv-extension-1.2.0/`，需要时可从 git 历史取回。
 
 ## 代码结构
 

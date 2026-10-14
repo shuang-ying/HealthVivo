@@ -1,8 +1,0 @@
-{
-  "schemaVersion": 1,
-  "appId": "com.lrh.healthvivo.watch",
-  "name": "活力记录同步",
-  "version": "1.2.0",
-  "entry": "index.html",
-  "service": "service.js"
-}

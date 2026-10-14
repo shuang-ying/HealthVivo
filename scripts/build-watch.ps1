@@ -22,10 +22,10 @@ New-Item -ItemType Directory -Path $stageRoot | Out-Null
 $watchSource = (Resolve-Path -LiteralPath (Join-Path $projectRoot 'watch\src')).Path
 $stageSource = Join-Path $stageRoot 'src'
 New-Item -ItemType Directory -Path $stageSource | Out-Null
-# Exclude legacy vendor SDK and generated private identity from the standalone package.
+# Exclude generated private identity and machine-local overrides from the standalone package.
 Get-ChildItem -LiteralPath $watchSource -Recurse -File | ForEach-Object {
     $relative = $_.FullName.Substring($watchSource.Length + 1)
-    if ($relative.StartsWith('common\orbitv\') -or $relative -match '\.local\.(js|json|properties)$') { return }
+    if ($relative -match '\.local\.(js|json|properties)$') { return }
     $destination = Join-Path $stageSource $relative
     New-Item -ItemType Directory -Force -Path (Split-Path $destination -Parent) | Out-Null
     Copy-Item -LiteralPath $_.FullName -Destination $destination
@@ -51,6 +51,6 @@ try {
     if ($Install) {
         & $adbPath -s $Serial push $artifact '/sdcard/Download/health-vivo-watch-0.7.1.rpk'
         if ($LASTEXITCODE -ne 0) { throw 'RPK transfer failed.' }
-        Write-Output 'RPK copied to Download. Use OrbitV to install it on the watch.'
+        Write-Output 'RPK copied to Download. Install it on the watch with the third-party OrbitV app (installer only).'
     }
 } finally { Pop-Location }

@@ -50,7 +50,7 @@ object WatchSnapshot {
                 .put("stale", it.fingerprint != AdviceSummary.create(data, day).fingerprint)
                 .put("content", JSONObject().put("food", it.advice.food).put("exercise", it.advice.exercise)) }))
     }
-    // Retained for historical prototype tools; production synchronization uses the OrbitV daily archive.
+    // Retained for historical prototype tools; production synchronization uses the direct link.
     fun checksum(text: String): String {
         var hash = 5381
         text.forEach { hash = hash * 31 + it.code }

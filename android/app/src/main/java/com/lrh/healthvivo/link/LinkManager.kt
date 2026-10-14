@@ -10,6 +10,7 @@ import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
@@ -26,7 +27,7 @@ import org.json.JSONObject
 import java.time.LocalDate
 import java.util.concurrent.atomic.AtomicBoolean
 
-/** A watch the user can pick. Kept separate from the legacy OrbitV device type. */
+/** A watch the user can pick. */
 data class LinkDevice(val address: String, val name: String)
 
 /**
@@ -68,12 +69,41 @@ data class LinkStatus(
  *   * a manual update request is persisted before it is attempted, so it survives a disconnect,
  *     an app restart and a battery change, and it resumes on the next successful connection.
  */
+/**
+ * The day-revision ledger, migrated once off the retired relay's preference file.
+ *
+ * `WatchDeltaSource` stores `revision`, `hash.<day>`, `version.<day>` and `time.<day>` here. Those
+ * values are what let the phone send only the days the watch does not already have, so they are
+ * carried over verbatim rather than reset. The old file is left on disk untouched.
+ */
+private fun revisionLedger(context: Context): SharedPreferences {
+    val current = context.getSharedPreferences("watch_revision_ledger", Context.MODE_PRIVATE)
+    if (current.all.isNotEmpty()) return current
+    val legacy = context.getSharedPreferences("orbitv_companion", Context.MODE_PRIVATE)
+    val previous = legacy.all
+    if (previous.isEmpty()) return current
+    val edit = current.edit()
+    previous.forEach { (key, value) ->
+        when (value) {
+            is String -> edit.putString(key, value)
+            is Long -> edit.putLong(key, value)
+            is Int -> edit.putInt(key, value)
+            is Boolean -> edit.putBoolean(key, value)
+            is Float -> edit.putFloat(key, value)
+        }
+    }
+    edit.commit()
+    return current
+}
+
 @SuppressLint("MissingPermission")
 class LinkManager(context: Context, repository: FitnessRepository, advice: DailyAdviceCoordinator) {
     private val context = context.applicationContext
     private val store = LinkStore(context)
-    // Reuse the previous day-revision ledger: it describes health records, not the transport.
-    private val source = WatchDeltaSource(repository, advice, context.getSharedPreferences("orbitv_companion", Context.MODE_PRIVATE))
+    // The per-day revision ledger describes health records, not the transport. It used to live in
+    // the retired bridge's preference file, so it is moved once and then kept: losing it would make
+    // every stored day look changed and force a full re-upload on the next sync.
+    private val source = WatchDeltaSource(repository, advice, revisionLedger(context))
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val mutable = MutableStateFlow(LinkStatus(enabled = store.enabled, active = false,
         pending = store.pending, selectedName = store.name, lastSavedAt = store.lastSavedAt, lastSavedDay = store.lastSavedDay))

@@ -1,6 +1,8 @@
 # 历史 BLE 原型说明（已停用）
 
-以下为 0.10.0 / 0.3.0 的开发记录，当前版本的安装与同步方式以 ORBITV_SYNC.md 为准。
+以下为 0.10.0 / 0.3.0 的开发记录。当前的安装与同步方式见 [手表直连实现](LINK_IMPLEMENTATION.md) 与
+[活力直连协议 v1](LINK_PROTOCOL.md)；本文提到的 OrbitV 中继方案已废弃，其源码存放在不纳入版本管理的
+`archive/orbitv-extension-1.2.0/`。
 
 # 手机与手表直连版
 2026-10-12：手机 0.10.0（versionCode 12），手表 0.3.0（versionCode 3）。目标为 iQOO WATCH GT2 / BlueOS 3。开发调试包，尚未上架。

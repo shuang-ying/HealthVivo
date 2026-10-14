@@ -4,8 +4,6 @@
 **/build/
 **/node_modules/
 watch/.cache/
-orbitv/dist/
-orbitv/release/
 watch/dist/
 watch/build/
 artifacts/

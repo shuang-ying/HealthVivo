@@ -1,4 +1,9 @@
-# 手机到手表直连协议 v3
+# 手机到手表直连协议 v3（历史记录，已停用）
+
+> 本文记录 0.10.0 / 0.3.0 时期的协议，包括当时的直连帧格式与更早的 OrbitV 中继协议。
+> 这些实现都已不在代码树中：当前协议见 [活力直连协议 v1](LINK_PROTOCOL.md)，
+> 当前实现见 [手表直连实现](LINK_IMPLEMENTATION.md)，旧扩展源码存放在不纳入版本管理的
+> `archive/orbitv-extension-1.2.0/`。
 
 手机0.10.0 / 手表0.3.0使用 BLE GATT。服务 UUID 为9f7c7200-1771-42b9-bc36-d88bfb0952a0；写入特征将首段7200换成7201，状态读取特征换成7202。BlueOS 属性枚举为写入[5]、读取[4]，不是 Android 属性位掩码。广播由 GattServer.startAdvertising 开启。
 

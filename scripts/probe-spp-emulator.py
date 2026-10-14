@@ -87,9 +87,8 @@ result = {"androidEmulator": True, "virtualPeer": "Bumble", "nativeRfcomm": True
           "responsesAfterBackground": after["responsesReceived"], "connections": after["connections"],
           "forcedPeerDisconnects": peer_after["forcedDisconnections"],
           "screenOff": "Dozing" in power or "Asleep" in power,
-          "orbitvInstalled": after["orbitvInstalled"], "vivoHealthInstalled": after["vivoHealthInstalled"],
-          "healthRecordsRead": after["healthRecordsRead"], "gt2FirmwareVerified": False,
-          "orbitvProtocolVerified": False}
+          "vivoHealthInstalled": after["vivoHealthInstalled"],
+          "healthRecordsRead": after["healthRecordsRead"], "gt2FirmwareVerified": False}
 assert result["forcedPeerDisconnects"] == 1
 assert result["screenOff"]
 (root / "android-spp-result.json").write_text(json.dumps(result, indent=2), "utf-8")

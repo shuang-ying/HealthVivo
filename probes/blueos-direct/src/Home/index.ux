@@ -4,7 +4,7 @@
     <text class="status">{{ message }}</text>
     <text class="counts">读 {{ reads }} · 写 {{ writes }} · 回应 {{ replies }}</text>
     <text class="hold" onclick="holdScreen">{{ screenMessage }}</text>
-    <text class="hint">独立诊断：没有健康记录或 OrbitV 扩展程序。</text>
+    <text class="hint">独立诊断：不涉及健康记录，也不使用任何扩展程序。</text>
   </div>
 </template>
 <script>

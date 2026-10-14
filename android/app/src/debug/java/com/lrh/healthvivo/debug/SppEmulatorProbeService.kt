@@ -33,7 +33,7 @@ class SppEmulatorProbeService : Service() {
     private val report = JSONObject().put("emulatorOnly", true).put("nativeAndroidBluetooth", true)
         .put("transport", "SPP/RFCOMM over netsim").put("foregroundServiceType", "connectedDevice")
         .put("peer", "Bumble virtual SPP server").put("applicationProtocol", "synthetic JSON PING/PONG")
-        .put("gt2FirmwareVerified", false).put("orbitvProtocolVerified", false).put("healthRecordsRead", 0)
+        .put("gt2FirmwareVerified", false).put("healthRecordsRead", 0)
         .put("connections", 0).put("messagesSent", 0).put("responsesReceived", 0).put("events", events)
     private val session = UUID.randomUUID().toString()
     private val started = SystemClock.elapsedRealtime()
@@ -60,7 +60,7 @@ class SppEmulatorProbeService : Service() {
             .setContentText("合成测试消息；不读取健康记录").setOngoing(true).build()
         startForeground(28345, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE)
         if (task?.isActive == true) return START_NOT_STICKY
-        report.put("orbitvInstalled", installed("com.yyh.orbitv")).put("vivoHealthInstalled", installed("com.vivo.health"))
+        report.put("vivoHealthInstalled", installed("com.vivo.health"))
         val duration = intent?.getIntExtra("duration_seconds", 60)?.coerceIn(15, 300) ?: 60
         val peerAddress = intent?.getStringExtra("peer_address") ?: "F0:F1:F2:F3:F4:F5"
         report.put("runId", intent?.getStringExtra("run_id") ?: session).put("virtualPeerAddress", peerAddress)

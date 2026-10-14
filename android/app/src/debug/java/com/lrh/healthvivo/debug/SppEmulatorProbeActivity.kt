@@ -32,6 +32,6 @@ class SppEmulatorProbeActivity : Activity() {
         service.putExtra("peer_address", intent.getStringExtra("peer_address") ?: "F0:F1:F2:F3:F4:F5")
         service.putExtra("run_id", intent.getStringExtra("run_id") ?: java.util.UUID.randomUUID().toString())
         startForegroundService(service)
-        text.text = "独立 App 虚拟 SPP 诊断运行中\n\n可退到桌面检查后台收发。\n只发送合成 PING/PONG，不使用 OrbitV、扩展程序或健康记录。\n\n对端是 Bumble 虚拟设备，不是 GT2 固件。"
+        text.text = "独立 App 虚拟 SPP 诊断运行中\n\n可退到桌面检查后台收发。\n只发送合成 PING/PONG，不使用扩展程序或健康记录。\n\n对端是 Bumble 虚拟设备，不是 GT2 固件。"
     }
 }

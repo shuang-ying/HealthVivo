@@ -1,4 +1,4 @@
-param([string]$StudioProject = 'D:\AgentProject\HealthVivoWatchDev', [switch]$Open, [switch]$Demo, [switch]$NoBuild)
+param([string]$StudioProject = 'D:\AgentProject\HealthVivoWatchDev', [switch]$Open, [switch]$NoBuild)
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path $PSScriptRoot -Parent
 if ($StudioProject.Contains(' ')) { throw 'Studio project path must not contain spaces.' }
@@ -9,10 +9,6 @@ New-Item -ItemType Directory -Force -Path $studioRoot | Out-Null
 [System.IO.File]::WriteAllText($marker,$projectRoot,[System.Text.UTF8Encoding]::new($false))
 foreach ($sourceDirectory in @('src','test')) { Copy-Item -LiteralPath (Join-Path $projectRoot ('watch\'+$sourceDirectory)) -Destination $studioRoot -Recurse -Force }
 foreach ($sourceFile in @('package.json','jsconfig.json')) { Copy-Item -LiteralPath (Join-Path $projectRoot ('watch\'+$sourceFile)) -Destination $studioRoot -Force }
-if ($Demo) {
-    & 'D:\DevTools\BlueOSStudio\resources\app\extensions\blueos-debugger\media\node\node.exe' (Join-Path $PSScriptRoot 'prepare-watch-orbitv-demo.mjs') $studioRoot
-    if ($LASTEXITCODE -ne 0) { throw 'Demo preparation failed.' }
-}
 $moduleRoot=Join-Path $studioRoot 'node_modules'
 New-Item -ItemType Directory -Force -Path $moduleRoot | Out-Null
 $packLink=Join-Path $moduleRoot 'blueos-pack'
