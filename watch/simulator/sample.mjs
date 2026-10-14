@@ -1,27 +1,57 @@
 // Synthetic data only. This module is outside src and is never packaged in the production RPK.
+// It is fed to the watch through the simulated BLE hooks, so it has to carry the same schema the
+// phone sends: schema 3, a `today`, the sparse `history` the calendar charts aggregate and a nullable
+// per-workout `steps`.
 function sample() {
   const now = new Date()
   const day = now.getFullYear() + '-' + ('0' + (now.getMonth() + 1)).slice(-2) + '-' + ('0' + now.getDate()).slice(-2)
+  const earlier = offset => {
+    const value = new Date(now.getFullYear(), now.getMonth(), now.getDate() + offset)
+    return value.getFullYear() + '-' + ('0' + (value.getMonth() + 1)).slice(-2) + '-' + ('0' + value.getDate()).slice(-2)
+  }
   const kinds = ['breakfast', 'lunch', 'dinner', 'snack']
   const foodRows = [
     [{ name: '燕麦粥', grams: 220, kcal: 180, estimated: false }, { name: '鸡蛋', grams: 50, kcal: 72, estimated: false }],
     [{ name: '熟米饭', grams: 150, kcal: 195, estimated: false }, { name: '鸡胸肉与青菜', grams: 250, kcal: 320, estimated: true }],
     [{ name: '杂粮饭', grams: 150, kcal: 180, estimated: false }, { name: '番茄豆腐', grams: 200, kcal: 170, estimated: true }], []
   ]
-  return { schema: 2, client: 'com.lrh.healthvivo.watch', day: day, revision: Date.now(), generatedAt: Date.now(),
-    steps: 6800, weightKg: 70.5, targetWeightKg: 65,
+  return { schema: 3, client: 'com.lrh.healthvivo.watch', day: day, today: day, revision: Date.now(), generatedAt: Date.now(),
+    steps: 6800, workoutSteps: 3000, recordedSteps: 3800, weightKg: 70.5, targetWeightKg: 65,
     body: { bmi: 23, bmiStatus: '正常', fatPercent: 19.5, fatDay: day, fatStatus: '参考正常',
       bmiScale: { min: 12, max: 36, breaks: [18.5, 24, 28], labels: ['偏低', '正常', '超重', '肥胖'], colors: ['#E9B748', '#42AC81', '#E9B748', '#E16B73'], unit: '', value: 23 },
       fatScale: { min: 0, max: 50, breaks: [8, 20], labels: ['偏低', '正常', '偏高'], colors: ['#E9B748', '#42AC81', '#E16B73'], unit: '%', value: 19.5 } },
-    energy: { intakeKcal: 1117, restingKcal: 1610, activityKcal: 286, referenceKcal: 1896, pendingCount: 1, overlapHandled: true },
+    energy: { intakeKcal: 1117, restingKcal: 1610, activityKcal: 286, referenceKcal: 1896, pendingCount: 1, overlapHandled: true,
+      stepsKcal: 126, workoutKcal: 160, mealKcal: [252, 515, 350, 0] },
+    history: {
+      days: [
+        { day: earlier(-6), intakeKcal: 1980, activityKcal: 240.5, referenceKcal: 1875.5 },
+        { day: earlier(-5), intakeKcal: 2210, activityKcal: 96, referenceKcal: 1902 },
+        { day: earlier(-4), intakeKcal: 1760, activityKcal: 388.25, referenceKcal: 1996.75 },
+        { day: earlier(-3), intakeKcal: 2050, activityKcal: 0, referenceKcal: 1806 },
+        { day: earlier(-2), intakeKcal: 1890, activityKcal: 512.5, referenceKcal: 2064.5 },
+        { day: earlier(-1), intakeKcal: 2140, activityKcal: 174.75, referenceKcal: 1852.25 },
+        { day: day, intakeKcal: 1117, activityKcal: 286, referenceKcal: 1896 }
+      ],
+      weights: [
+        { day: earlier(-6), value: 71.4 },
+        { day: earlier(-3), value: 71 },
+        { day: earlier(-1), value: 70.8 },
+        { day: day, value: 70.5 }
+      ],
+      fats: [
+        { day: earlier(-5), value: 20.2 },
+        { day: earlier(-1), value: 19.8 },
+        { day: day, value: 19.5 }
+      ]
+    },
     meals: kinds.map((kind, index) => ({ kind: kind, count: foodRows[index].length, omitted: 0,
       kcal: foodRows[index].length ? foodRows[index].reduce((sum, food) => sum + food.kcal, 0) : null, foods: foodRows[index] })),
     exerciseCount: 2, omittedExercises: 0,
     exercises: [
       { name: '轻松跑步', category: 'aerobic', minutes: 30, distanceKm: 3, sets: null, reps: null, loadKg: null,
-        kcal: 211.5, net: true, estimated: false, includedInSteps: true },
+        kcal: 160, net: true, estimated: false, includedInSteps: true, steps: 3000 },
       { name: '哑铃深蹲', category: 'anaerobic', minutes: null, distanceKm: null, sets: 4, reps: 12, loadKg: 10,
-        kcal: null, net: false, estimated: false, includedInSteps: false }
+        kcal: null, net: false, estimated: false, includedInSteps: false, steps: null }
     ],
     advice: { generatedAt: Date.now(), stale: false, content: {
       overview: '这是模拟器的演示建议与虚构记录，不代表用户真实饮食或运动。',

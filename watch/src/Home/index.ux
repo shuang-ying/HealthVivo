@@ -48,11 +48,28 @@
         <text class="balance-label">热量剩余</text>
         <text class="balance-value">{{card.balance}}</text>
       </div>
+      <div class="choice-row" if="{{card.choices}}">
+        <input class="{{card.left.cardClass}}" type="button" value="{{card.left.text}}" onclick="select(card.left.action)" />
+        <input class="{{card.middle.cardClass}}" type="button" value="{{card.middle.text}}" onclick="select(card.middle.action)" />
+        <input class="{{card.right.cardClass}}" type="button" value="{{card.right.text}}" onclick="select(card.right.action)" />
+      </div>
+      <div class="period-row" if="{{card.periodText}}">
+        <input class="period-arrow" type="button" value="‹" onclick="select(card.previous)" />
+        <input class="period-value" type="button" value="{{card.periodText}}" onclick="select(card.reset)" />
+        <input class="period-arrow" type="button" value="›" onclick="select(card.next)" if="{{card.canNext}}" />
+      </div>
+      <div class="trend-marker-row" if="{{card.bars}}">
+        <text class="trend-marker" if="{{card.marker}}" style="left: {{card.markerLeft}}px;">▼</text>
+      </div>
       <div class="trend-plot" if="{{card.bars}}">
-        <div class="trend-bar" for="{{bar in card.bars}}" style="width: {{bar.width}}px; height: {{bar.height}}px; background-color: {{bar.color}};"></div>
+        <div class="trend-bar" for="{{bar in card.bars}}" style="margin-top: {{bar.top}}px; width: {{bar.width}}px; height: {{bar.height}}px; background-color: {{bar.color}};"></div>
       </div>
       <div class="trend-labels" if="{{card.bars}}">
-        <text class="trend-label" for="{{bar in card.bars}}" style="width: {{bar.width}}px;">{{bar.label}}</text>
+        <text class="{{bar.labelClass}}" for="{{bar in card.bars}}" style="width: {{bar.width}}px;">{{bar.label}}</text>
+      </div>
+      <div class="trend-axis" if="{{card.bars}}">
+        <text class="trend-axis-text">{{card.axisTop}}</text>
+        <text class="trend-axis-text">{{card.axisBottom}}</text>
       </div>
       <text class="hint" if="{{card.hint}}">{{card.hint}}</text>
     </list-item>
@@ -60,7 +77,7 @@
       <text class="caption">{{connectionText}}</text>
       <input class="button" type="button" value="{{updateButton}}" onclick="refresh" />
       <input class="settings-button" type="button" value="连接管理" onclick="connection" />
-      <text class="footnote">活力记录 0.7.1 · 蓝牙直连</text>
+      <text class="footnote">活力记录 0.9.0 · 蓝牙直连</text>
     </list-item>
   </list>
 </template>
@@ -141,17 +158,21 @@ export default {
   select(page) {
     if (!page) return
     if (page.indexOf('day:') === 0) { this.runtime.day = page.slice(4); this.runtime.page = 'home'; this.loadDay(); return }
-    if (['home', 'connection', 'energy', 'exercise', 'meals', 'advice', 'dates', 'trend:meals', 'trend:exercise', 'trend:balance',
-      'meal:breakfast', 'meal:lunch', 'meal:dinner', 'meal:snack'].indexOf(page) < 0) return
+    // The trend pages carry their own state in their name (series, scale, how many periods back, which
+    // column was tapped), so the router asks the dashboard rather than keeping a list that cannot know
+    // about tomorrow's scale.
+    if (['home', 'connection', 'energy', 'exercise', 'meals', 'advice', 'dates',
+      'meal:breakfast', 'meal:lunch', 'meal:dinner', 'meal:snack'].indexOf(page) < 0 && !dashboard.parse(page)) return
     if (page !== 'connection') this.confirmDisconnect = false
     this.runtime.page = page; this.updateDisplay()
     try { this.$element('dashboard-list').scrollTo({ index: 0 }) } catch (_) {}
   },
   updateDisplay() {
     const titles = { home: '每日总览', connection: '连接管理', energy: '每日能量参考', exercise: '运动记录',
-      meals: '三餐', advice: 'AI 建议', dates: '选择日期', 'trend:meals': '饮食趋势', 'trend:exercise': '运动趋势', 'trend:balance': '热量剩余趋势',
+      meals: '三餐', advice: 'AI 建议', dates: '选择日期',
       'meal:breakfast': '早餐', 'meal:lunch': '午餐', 'meal:dinner': '晚餐', 'meal:snack': '加餐' }
-    this.pageTitle = titles[this.runtime.page]; this.detail = this.runtime.page !== 'home'; this.pairMode = this.runtime.page === 'connection'
+    this.pageTitle = titles[this.runtime.page] || dashboard.title(this.runtime.page)
+    this.detail = this.runtime.page !== 'home'; this.pairMode = this.runtime.page === 'connection'
     this.backLabel = this.runtime.page.indexOf('meal:') === 0 ? '‹ 返回三餐' : '‹ 返回总览'
     this.dayText = this.runtime.day + (this.runtime.day === today() ? ' · 今天' : '')
     this.savedText = this.runtime.savedAt ? '保存于 ' + dashboard.time(this.runtime.savedAt) : '该日暂无已同步记录'
@@ -214,10 +235,21 @@ export default {
 .scale-name { position: absolute; width: 60px; font-size: 15px; text-align: center; color: #D4CADE; }
 .scale-note { width: 300px; font-size: 18px; line-height: 26px; text-align: center; color: #B9B3CA; margin-top: 10px; }
 .settings-button { width: 360px; height: 56px; margin-top: 12px; border-radius: 18px; background-color: #252032; color: #D6C9FF; font-size: 22px; }
-.trend-plot { width: 360px; height: 120px; flex-direction: row; align-items: flex-end; justify-content: center; margin-top: 16px; }
+.trend-plot { width: 360px; height: 120px; flex-direction: row; align-items: flex-start; justify-content: center; margin-top: 16px; }
 .trend-bar { margin-left: 4px; border-radius: 3px; }
 .trend-labels { width: 360px; flex-direction: row; justify-content: center; margin-top: 6px; }
 .trend-label { margin-left: 4px; text-align: center; font-size: 15px; color: #8F879F; }
+.trend-label-on { color: #F2C14E; font-weight: bold; }
+.trend-marker-row { width: 360px; height: 22px; position: relative; margin-top: 12px; }
+.trend-marker { position: absolute; width: 20px; height: 22px; font-size: 16px; text-align: center; color: #F2C14E; }
+.trend-axis { width: 360px; flex-direction: row; justify-content: space-between; margin-top: 8px; }
+.trend-axis-text { font-size: 16px; color: #B9B3CA; }
+.choice-row { width: 360px; flex-direction: row; justify-content: center; margin-top: 14px; }
+.choice { width: 108px; height: 48px; margin: 0px 4px; border-radius: 14px; background-color: #252032; color: #D6C9FF; font-size: 20px; }
+.choice-on { background-color: #7955D8; color: #FFFFFF; font-weight: bold; }
+.period-row { width: 360px; flex-direction: row; align-items: center; justify-content: center; margin-top: 12px; }
+.period-arrow { width: 44px; height: 46px; background-color: #252032; color: #D6C9FF; border-radius: 16px; font-size: 26px; }
+.period-value { width: 262px; height: 46px; margin: 0px 4px; background-color: #211D2E; color: #D6C9FF; border-radius: 16px; font-size: 20px; }
 .tab-off { width: 396px; flex-direction: column; align-items: center; padding: 14px; margin: 4px 18px; border-radius: 20px; background-color: #252032; }
 .tab-on { width: 396px; flex-direction: column; align-items: center; padding: 14px; margin: 4px 18px; border-radius: 20px; background-color: #7955D8; }
 </style>
