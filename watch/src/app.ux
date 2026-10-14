@@ -1,6 +1,9 @@
 <script>
+import link from './lib/link/runtime.js'
 export default {
-  onCreate() {},
-  onDestroy() {}
+  // The application owns the BLE server so a page switch can never tear the link down.
+  getLinkRuntime() { return link },
+  onCreate() { link.start() },
+  onDestroy() { link.close() }
 }
 </script>

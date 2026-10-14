@@ -1,15 +1,9 @@
-import java.util.Properties
-
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
     id("org.jetbrains.kotlin.kapt")
 }
-val bleLocal = Properties().apply {
-    rootProject.file("ble-watch.local.properties").takeIf { it.exists() }?.inputStream()?.use { load(it) }
-}
-fun javaString(value: String) = "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r") + "\""
 android {
     namespace = "com.lrh.healthvivo"
     compileSdk = 36
@@ -18,9 +12,8 @@ android {
         applicationId = "com.lrh.healthvivo"
         minSdk = 26
         targetSdk = 36
-        versionCode = 19
-        versionName = "0.12.3"
-        buildConfigField("String", "WATCH_BLE_PUBLIC_KEY", javaString(bleLocal.getProperty("publicKey", "")))
+        versionCode = 22
+        versionName = "0.14.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildFeatures { compose = true; buildConfig = true }

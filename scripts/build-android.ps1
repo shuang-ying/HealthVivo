@@ -1,9 +1,6 @@
 param([switch]$Install, [switch]$UnitTests, [switch]$DeviceTests, [string]$Serial = '10AC610LZC001DX')
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path $PSScriptRoot -Parent
-$pythonPath = 'C:\Users\lrh\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe'
-& $pythonPath (Join-Path $PSScriptRoot 'prepare-ble-keys.py')
-if ($LASTEXITCODE -ne 0) { throw 'BLE build identity preparation failed.' }
 $env:JAVA_HOME = [Environment]::GetEnvironmentVariable('JAVA_HOME','User')
 $env:ANDROID_HOME = [Environment]::GetEnvironmentVariable('ANDROID_HOME','User')
 if (!$env:JAVA_HOME -or !$env:ANDROID_HOME) { throw 'Configure user JAVA_HOME (JDK 17) and ANDROID_HOME.' }
@@ -22,7 +19,7 @@ if ($DeviceTests) { $tasks += 'assembleDebugAndroidTest' }
 if ($LASTEXITCODE -ne 0) { throw 'Android build/tests failed.' }
 $artifactDir = Join-Path $projectRoot 'artifacts'
 New-Item -ItemType Directory -Force -Path $artifactDir | Out-Null
-$apkPath = Join-Path $artifactDir 'vitality-phone-0.12.3.apk'
+$apkPath = Join-Path $artifactDir 'vitality-phone-0.14.0.apk'
 Copy-Item -LiteralPath (Join-Path $androidRoot 'app\build\outputs\apk\debug\app-debug.apk') -Destination $apkPath -Force
 $signerPath = Join-Path $env:ANDROID_HOME 'build-tools\36.0.0\apksigner.bat'
 $signature = & $signerPath verify --print-certs $apkPath

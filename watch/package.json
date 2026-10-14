@@ -1,10 +1,10 @@
 {
   "name": "health-vivo-watch",
-  "version": "0.5.3",
+  "version": "0.6.2",
   "license": "MIT",
   "private": true,
   "scripts": {
-    "test": "node --test test/*.test.cjs",
+    "test": "node --test test/*.test.mjs",
     "build": "node node_modules/blueos-pack/bin/index.js build --device-type watch-square --debug"
   },
   "devDependencies": { "blueos-pack": "1.0.12-beta.13" }

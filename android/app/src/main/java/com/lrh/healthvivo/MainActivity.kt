@@ -102,9 +102,9 @@ open class MainActivity : ComponentActivity() {
     }
     override fun onStart() {
         super.onStart()
-        if(previewData == null && app.orbitBridge.connectionEnabled() && !app.orbitBridge.status.value.active) {
+        if(previewData == null && app.link.status.value.enabled && !app.link.status.value.active && app.link.hasPermissions()) {
             runCatching { androidx.core.content.ContextCompat.startForegroundService(this,
-                Intent(this, com.lrh.healthvivo.watch.OrbitSyncService::class.java)) }
+                Intent(this, com.lrh.healthvivo.link.LinkService::class.java)) }
                 .onFailure { toast("持续连接暂未恢复，请在“我的”重新开启") }
         }
     }
@@ -320,7 +320,7 @@ open class MainActivity : ComponentActivity() {
                                 OutlinedButton(onClick = { showApi = true }) { Text("配置 / 更换 API") }
                             }
                             if(previewData == null) {
-                                com.lrh.healthvivo.watch.OrbitSyncPanel(app.orbitBridge)
+                                com.lrh.healthvivo.link.LinkPanel(app.link)
                             }
                             Panel("我的食物库") {
                                 Text("内置 ${app.catalog.foods.size} 种有来源的基础食物；自建 ${data.customFoods.size} 种。", fontSize = 13.sp)

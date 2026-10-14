@@ -4,6 +4,8 @@
 
 ## OrbitV SDK 与扩展模板
 
+手机 0.13.0 / 手表 0.6.0 的同步运行路径不使用 OrbitV SDK 或扩展程序；当前手表构建脚本排除该 SDK，以下记录对应仓库中保留的历史扩展方案。
+
 - 来源：[OrbitV 开发者下载页](https://doc.developers.orbitv.top/downloads)。
 - 本项目保留的 BlueOS SDK 版本：1.0.0。
 - SDK 文件：`watch/src/common/orbitv/`。原下载包的 SDK 实现、README 与版本信息保留。

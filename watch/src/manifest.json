@@ -2,19 +2,18 @@
   "package": "com.lrh.healthvivo.watch",
   "name": "活力记录",
   "icon": "/common/icon.png",
-  "versionName": "0.5.3",
-  "versionCode": 10,
+  "versionName": "0.7.0",
+  "versionCode": 14,
   "deviceTypeList": ["watch-square"],
   "appCategory": ["sports", "lifestyle"],
   "features": [
     { "name": "blueos.storage.storage" },
-    { "name": "blueos.network.fetch" },
-    { "name": "blueos.network.request" },
-    { "name": "blueos.storage.file" },
+    { "name": "blueos.bluetooth.ble" },
+    { "name": "blueos.security.cipher" },
     { "name": "blueos.hardware.display.brightness" }
   ],
-  "permissions": [],
-  "config": { "designWidth": 432 },
+  "permissions": [{ "name": "blueos.permission.BLUETOOTH" }],
+  "config": { "designWidth": 432, "background": { "features": ["blueos.bluetooth.ble"] } },
   "router": { "entry": "Home", "pages": { "Home": { "component": "index" } } },
   "display": { "backgroundColor": "#111018" }
 }

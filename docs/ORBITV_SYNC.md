@@ -78,12 +78,11 @@ Android Room／建议缓存 → 绑定 `127.0.0.1:28341` 的持续本机接口 �
 ./scripts/build-android.ps1
 ./scripts/build-watch.ps1
 ./scripts/build-orbitv.ps1
-node scripts/simulate-orbitv-watch.mjs
 node scripts/simulate-orbitv-connection.mjs
 ./scripts/prepare-watch-studio.ps1 -Demo
 ```
 
-`build-watch.ps1 -Install` 仅把 RPK 复制到手机 Download，随后通过 OrbitV 安装。BLE 历史研究工具不属于当前运行路径。
+`build-watch.ps1 -Install` 仅把 RPK 复制到手机 Download，随后通过 OrbitV 安装。BLE 历史研究工具不属于当前运行路径。`simulate-orbitv-watch.mjs` 与被它驱动的 `orbitv-sync.mjs` 已在 0.7.0 随直连协议重写一并删除；OrbitV 现在只用于把 RPK 安装到手表。
 
 ## 来源
 

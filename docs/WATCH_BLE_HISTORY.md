@@ -54,6 +54,6 @@ build-watch.ps1 -Install 仍可经手机发起 vivo 健康调试安装请求。�
 
 Studio 副本仍在 D:\AgentProject\HealthVivoWatchDev。演示包名带.preview，使用虚构数据、模拟确认与内存存储，不访问真实蓝牙、模型 API 或健康数据；不会携带生产私钥。点击演示“允许这台手机”后显示看板。
 
-scripts/simulate-ble-watch.mjs 运行生产 GATT 协议和 Home 页面处理函数，用独立的 Node 原生 RSA/AES/HMAC 和临时身份模拟手机，覆盖最小20字节包、认证、人工确认、保存前不回执、存储失败、零步数、半包、旧版本、对端隔离及离线重开。旧 simulate-watch.mjs 命令转到当前模拟。
+~~scripts/simulate-ble-watch.mjs~~ 运行当时的 GATT 协议和 Home 页面处理函数，用独立的 Node 原生 RSA/AES/HMAC 和临时身份模拟手机，覆盖最小20字节包、认证、人工确认、保存前不回执、存储失败、零步数、半包、旧版本、对端隔离及离线重开。该脚本与被它驱动的 `ble-transport.mjs` / `ble-wire.mjs` 已在 0.7.0 随直连协议重写一并删除；当前协议的仿真与测试见 [活力直连协议 v1](LINK_PROTOCOL.md) 的“测试”一节。
 
 APK、RPK 已构建成功；手机预览使用 Android 模拟器的合成记录。协议仿真不等于 GT2 真机 BLE/BlueOS 原生加密验证；真实 API 服务、手表安装及系统后台限制亦未验证。目前未发现通过 ADB 连接的 X80。本次未运行旧单元测试或 instrumentation。

@@ -15,6 +15,7 @@ class HealthApplication : Application() {
     val apiSettings by lazy { ApiSettingsStore(this) }
     val recognition by lazy { MealAiClient() }
     val advice by lazy { DailyAdviceCoordinator(repository, apiSettings, DailyAdviceStore(this)) }
-    val watch by lazy { com.lrh.healthvivo.watch.WatchSyncBridge(this, repository, advice) }
+    /** The persistent BLE link to the watch. One instance for the whole process, like the service. */
+    val link by lazy { com.lrh.healthvivo.link.LinkManager(this, repository, advice) }
     val orbitBridge by lazy { com.lrh.healthvivo.watch.OrbitLocalBridge(this, repository, advice) }
 }

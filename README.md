@@ -1,14 +1,14 @@
-# 活力记录 · 手机 0.12.3 / 手表 0.5.3
+# 活力记录 · 手机 0.14.0 / 手表 0.7.0
 
-GitHub 上传与三套软件的 Release 发布说明见 [GITHUB_RELEASE.md](docs/GITHUB_RELEASE.md)。源码由一个仓库管理，安装包作为 Release 附件上传。
+本版把手机与手表之间的蓝牙连接重写为独立的持久化直连实现：单特征 GATT 读写、CRC32 校验的分帧传输、首次登记后自动认证、双端自动重连，手表端另有广播看门狗。协议见 [LINK_PROTOCOL.md](docs/LINK_PROTOCOL.md)，实现与验证状态见 [LINK_IMPLEMENTATION.md](docs/LINK_IMPLEMENTATION.md)，使用说明见 [WATCH_GUIDE.md](docs/WATCH_GUIDE.md)。两端已编译通过，手表协议测试 36 项、手机 JVM 测试 49 项通过；真机完整同步保存确认与长期后台行为仍待验证。GitHub 发布说明见 [GITHUB_RELEASE.md](docs/GITHUB_RELEASE.md)，其中三套软件流程对应旧扩展版本；新版本尚未发布。
 
 仓库：[shuang-ying/HealthVivo](https://github.com/shuang-ying/HealthVivo)。首个预发布：[v0.12.3](https://github.com/shuang-ying/HealthVivo/releases/tag/v0.12.3)，包含手机 0.12.3、手表 0.5.3、OrbitV 扩展 1.2.0。APK 为调试构建，本版 GT2 数轴实机显示仍待确认。
 
 项目原创代码采用 [MIT License](LICENSE)，Copyright (c) 2026 shuang-ying。第三方 SDK、模板、依赖和数据遵循各自条款，详见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。OrbitV SDK／模板的再分发授权仍待确认，项目 MIT 声明不覆盖其原有部分。
 
-通过用户录入或选择的食物照片、文字、体重与运动数据，计算热量参考值和记录趋势。手机独立记录、BMI、手动体脂率与 AI 建议继续可用；手表通过 OrbitV 本机扩展程序与蓝牙通道同步，不读取 vivo 健康数据库。
+通过用户录入或选择的食物照片、文字、体重与运动数据，计算热量参考值和记录趋势。手机独立记录、BMI、手动体脂率与 AI 建议继续可用；手表通过手机原生 BLE 客户端和 BlueOS 原生服务同步，不读取 vivo 健康数据库。
 
-手表看板：iQOO WATCH GT2 / BlueOS 3 显示步数、运动、热量、三餐、体重、目标和手机 AI 建议，并可按天离线查询。只在手机点击“更新到手表”或手表主页底部点击“获取更新”后同步，按日期只更新新增和修改的摘要；保存记录和切换日期不自动同步。需要手机持续本机接口及 OrbitV 扩展程序页面开启，实验 BLE 连接入口已移除。安装与使用说明见 [ORBITV_SYNC.md](docs/ORBITV_SYNC.md)。
+手表看板：iQOO WATCH GT2 / BlueOS 3 显示步数、运动、热量、三餐、体重、目标和手机 AI 建议，并可按天离线查询。只在手机点击“更新到手表”或手表主页底部点击“获取更新”后同步，按日期只更新新增和修改的摘要；保存记录和切换日期不自动同步。首次搜索并选择手表，连接凭据自动保存在两端；手机前台服务维护连接并按 1、2、4、8 秒递增重试（上限 30 秒），手表端每 3 秒检查一次广播与服务，无人连接时重新请求广播、服务失效时重建服务，因此手机随时可以重新连上。手表会话失效时手机会在同一条蓝牙链路上重跑握手，不重建物理连接。系统回收/挂起仍可能中断；真机长期后台表现尚未验证。使用说明见 [WATCH_GUIDE.md](docs/WATCH_GUIDE.md)。
 
 ## 可以使用的功能
 
@@ -91,6 +91,7 @@ Android Studio 打开 android；Gradle 使用 JDK 17，API 36 / Build-Tools 36.0
 
 ```powershell
 ./scripts/build-android.ps1
+./scripts/build-watch.ps1
 ./scripts/build-android.ps1 -Install
 ./scripts/build-android.ps1 -UnitTests
 ./scripts/build-android.ps1 -DeviceTests -Install
@@ -98,7 +99,7 @@ Android Studio 打开 android；Gradle 使用 JDK 17，API 36 / Build-Tools 36.0
 
 默认脚本只编译和打包，不运行测试；-UnitTests / -DeviceTests 为显式测试选项。
 
-当前产物 artifacts/vitality-phone-0.12.3.apk、artifacts/health-vivo-watch-0.5.3.rpk、artifacts/vitality-orbitv-1.2.0.ovpkg。包名 com.lrh.healthvivo 保持兼容，应用名“活力记录”。本次不改变数据库版本4，保留旧记录、加密 API 配置和 OrbitV 配对信息。
+当前产物 artifacts/vitality-phone-0.14.0.apk、artifacts/health-vivo-watch-0.7.0.rpk。包名保持兼容，应用名“活力记录”。本次不改变数据库版本4，保留旧记录、加密 API 配置、日期版本账本和手表缓存；新旧蓝牙连接信息分开保存（新键 `link_connection` / `link_secret`、手表 `fitness.link.identity.v1`），升级后需要一次首次连接，不需 ovpkg。专用协议测试：`node --test watch/test/link-wire.test.mjs watch/test/link-server.test.mjs`；跨语言向量：`node scripts/generate-link-vectors.mjs`；手机端 `./scripts/build-android.ps1 -UnitTests`。脚本默认仍只构建。
 
 本机数据库为 fitness-local.db，当前版本4；从0.3.0的数据库版本1迁移到版本2，保留个人资料、体重、三餐、自建食物和历史运动，移除活动系数并增加步数表。旧手填运动热量口径未确认，不参与净消耗；旧 MET 值保留，步行/跑步默认标记包含在总步数中，可编辑。没有破坏性迁移或清空数据操作。旧手机采集原型保留在 archive；手表现为手机数据看板。健康数据保存在应用私有目录，关闭 Android 自动备份；API 密钥用 Android Keystore 加密。应用不会读取计步、位置或其他 App 的私有数据。
 
@@ -112,6 +113,6 @@ Android Studio 打开 android；Gradle 使用 JDK 17，API 36 / Build-Tools 36.0
 
 BMI依据[国家卫健委成人标准](https://www.nhc.gov.cn/jkj/s10045/200907/943149b60565497bb3e25783a0e3de68.shtml)。体脂率使用[Gallagher等2000年论文](https://pubmed.ncbi.nlm.nih.gov/10966886/)的Table4年龄/性别参考范围，适用于20–79岁资料，属于暂定参考而非诊断；[全文Table4](https://zakboekdietetiek.nl/wp-content/uploads/2015/11/Am-J-Clin-Nutr-2000-Gallagher-694-701.pdf)。年龄或资料不适用时只显示测量值。参考状态不能代表整体健康。
 
-当前同步使用公开 OrbitV SDK 和本项目本机扩展程序，不依赖 device-rpc.aar、vivo SDK 密钥或 vivo 健康。0.4.1 在 GT2 同步成功已由用户确认，0.5.2 改为手动增量更新，新增历史查询并优化卡片宽度和三餐层级。当前使用说明见 docs/WATCH_GUIDE.md；BLE 原型协议和旧交付报告作为历史开发记录保留。
+历史扩展方案使用公开 OrbitV SDK 和本项目本机扩展程序。0.4.1 在 GT2 同步成功已由用户确认，0.5.2 改为手动增量更新，新增历史查询并优化卡片宽度和三餐层级。这些结果不代表直连协议已经验证；当前方案见 [LINK_PROTOCOL.md](docs/LINK_PROTOCOL.md)。
 
-本版 0.12.3 / 0.5.3 / 扩展程序 1.2.0：本机接口持续开启，保留开关与配对信息，重复更新不重建连接。三段状态及心跳检测后才转发，恢复连接本身不传输健康记录；仍只由手动指令触发增量同步。旧缓存缺少数轴时明确提示，保留全屏卡片尺寸。OrbitV 扩展页退出后自身服务会停止，Android 后台服务时限也保持遵循，详见 docs/ORBITV_SYNC.md。
+历史版本 0.12.3 / 0.5.3 / 扩展程序 1.2.0：本机接口持续开启，保留开关与配对信息，重复更新不重建连接。三段状态及心跳检测后才转发，恢复连接本身不传输健康记录；仍只由手动指令触发增量同步。旧缓存缺少数轴时明确提示，保留全屏卡片尺寸。OrbitV 扩展页退出后自身服务会停止，Android 后台服务时限也保持遵循，详见 docs/ORBITV_SYNC.md。

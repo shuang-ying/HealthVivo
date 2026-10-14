@@ -28,7 +28,7 @@ class ClassicSppProbeActivity : Activity() {
         super.onCreate(savedInstanceState)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         text = TextView(this).apply { textSize = 16f; setPadding(36, 72, 36, 36) }; setContentView(text)
-        val bridge = (application as HealthApplication).watch
+        val bridge = (application as HealthApplication).link
         bridge.disconnect()
         if(!bridge.hasPermissions()) { report.put("error", "附近设备权限未授予"); save(); return }
         val adapter = getSystemService(BluetoothManager::class.java)?.adapter
