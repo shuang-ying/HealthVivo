@@ -1,6 +1,7 @@
 package com.lrh.healthvivo.ui
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -83,15 +84,16 @@ private class PeriodState(val scale: TrendScale, val period: com.lrh.healthvivo.
     // to its value. Only the top of the axis is chosen to fit the data.
     val top = niceTop(known.maxOrNull() ?: 0.0)
     val low = if(series == 2) min(known.minOrNull() ?: 0.0, 0.0) else 0.0
-    val ticks = tickValues(low, top)
+    val ticks = tickValues(low, top, 1.0)
     val index = selected?.coerceIn(0, max(buckets.size - 1, 0))
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         ScaleChips(state.scale, state.setScale)
         PeriodBar(state)
         ChipRow(listOf("饮食", "运动", "热量剩余"), series) { series = it; selected = null }
-        FitChart(buckets.size, plotHeight, index, low, top, ticks, { "%.0f".format(it) }, { selected = it },
+        FitChart(buckets.size, plotHeight, index, low, top, ticks, { "%.0f".format(it) }, labelStride(state.scale), { selected = it },
             anchorIndex = buckets.indexOfFirst { it.startDay == anchorDay },
-            tooltip = { position -> values.getOrNull(position)?.let { energyAmount(series, it) to it } },
+            tooltip = { position -> values.getOrNull(position)?.let { value ->
+                (buckets[position].shortText + " · " + energyAmount(series, value)) to value } },
             axis = { buckets.map { it.label } },
             draw = { plot ->
                 val zero = plot.y(0.0)
@@ -155,14 +157,15 @@ private class PeriodState(val scale: TrendScale, val period: com.lrh.healthvivo.
     val lowValue = present.minOf { it.value!! }; val highValue = present.maxOf { it.value!! }
     val spread = if(highValue - lowValue < 0.001) 1.0 else (highValue - lowValue) * 1.25
     val low = lowValue - spread * .125; val top = lowValue + spread * .875
-    val ticks = tickValues(low, top)
+    val ticks = tickValues(low, top, 1.0 / 10.0.pow(decimals))
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         ScaleChips(state.scale, state.setScale)
         PeriodBar(state)
-        FitChart(points.size, measureHeight, index, low, top, ticks, { format(it, decimals) },
+        FitChart(points.size, measureHeight, index, low, top, ticks, { format(it, decimals) }, labelStride(state.scale),
             { selected = it },
             anchorIndex = points.indexOfFirst { it.startDay == anchorDay },
-            tooltip = { position -> points.getOrNull(position)?.value?.let { format(it, decimals) + unit to it } },
+            tooltip = { position -> points.getOrNull(position)?.value?.let { value ->
+                (points[position].shortText + " · " + format(value, decimals) + unit) to value } },
             axis = { points.map { it.label } },
             draw = { plot ->
                 val positions = points.mapIndexedNotNull { position, point ->
@@ -206,7 +209,7 @@ private class Plot(val left: Float, val width: Float, val slot: Float, val barWi
  * get, because seeing the shape of the whole period matters more than the width of one bar.
  */
 @Composable private fun FitChart(count: Int, height: Dp, selected: Int?, low: Double, top: Double, ticks: List<Double>,
-    formatTick: (Double) -> String, onSelect: (Int) -> Unit, anchorIndex: Int,
+    formatTick: (Double) -> String, labelStride: Int, onSelect: (Int) -> Unit, anchorIndex: Int,
     tooltip: (Int) -> Pair<String, Double>?, axis: () -> List<String>, draw: DrawScope.(Plot) -> Unit) {
     var width by remember { mutableStateOf(0f) }
     val density = LocalDensity.current
@@ -217,16 +220,18 @@ private class Plot(val left: Float, val width: Float, val slot: Float, val barWi
     val heightPx = with(density) { height.toPx() }
     val liftPx = with(density) { 30.dp.toPx() }
     val halfLinePx = with(density) { 7.dp.toPx() }
-    val tooltipWidth = 96.dp
+    val tooltipWidth = 132.dp
     val tooltipWidthPx = with(density) { tooltipWidth.toPx() }
+    val labelWidth = 34.dp
+    val labelWidthPx = with(density) { labelWidth.toPx() }
+    val labelHalfPx = labelWidthPx / 2f
+    val markerHalfPx = with(density) { 2.5.dp.toPx() }
     val plotWidth = (width - gutterPx).coerceAtLeast(1f)
     val slot = if(count <= 0) plotWidth else plotWidth / count
     val labels = axis()
     val marker = anchorIndex
     fun yOf(value: Double) = (heightPx * (1 - (value - low) / (top - low))).toFloat().coerceIn(0f, heightPx)
-    // Keep the axis readable: one label per column only while it has room, otherwise every few columns.
-    val perLabel = with(density) { 26.dp.toPx() }
-    val stride = max(1, ceil(count / max(1f, plotWidth / perLabel)).toInt())
+    val stride = max(1, labelStride)
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Box(Modifier.fillMaxWidth().onSizeChanged { width = it.width.toFloat() }) {
             Row(Modifier.fillMaxWidth().height(height)) {
@@ -267,15 +272,25 @@ private class Plot(val left: Float, val width: Float, val slot: Float, val barWi
                 }
             } }
         }
-        Row(Modifier.fillMaxWidth()) {
-            Spacer(Modifier.width(gutter))
+        // Labels are placed over the column they name instead of inside it: a month's column is only a
+        // few dp wide, and a two-digit day would be truncated to its first digit if it had to fit.
+        // They are centred on their column and never nudged inwards - shifting an edge label to keep it
+        // inside would break the even spacing and push it onto its neighbour.
+        Box(Modifier.fillMaxWidth().height(16.dp)) {
             labels.forEachIndexed { position, label ->
-                Text(if(position % stride == 0 || position == labels.lastIndex) label else "",
-                    modifier = Modifier.weight(1f), fontSize = 10.sp, maxLines = 1,
-                    textAlign = TextAlign.Center,
-                    color = if(position == marker) markerColor else tickColor,
-                    fontWeight = if(position == marker) FontWeight.Bold else FontWeight.Normal)
+                if(position % stride == 0) {
+                    Text(label, fontSize = 10.sp, maxLines = 1, softWrap = false, textAlign = TextAlign.Center,
+                        color = if(position == marker) markerColor else tickColor,
+                        fontWeight = if(position == marker) FontWeight.Bold else FontWeight.Normal,
+                        modifier = Modifier.width(labelWidth).offset { IntOffset(
+                            (gutterPx + position * slot + slot / 2f - labelHalfPx).roundToInt(), 0) })
+                }
             }
+            // The viewed column is marked even when its own label is skipped by the stride.
+            if(marker in labels.indices) Box(Modifier
+                .offset { IntOffset((gutterPx + marker * slot + slot / 2f - markerHalfPx).roundToInt(), 0) }
+                .padding(top = 12.dp).size(5.dp)
+                .background(markerColor, RoundedCornerShape(50)))
         }
     }
 }
@@ -336,6 +351,16 @@ private fun energyValue(bucket: TrendBucket, series: Int): Double? = when(series
     1 -> bucket.activityKcal
     else -> bucket.referenceKcal?.let { it - bucket.intakeKcal }
 }
+/**
+ * How many columns apart the axis labels sit, chosen from what each scale has to show rather than from
+ * the pixel width: a week labels every day, a month every fifth day (1, 6, 11 …) and a year every other
+ * month (1月, 3月 … 11月), which is what stays legible at the compressed widths.
+ */
+private fun labelStride(scale: TrendScale) = when(scale) {
+    TrendScale.Week -> 1
+    TrendScale.Month -> 5
+    TrendScale.Year -> 2
+}
 /** The range text of the column that holds [anchorDay] in the current scale. */
 private fun barY(value: Double, low: Double, top: Double) = 0f
 
@@ -345,14 +370,21 @@ private fun niceTop(value: Double): Double {
     val step = niceStep(value / 3)
     return ceil(value / step) * step
 }
-/** Values from [low] to [top] at a readable interval. */
-private fun tickValues(low: Double, top: Double): List<Double> {
+/** Values from [low] to [top] at a readable interval, never closer than [minStep]. */
+private fun tickValues(low: Double, top: Double, minStep: Double): List<Double> {
     if(top <= low) return listOf(low)
-    val step = niceStep((top - low) / 3)
+    var step = niceStep((top - low) / 3)
+    var result = ticksAt(low, top, step)
+    // Two grid lines are the minimum for the axis to read as a scale. Subdividing stops at the smallest
+    // step the labels can still show distinctly, or two ticks would print the same number.
+    while(result.size < 2 && step > minStep) { step = max(step / 2, minStep); result = ticksAt(low, top, step) }
+    // Inserting the axis bounds would put a grid line off the step grid and make the spacing uneven.
+    return result
+}
+private fun ticksAt(low: Double, top: Double, step: Double): List<Double> {
     val result = mutableListOf<Double>()
     var value = ceil(low / step) * step
-    while(value <= top + step * .001 && result.size < 8) { result += value; value += step }
-    if(result.isEmpty() || result.first() > low) result.add(0, low)
+    while(value <= top + step * 1e-6 && result.size < 8) { result += value; value += step }
     return result
 }
 private fun niceStep(raw: Double): Double {

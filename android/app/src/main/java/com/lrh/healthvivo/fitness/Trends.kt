@@ -36,11 +36,13 @@ data class TrendPeriod(val scale: TrendScale, val start: LocalDate, val endExclu
 }
 
 /** One column: a day for a week or month view, a whole month for a year view. */
-data class TrendBucket(val startDay: String, val label: String, val rangeText: String, val intakeKcal: Double,
-    val activityKcal: Double, val referenceKcal: Double?, val recorded: Boolean, val future: Boolean)
+data class TrendBucket(val startDay: String, val label: String, val shortText: String, val rangeText: String,
+    val intakeKcal: Double, val activityKcal: Double, val referenceKcal: Double?,
+    val recorded: Boolean, val future: Boolean)
 
 /** One point of a measurement chart, which is sparse by nature: many columns hold no measurement. */
-data class TrendPoint(val startDay: String, val label: String, val rangeText: String, val value: Double?, val future: Boolean)
+data class TrendPoint(val startDay: String, val label: String, val shortText: String, val rangeText: String,
+    val value: Double?, val future: Boolean)
 
 object Trends {
     private val weekdayNames = listOf("一", "二", "三", "四", "五", "六", "日")
@@ -97,6 +99,12 @@ object Trends {
         TrendScale.Year -> "%d年%d月".format(start.year, start.monthValue)
     }
 
+    /** The column named as briefly as possible, for a tooltip that also has to fit a number. */
+    private fun columnShort(period: TrendPeriod, start: LocalDate): String = when (period.scale) {
+        TrendScale.Week, TrendScale.Month -> "%d/%d".format(start.monthValue, start.dayOfMonth)
+        TrendScale.Year -> "%d月".format(start.monthValue)
+    }
+
     /**
      * The intake, recorded activity and remaining reference of every column of [period].
      *
@@ -128,7 +136,8 @@ object Trends {
                 if (dayPlan != null) { reference += dayPlan.maintenanceKcal; referenceKnown = true }
                 cursor = cursor.plusDays(1)
             }
-            TrendBucket(columnStart.toString(), columnLabel(period, columnStart), columnText(period, columnStart, columnEnd),
+            TrendBucket(columnStart.toString(), columnLabel(period, columnStart), columnShort(period, columnStart),
+                columnText(period, columnStart, columnEnd),
                 intake, activity, reference.takeIf { referenceKnown }, recorded, columnStart > today)
         }
     }
@@ -148,6 +157,7 @@ object Trends {
                 values[cursor.toString()]?.let { value = it }
                 cursor = cursor.plusDays(1)
             }
-            TrendPoint(columnStart.toString(), columnLabel(period, columnStart), columnText(period, columnStart, columnEnd), value, columnStart > today)
+            TrendPoint(columnStart.toString(), columnLabel(period, columnStart), columnShort(period, columnStart),
+                columnText(period, columnStart, columnEnd), value, columnStart > today)
         }
 }

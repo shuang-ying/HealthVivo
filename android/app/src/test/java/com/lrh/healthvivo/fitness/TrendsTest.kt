@@ -110,6 +110,23 @@ class TrendsTest {
         assertFalse(month[14].recorded); assertTrue(month[14].future)
     }
 
+    @Test fun axisLabelsAndTooltipNamesMatchTheScale() {
+        val week = Trends.energy(FitnessData(profile()), Trends.period("2026-10-14", TrendScale.Week), today)
+        assertEquals(listOf("一", "二", "三", "四", "五", "六", "日"), week.map { it.label })
+        assertEquals("10/12", week.first().shortText)
+        assertEquals("10/12 周一", week.first().rangeText)
+        val month = Trends.energy(FitnessData(profile()), Trends.period("2026-10-14", TrendScale.Month), today)
+        assertEquals("1", month.first().label)
+        assertEquals("31", month.last().label)
+        // The tooltip names the day it belongs to, not just the number.
+        assertEquals("10/31", month.last().shortText)
+        val year = Trends.energy(FitnessData(profile()), Trends.period("2026-10-14", TrendScale.Year), today)
+        assertEquals("1月", year.first().label)
+        assertEquals("12月", year.last().label)
+        assertEquals("12月", year.last().shortText)
+        assertEquals("2026年12月", year.last().rangeText)
+    }
+
     @Test fun aSparseMeasurementKeepsItsGapsAndAYearTakesTheMonthEnd() {
         val values = mapOf("2026-01-05" to 80.0, "2026-01-20" to 78.0, "2026-03-02" to 77.0, "2025-12-31" to 81.0)
         val year = Trends.measure(values, Trends.period("2026-10-14", TrendScale.Year), today)
