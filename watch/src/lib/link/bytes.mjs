@@ -18,15 +18,37 @@ const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789
 export function bytes(value) {
   if (value instanceof Uint8Array) return value
   if (value instanceof ArrayBuffer) return new Uint8Array(value)
-  if (ArrayBuffer.isView(value)) return new Uint8Array(value.buffer, value.byteOffset, value.byteLength)
+  if (value && value.buffer instanceof ArrayBuffer && typeof value.byteLength === 'number') {
+    return new Uint8Array(value.buffer, value.byteOffset, value.byteLength)
+  }
   if (Array.isArray(value)) return new Uint8Array(value)
   throw new Error('Expected a binary GATT payload')
 }
 
+/**
+ * UTF-8 encode a string using nothing but `charCodeAt`.
+ *
+ * The packer injects a fixed set of host globals into each module (console, BroadcastChannel and
+ * the four timer functions) and the engine supplies the rest of ECMAScript. The legacy `escape` /
+ * `unescape` pair is Annex B rather than core ECMAScript, so it is not relied on here — this used
+ * to be `unescape(encodeURIComponent(...))`, which would have broken the handshake on an engine
+ * without it.
+ */
 export function utf8(value) {
-  const text = unescape(encodeURIComponent(value)), output = new Uint8Array(text.length)
-  for (let i = 0; i < text.length; i++) output[i] = text.charCodeAt(i)
-  return output
+  const input = String(value)
+  const out = []
+  for (let i = 0; i < input.length; i++) {
+    let code = input.charCodeAt(i)
+    if (code >= 0xd800 && code <= 0xdbff && i + 1 < input.length) {
+      const low = input.charCodeAt(i + 1)
+      if (low >= 0xdc00 && low <= 0xdfff) { code = 0x10000 + ((code - 0xd800) << 10) + (low - 0xdc00); i++ }
+    }
+    if (code < 0x80) out.push(code)
+    else if (code < 0x800) out.push(0xc0 | (code >> 6), 0x80 | (code & 63))
+    else if (code < 0x10000) out.push(0xe0 | (code >> 12), 0x80 | ((code >> 6) & 63), 0x80 | (code & 63))
+    else out.push(0xf0 | (code >> 18), 0x80 | ((code >> 12) & 63), 0x80 | ((code >> 6) & 63), 0x80 | (code & 63))
+  }
+  return new Uint8Array(out)
 }
 
 export function text(value) {
@@ -46,10 +68,29 @@ export function join() {
 
 export function u16(value) { const out = new Uint8Array(2); new DataView(out.buffer).setUint16(0, value & 0xffff); return out }
 export function u32(value) { const out = new Uint8Array(4); new DataView(out.buffer).setUint32(0, value >>> 0); return out }
-export function u64(value) { const out = new Uint8Array(8); new DataView(out.buffer).setBigUint64(0, BigInt(value)); return out }
+
+/**
+ * 64-bit big-endian, built from two 32-bit halves on purpose.
+ *
+ * The BlueOS runtime is a polyfilled engine: the previously working watch transport also avoided
+ * BigInt, and `DataView.setBigUint64` / the `BigInt` global are not guaranteed here. Every value
+ * this protocol puts in 64 bits (an epoch or a message counter) is far below 2^53, so splitting the
+ * number is exact and produces byte-for-byte the same encoding.
+ */
+export function u64(value) {
+  const out = new Uint8Array(8)
+  const high = Math.floor(value / 4294967296), low = value - high * 4294967296
+  out[0] = (high >>> 24) & 255; out[1] = (high >>> 16) & 255; out[2] = (high >>> 8) & 255; out[3] = high & 255
+  out[4] = (low >>> 24) & 255; out[5] = (low >>> 16) & 255; out[6] = (low >>> 8) & 255; out[7] = low & 255
+  return out
+}
 export function read16(value, offset) { return new DataView(value.buffer, value.byteOffset, value.byteLength).getUint16(offset) }
 export function read32(value, offset) { return new DataView(value.buffer, value.byteOffset, value.byteLength).getUint32(offset) }
-export function read64(value, offset) { return Number(new DataView(value.buffer, value.byteOffset, value.byteLength).getBigUint64(offset)) }
+/**
+ * The inverse of u64. Both sides validate the range (1 .. 2^53-1) after reading, so an
+ * out-of-range field is rejected rather than silently rounded.
+ */
+export function read64(value, offset) { return (read32(value, offset) >>> 0) * 4294967296 + (read32(value, offset + 4) >>> 0) }
 
 export function b64(value) {
   const input = bytes(value); let out = ''

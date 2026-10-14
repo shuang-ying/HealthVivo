@@ -131,8 +131,11 @@ export function harness(options = {}) {
       request.success({ text: Buffer.concat([aes.update(input), aes.final()]).toString(encrypting ? 'base64' : 'utf8') })
     } catch (_) { request.fail({}, 200) }
   } }
-  const server = createLinkServerCore({ ble, cipher, identity, archive, clock: () => clock.now,
-    timers: clock, hooks: { state: value => states.push(value), saved: value => saved.push(value) } })
+  const server = createLinkServerCore(options.realTimers
+    // No `timers` and no `clock`: exercise the bare-global fallback the real watch uses.
+    ? { ble: ble, cipher: cipher, identity: identity, archive: archive, hooks: { state: value => states.push(value), saved: value => saved.push(value) } }
+    : { ble, cipher, identity, archive, clock: () => clock.now, timers: clock,
+        hooks: { state: value => states.push(value), saved: value => saved.push(value) } })
   const current = () => records[records.length - 1]
   return {
     server, identity, archive, records, saved, states, persisted, merges, clock, current,

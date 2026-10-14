@@ -14,6 +14,11 @@
 // Native modules and timers are injected so the Node test suite can drive a deterministic double
 // instead of a real watch. The engine in ./protocol.mjs makes every protocol decision; this file
 // only moves bytes and manages the native lifecycle.
+//
+// Only constructs the previously working watch transport already used are allowed here. In
+// particular there is no `globalThis` (not guaranteed on this runtime, and as a default parameter
+// it would throw while this module is being constructed) and no `setInterval` (the old code only
+// ever used `setTimeout`); the watchdog re-arms itself with a plain timeout instead.
 
 import { SERVICE, CHARACTERISTIC, CHARACTERISTIC_PROPERTIES } from './frames.mjs'
 import { createLinkProtocol } from './protocol.mjs'
@@ -38,18 +43,26 @@ const peerId = value => (typeof value === 'string' ? value.trim().toLowerCase() 
 /** BlueOS declares every binary field as ArrayBuffer; never hand it a view over a larger buffer. */
 export function wire(value) {
   const view = value instanceof Uint8Array ? value : new Uint8Array(value || new ArrayBuffer(0))
-  return view.buffer.slice(view.byteOffset, view.byteOffset + view.byteLength)
+  // Copy into an exact-length backing store; ArrayBuffer.prototype.slice is not relied on here.
+  const out = new Uint8Array(view.length)
+  out.set(view)
+  return out.buffer
 }
 
-export function createLinkServerCore({ ble, cipher, identity, archive, hooks = {}, timers = globalThis, clock = () => Date.now() }) {
-  const delay = timers.setTimeout.bind(timers), cancelDelay = timers.clearTimeout.bind(timers)
-  const repeat = timers.setInterval.bind(timers), cancelRepeat = timers.clearInterval.bind(timers)
+export function createLinkServerCore(options) {
+  const ble = options.ble, cipher = options.cipher, identity = options.identity, archive = options.archive
+  const hooks = options.hooks || {}
+  const injected = options.timers || null
+  const clock = options.clock || function () { return Date.now() }
+  const delay = injected ? injected.setTimeout.bind(injected) : function (fn, ms) { return setTimeout(fn, ms) }
+  const cancelDelay = injected ? injected.clearTimeout.bind(injected) : function (id) { clearTimeout(id) }
   let server = null, ready = false, stopped = true, nativeFailed = false
   let nativeStage = 'idle', lastError = '', message = '正在启动直连服务…'
   let connected = [], advertising = false
-  let lastAdvertiseAt = 0, lastOpenAt = 0, health = null, advertiseTimer = null
+  let lastAdvertiseAt = 0, lastOpenAt = 0, healthTimer = null, advertiseTimer = null
 
-  const protocol = createLinkProtocol({ cipher, identity, archive, clock, timers, hooks: { state: () => publish(), saved: hooks.saved } })
+  const protocol = createLinkProtocol({ cipher: cipher, identity: identity, archive: archive,
+    clock: clock, timers: injected, hooks: { state: function () { publish() }, saved: hooks.saved } })
 
   function snapshot() {
     const inner = protocol.snapshot()
@@ -198,17 +211,31 @@ export function createLinkServerCore({ ble, cipher, identity, archive, hooks = {
     if (clock() - lastAdvertiseAt >= READVERTISE_AFTER) advertise()
   }
 
+  /**
+   * The watchdog re-arms itself with a plain timeout after every run, because `setInterval` is not
+   * part of the construct set the previously working watch transport used.
+   */
+  function armHealth() {
+    if (stopped || healthTimer !== null) return
+    healthTimer = delay(function () { healthTimer = null; tick(); armHealth() }, HEALTH_INTERVAL)
+  }
+  function stopHealth() {
+    if (healthTimer !== null) cancelDelay(healthTimer)
+    healthTimer = null
+  }
+
   return {
     start() {
       if (!stopped) return
       stopped = false
       open()
-      if (!health) health = repeat(tick, HEALTH_INTERVAL)
+      armHealth()
     },
     close() {
       stopped = true
-      if (health) cancelRepeat(health); health = null
-      if (advertiseTimer) cancelDelay(advertiseTimer); advertiseTimer = null
+      stopHealth()
+      if (advertiseTimer !== null) cancelDelay(advertiseTimer)
+      advertiseTimer = null
       connected = []
       protocol.close()
       releaseServer()

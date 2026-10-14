@@ -53,6 +53,41 @@ AES 才走原生（`cipher.aes`，`text` 为字符串、`key`/`iv` 为 Base64、
 数据内容层（`WatchDeltaSource.kt`、`WatchSnapshot.kt`、`watch/src/lib/dashboard.mjs`、
 `watch/src/lib/archive.mjs`）保持原样：它们描述的是健康记录与手表缓存，与传输无关。
 
+## 手表运行时约束（真机踩过的坑）
+
+BlueOS 不是浏览器，也不是 Node。打包器 `blueos-pack` 为**每个模块**注入一份固定的宿主全局名单；
+从已构建的 `.vru` 里可以直接读出它：
+
+```
+requireModule unRequireModule $app_define$ $app_bootstrap$ $app_require$
+console BroadcastChannel setTimeout clearTimeout setInterval clearInterval $style$ $app_style$
+```
+
+其余全局来自引擎自身的 ECMAScript 实现。这条边界有一个很隐蔽的后果：
+
+- **`globalThis` 不在注入名单里。** 我最初把 `createLinkServerCore` 的默认参数写成 `timers = globalThis`。
+  默认参数由调用方求值，而该构造函数在 `openServer()` 里被调用——于是它抛 ReferenceError，
+  被 `runtime.js` 的兜底 catch 吞掉，界面显示「读取连接信息失败，请重新打开应用」，
+  而 `server` 从未创建，**GATT 服务没有注册、手表根本没有广播**。手机侧看到的是 LE 建连一直
+  `ARMED` 直到 25 秒超时（`gatt_cleanup_upon_disc: Connection timeout`），完全看不出是手表的问题。
+- **`BigInt` 同样不在名单里。** 我改用 `BigInt`/`DataView.setBigUint64` 实现 `u64`，这是第二个同类地雷。
+  现在 `u64`/`read64` 用两个 32 位半字拼装，只要数值小于 2^53 就完全精确，字节结果与原来一致
+  （由跨语言向量锁定）。
+- 遗留的 Annex B 全局 `escape`/`unescape` 也不使用。`utf8()` 改为只依赖 `charCodeAt` 的手写编码，
+  与 `Buffer.from(s,'utf8')` 逐字节一致（含中文与代理对）。
+- `setInterval`/`clearInterval` 其实是被注入的，但看门狗改成自重排的 `setTimeout` 后，
+  整个链路只依赖四个定时器里最基础的那一个。
+
+教训是：**默认参数里的全局引用会把"某一项功能不可用"升级成"整个应用起不来"**，而兜底 catch 又会
+把真实原因替换成一句没用的提示。所以现在：
+
+- 启动的三个阶段（日期缓存、连接记录、原生 GATT 服务）互相独立，任一失败都不阻止 GATT 服务启动；
+- 失败消息一律带上底层 `error.message`；
+- `runtime.js` 在启动前做一次能力自检，缺失的全局会直接追加到启动失败提示里
+  （`直连服务启动失败 · 添加服务（缺少：…）`）；
+- `watch/test/link-runtime.test.mjs` 机械地禁止这些构造回到代码里，并且额外验证
+  「不注入任何定时器对象也能完成注册、广播与一次完整登记」。
+
 ## 连接持久化的具体做法
 
 官方文档在几处留了空白，这些空白正是连接会“悄悄断掉”的原因，实现在对应位置做了防御：
@@ -122,10 +157,11 @@ AES 才走原生（`cipher.aes`，`text` 为字符串、`key`/`iv` 为 Base64、
 
 **已经在本地完成**
 
-- 手表协议测试 36 项：帧布局与固定向量、CRC-32 与 Node zlib 对照、会话派生与 Node crypto 对照、
+- 手表协议测试 40 项：帧布局与固定向量、CRC-32 与 Node zlib 对照、会话派生与 Node crypto 对照、
   首次登记、凭据重连、重放/越界/乱序/错误 CRC/错误 MAC 拒绝、组装超时、登记限速、
   绑定对端保护、`SAVED` 必须在存储提交之后、断线保留请求、清除旧连接、
-  看门狗重新广播、注册失败重建服务、订阅失败保留阶段、`close()` 顺序。
+  看门狗重新广播、注册失败重建服务、订阅失败保留阶段、`close()` 顺序，
+  以及 4 项运行时约束守卫（禁用构造、禁用默认参数引用全局、不注入定时器也能工作、单一原生导入点）。
 - 手机 JVM 测试 15 项（含原有测试共 49 项）：直接断言由**手表实现**生成的
   `link-vectors.properties`，覆盖 CRC、帧字节、问候解析、会话派生、正文加密、
   回复验证解密、回执验证、篡改拒绝、回复分段校验。

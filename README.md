@@ -1,6 +1,6 @@
 # 活力记录 · 手机 0.14.0 / 手表 0.7.0
 
-本版把手机与手表之间的蓝牙连接重写为独立的持久化直连实现：单特征 GATT 读写、CRC32 校验的分帧传输、首次登记后自动认证、双端自动重连，手表端另有广播看门狗。协议见 [LINK_PROTOCOL.md](docs/LINK_PROTOCOL.md)，实现与验证状态见 [LINK_IMPLEMENTATION.md](docs/LINK_IMPLEMENTATION.md)，使用说明见 [WATCH_GUIDE.md](docs/WATCH_GUIDE.md)。两端已编译通过，手表协议测试 36 项、手机 JVM 测试 49 项通过；真机完整同步保存确认与长期后台行为仍待验证。GitHub 发布说明见 [GITHUB_RELEASE.md](docs/GITHUB_RELEASE.md)，其中三套软件流程对应旧扩展版本；新版本尚未发布。
+本版把手机与手表之间的蓝牙连接重写为独立的持久化直连实现：单特征 GATT 读写、CRC32 校验的分帧传输、首次登记后自动认证、双端自动重连，手表端另有广播看门狗。协议见 [LINK_PROTOCOL.md](docs/LINK_PROTOCOL.md)，实现与验证状态见 [LINK_IMPLEMENTATION.md](docs/LINK_IMPLEMENTATION.md)，使用说明见 [WATCH_GUIDE.md](docs/WATCH_GUIDE.md)。两端已编译通过，手表协议测试 40 项、手机 JVM 测试 49 项通过；真机完整同步保存确认与长期后台行为仍待验证。GitHub 发布说明见 [GITHUB_RELEASE.md](docs/GITHUB_RELEASE.md)，其中三套软件流程对应旧扩展版本；新版本尚未发布。
 
 仓库：[shuang-ying/HealthVivo](https://github.com/shuang-ying/HealthVivo)。首个预发布：[v0.12.3](https://github.com/shuang-ying/HealthVivo/releases/tag/v0.12.3)，包含手机 0.12.3、手表 0.5.3、OrbitV 扩展 1.2.0。APK 为调试构建，本版 GT2 数轴实机显示仍待确认。
 

@@ -36,15 +36,24 @@ function nativeAes(cipher, options) {
 }
 
 /**
- * @param cipher    native `@blueos.security.cipher` module (or a double in tests)
- * @param identity  { secret, epoch, pending, acceptHandshake(secret), completeRequest() }
- * @param archive   { versions(): object, merge(days): Promise<number> }
- * @param clock     () => milliseconds, injected so a test never sleeps for real
- * @param timers    setTimeout/clearTimeout source; the test suite supplies a virtual clock
- * @param hooks     { state(snapshot), saved(count) }
+ * @param options.cipher    native `@blueos.security.cipher` module (or a double in tests)
+ * @param options.identity  { secret, epoch, pending, acceptHandshake(secret), completeRequest() }
+ * @param options.archive   { versions(): object, merge(days): Promise<number> }
+ * @param options.clock     () => milliseconds, injected so a test never sleeps for real
+ * @param options.timers    optional setTimeout/clearTimeout source; the test suite supplies a
+ *                          virtual clock. When absent the bare globals are used, which is what the
+ *                          previously working watch transport did — `globalThis` is not guaranteed
+ *                          on this runtime, and a default parameter referencing it would throw
+ *                          while the module is being wired up.
+ * @param options.hooks     { state(snapshot), saved(count) }
  */
-export function createLinkProtocol({ cipher, identity, archive, clock = () => Date.now(), timers = globalThis, hooks = {} }) {
-  const schedule = timers.setTimeout.bind(timers), cancelSchedule = timers.clearTimeout.bind(timers)
+export function createLinkProtocol(options) {
+  const cipher = options.cipher, identity = options.identity, archive = options.archive
+  const clock = options.clock || function () { return Date.now() }
+  const injected = options.timers || null
+  const hooks = options.hooks || {}
+  const schedule = injected ? injected.setTimeout.bind(injected) : function (fn, ms) { return setTimeout(fn, ms) }
+  const cancelSchedule = injected ? injected.clearTimeout.bind(injected) : function (id) { clearTimeout(id) }
   let closed = false, paused = false, session = null, peer = '', assembly = null, busy = false
   let stateCode = 0, transferId = 0, flags = 0, reply = null, replyOffset = null, replyChunk = F.REPLY_PAYLOAD
   let generation = 0, timer = null, lastId = 0, attempts = [], stage = STAGE.ACCEPT, authFailed = false
