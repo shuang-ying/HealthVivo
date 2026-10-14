@@ -33,6 +33,23 @@ git push
 
 本地私钥、SDK 配置、API 设置、健康数据、缓存、历史试验目录和安装包已设置为忽略。不要使用 `git add -f` 加入这些文件。首次上传前检查的是最终 Git 文件清单，并非整个电脑目录。
 
+## 版本号规则
+
+**小更新只动第三位（修订号），前两位由项目所有者决定。** 修 bug、调文案、改图表这类改动直接 `x.x.3 → x.x.4`，
+不需要询问；凡是 `.x` 与 `x.` 这两位的变动（新功能版、对外协议变更）必须先问，或者等对方直接给出目标版本号。
+
+两个应用各自独立编号，配套发布时要一起确认：手机在 `android/app/build.gradle.kts` 的 `versionName`，手表在
+`watch/src/manifest.json` 的 `versionName`。改版本号时**三处要同步改**，否则安装包名与系统里显示的版本会对不上：
+
+| 位置 | 改什么 |
+| --- | --- |
+| `android/app/build.gradle.kts` | `versionName`（第三位加一）与 `versionCode`（加一，Android 用它判断升级） |
+| `watch/src/manifest.json` | `versionName` 与 `versionCode` |
+| `watch/src/Home/index.ux` 页脚 | 手表主页显示的版本号，与 manifest 保持一致 |
+
+构建脚本从上面两处读取版本号来决定产物文件名（`vitality-phone-<版本>.apk`、`health-vivo-watch-<版本>.rpk`），
+所以改完版本号直接构建即可，不需要另外改脚本。`docs/releases/` 下的发布说明文件名也跟版本号走。
+
 ## 准备 Release 附件
 
 两套软件版本独立，仓库以手机版本作为套件标签，例如 `v0.15.0`。每次发布说明列出当次配套的手机与手表版本。
