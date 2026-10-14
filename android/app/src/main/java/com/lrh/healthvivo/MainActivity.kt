@@ -308,24 +308,37 @@ open class MainActivity : ComponentActivity() {
                         3 -> {
                             Panel("体重趋势") {
                                 WeightBmi(weight, data.profile) { showWeight = true }
-                                val weights = data.weights.filter { it.day <= dayString }.take(14).reversed()
+                                val weights = data.weights.filter { it.day <= dayString }
                                 if (weights.isEmpty()) Text("记录体重后，会在这里显示变化。", color = muted)
                                 else {
-                                    WeightChart(weights)
-                                    Text("最近 ${weights.size} 次记录 · 变化 ${decimal(weights.last().kg - weights.first().kg)} kg", fontSize = 13.sp)
-                                    weights.takeLast(7).reversed().forEach { entry -> Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                    // The same calendar navigation as the energy charts, on a sparse series.
+                                    MeasureTrendCard(weights.associate { it.day to it.kg }, dayString, " kg", 1)
+                                    weights.sortedByDescending { it.day }.take(7).forEach { entry -> Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                                         Text("${entry.day.substring(5)}  ${decimal(entry.kg)} kg")
                                         TextButton(onClick = { deletion = "weight" to entry.day }) { Text("删除") }
                                     } }
                                 }
                             }
                             Panel("体脂率趋势") {
-                                val entries = data.bodyFats.filter { it.day <= dayString }.sortedByDescending { it.day }.take(14).reversed()
-                                BodyFatTrend(entries, data.profile, { showBodyFat = true }, { deletion = "body_fat" to it })
+                                val measured = data.bodyFats.filter { it.day <= dayString }
+                                Button(onClick = { showBodyFat = true }) { Text("记录 / 更新体脂率") }
+                                if (measured.isEmpty()) Text("手动记录体脂率后显示趋势。", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                else {
+                                    MeasureTrendCard(measured.associate { it.day to it.percent }, dayString, "%", 1)
+                                    measured.sortedByDescending { it.day }.take(7).forEach { entry ->
+                                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                                            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                                Text("${entry.day.substring(5)} · ${decimal(entry.percent)}%", fontSize = 14.sp)
+                                                MetricStatus(BodyMetrics.fatStatus(entry.percent, data.profile))
+                                            }
+                                            TextButton(onClick = { deletion = "body_fat" to entry.day }) { Text("删除") }
+                                        }
+                                    }
+                                }
                                 BodyMetricReferences()
                             }
                             Panel("饮食 · 运动 · 热量剩余趋势") {
-                                TrendCard(data, dayString)
+                                EnergyTrendCard(data, dayString)
                             }
                         }
                         else -> {
@@ -433,27 +446,6 @@ open class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             try { action(); success(); if(adviceDays.isNotEmpty()) app.advice.request(adviceDays) } catch (error: Exception) { toast(if(error is IllegalArgumentException) error.message ?: "请检查输入" else "保存失败，原记录已保留") }
             finally { saving = false }
-        }
-    }
-    @Composable private fun WeightChart(weights: List<WeightEntry>) {
-        val line = MaterialTheme.colorScheme.primary
-        val grid = MaterialTheme.colorScheme.outlineVariant
-        Canvas(Modifier.fillMaxWidth().height(125.dp)) {
-            val min = weights.minOf { it.kg } - 0.5; val max = weights.maxOf { it.kg } + 0.5
-            val first = LocalDate.parse(weights.first().day).toEpochDay()
-            val span = LocalDate.parse(weights.last().day).toEpochDay() - first
-            (1..3).forEach { index -> drawLine(grid, Offset(0f, size.height * index / 4), Offset(size.width, size.height * index / 4), strokeWidth = 1f) }
-            val points = weights.map { w -> Offset(if(span == 0L) size.width / 2 else (8 + (LocalDate.parse(w.day).toEpochDay() - first).toFloat() / span * (size.width - 16)), (size.height - 8 - ((w.kg - min) / (max - min)) * (size.height - 16)).toFloat()) }
-            if(points.size > 1) {
-                val fill = androidx.compose.ui.graphics.Path().apply { moveTo(points.first().x, size.height); points.forEach { lineTo(it.x, it.y) }; lineTo(points.last().x, size.height); close() }
-                drawPath(fill, Brush.verticalGradient(listOf(line.copy(alpha = .22f), line.copy(alpha = .01f))))
-            }
-            points.zipWithNext().forEach { (start, end) -> drawLine(line, start, end, strokeWidth = 6f, cap = androidx.compose.ui.graphics.StrokeCap.Round) }
-            points.forEach { drawCircle(line, 7f, it) }
-        }
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(weights.first().day.substring(5), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text(weights.last().day.substring(5), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
     @Composable private fun PhotoPreview(uri: Uri) {

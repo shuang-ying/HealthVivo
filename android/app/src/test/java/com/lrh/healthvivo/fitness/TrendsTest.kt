@@ -1,0 +1,124 @@
+package com.lrh.healthvivo.fitness
+
+import org.junit.Assert.*
+import org.junit.Test
+import java.time.LocalDate
+
+/**
+ * The calendar model behind the trend charts: which period is shown, how the columns divide it, and
+ * how switching scale keeps the place. 2026-10-12 is a Monday and October 2026 has 31 days.
+ */
+class TrendsTest {
+    private val today = LocalDate.parse("2026-10-14")
+    private fun profile() = Profile(age = 30, heightCm = 175.0, weightKg = 70.0, sex = "male", updatedAt = 1)
+    private fun meal(id: String, day: String, kcal: Double) = MealEntry(id, day, "lunch", "食物", 100.0, kcal, source = "manual", recordedAt = 1)
+
+    @Test fun aWeekRunsFromMondayToSunday() {
+        val period = Trends.period("2026-10-14", TrendScale.Week)
+        assertEquals(LocalDate.parse("2026-10-12"), period.start)
+        assertEquals(LocalDate.parse("2026-10-19"), period.endExclusive)
+        assertEquals("10/12–10/18", period.label)
+    }
+
+    @Test fun aMonthAndAYearCoverTheirWholeCalendarSpan() {
+        val month = Trends.period("2026-10-14", TrendScale.Month)
+        assertEquals(LocalDate.parse("2026-10-01"), month.start)
+        assertEquals(LocalDate.parse("2026-11-01"), month.endExclusive)
+        assertEquals("2026年10月", month.label)
+        val year = Trends.period("2026-10-14", TrendScale.Year)
+        assertEquals(LocalDate.parse("2026-01-01"), year.start)
+        assertEquals(LocalDate.parse("2027-01-01"), year.endExclusive)
+        assertEquals("2026年", year.label)
+    }
+
+    @Test fun changingScaleKeepsTheCalendarPlaceInsteadOfJumpingToToday() {
+        // Standing in the week of 10/05 and switching to 月 must show October, not the current month.
+        val inThatWeek = LocalDate.parse("2026-10-08")
+        assertEquals(LocalDate.parse("2026-10-05"), Trends.period(inThatWeek.toString(), TrendScale.Week).start)
+        assertEquals(LocalDate.parse("2026-10-01"), Trends.period(inThatWeek.toString(), TrendScale.Month).start)
+        assertEquals(LocalDate.parse("2026-01-01"), Trends.period(inThatWeek.toString(), TrendScale.Year).start)
+        // A year view of 2025 opens the month and week that contain the same day.
+        val lastYear = LocalDate.parse("2025-06-15")
+        assertEquals(LocalDate.parse("2025-01-01"), Trends.period(lastYear.toString(), TrendScale.Year).start)
+        assertEquals(LocalDate.parse("2025-06-01"), Trends.period(lastYear.toString(), TrendScale.Month).start)
+        assertEquals(LocalDate.parse("2025-06-09"), Trends.period(lastYear.toString(), TrendScale.Week).start)
+    }
+
+    @Test fun navigationStepsByTheUnitOfTheCurrentScale() {
+        val anchor = LocalDate.parse("2026-10-14")
+        assertEquals(LocalDate.parse("2026-10-07"), Trends.shift(anchor, TrendScale.Week, -1))
+        assertEquals(LocalDate.parse("2026-09-14"), Trends.shift(anchor, TrendScale.Month, -1))
+        assertEquals(LocalDate.parse("2025-10-14"), Trends.shift(anchor, TrendScale.Year, -1))
+        // Stepping a month back from a month view lands in the previous calendar month.
+        val monthBack = Trends.shift(anchor, TrendScale.Month, -1)
+        assertEquals("2026年9月", Trends.period(monthBack.toString(), TrendScale.Month).label)
+        val yearBack = Trends.shift(anchor, TrendScale.Year, -2)
+        assertEquals("2024年", Trends.period(yearBack.toString(), TrendScale.Year).label)
+    }
+
+    @Test fun aWeekViewHasOneColumnPerDayNamedAfterTheWeekday() {
+        val buckets = Trends.energy(FitnessData(profile()), Trends.period("2026-10-14", TrendScale.Week), today)
+        assertEquals(7, buckets.size)
+        assertEquals(listOf("一", "二", "三", "四", "五", "六", "日"), buckets.map { it.label })
+        assertEquals("10/12 周一", buckets.first().rangeText)
+        assertEquals("10/18 周日", buckets.last().rangeText)
+    }
+
+    @Test fun aMonthViewHasOneColumnPerDayAndAYearViewOnePerMonth() {
+        val month = Trends.energy(FitnessData(profile()), Trends.period("2026-10-14", TrendScale.Month), today)
+        assertEquals(31, month.size)
+        assertEquals("1", month.first().label)
+        assertEquals("31", month.last().label)
+        assertEquals("10/1", month.first().rangeText)
+        val year = Trends.energy(FitnessData(profile()), Trends.period("2026-10-14", TrendScale.Year), today)
+        assertEquals(12, year.size)
+        assertEquals("1月", year.first().label)
+        assertEquals("12月", year.last().label)
+        assertEquals("2026年1月", year.first().rangeText)
+    }
+
+    @Test fun aRecordLandsInItsOwnColumnAndNotInTheNeighbouringPeriod() {
+        val data = FitnessData(profile(), meals = listOf(
+            meal("a", "2026-10-12", 500.0),
+            meal("b", "2026-10-18", 300.0),
+            meal("c", "2026-10-11", 900.0)))
+        val week = Trends.energy(data, Trends.period("2026-10-14", TrendScale.Week), today)
+        assertEquals(500.0, week[0].intakeKcal, 0.001)
+        assertEquals(300.0, week[6].intakeKcal, 0.001)
+        assertEquals(0.0, week[3].intakeKcal, 0.001)
+        // The previous Sunday belongs to the previous week, not this one.
+        assertEquals(week.sumOf { it.intakeKcal }, 800.0, 0.001)
+    }
+
+    @Test fun aYearColumnSumsTheWholeMonthItStandsFor() {
+        val data = FitnessData(profile(), meals = listOf(
+            meal("a", "2026-01-05", 400.0), meal("b", "2026-01-20", 600.0), meal("c", "2026-03-01", 250.0)))
+        val year = Trends.energy(data, Trends.period("2026-10-14", TrendScale.Year), today)
+        assertEquals(1000.0, year[0].intakeKcal, 0.001)
+        assertEquals(250.0, year[2].intakeKcal, 0.001)
+        assertEquals(0.0, year[1].intakeKcal, 0.001)
+    }
+
+    @Test fun daysThatHaveNotHappenedAreFlaggedRatherThanCountedAsMeasuredZeros() {
+        val data = FitnessData(profile(), meals = listOf(meal("a", "2026-10-12", 500.0)))
+        val month = Trends.energy(data, Trends.period("2026-10-14", TrendScale.Month), today)
+        // Index 0 is the 1st, so the meal on the 12th lands at index 11.
+        assertFalse(month[0].recorded); assertFalse(month[0].future)
+        assertTrue(month[11].recorded); assertFalse(month[11].future)
+        // The 13th has passed with nothing recorded; the 15th has not arrived.
+        assertFalse(month[12].recorded); assertFalse(month[12].future)
+        assertFalse(month[14].recorded); assertTrue(month[14].future)
+    }
+
+    @Test fun aSparseMeasurementKeepsItsGapsAndAYearTakesTheMonthEnd() {
+        val values = mapOf("2026-01-05" to 80.0, "2026-01-20" to 78.0, "2026-03-02" to 77.0, "2025-12-31" to 81.0)
+        val year = Trends.measure(values, Trends.period("2026-10-14", TrendScale.Year), today)
+        assertEquals(78.0, year[0].value!!, 0.001)
+        assertNull(year[1].value)
+        assertEquals(77.0, year[2].value!!, 0.001)
+        val week = Trends.measure(values, Trends.period("2026-01-05", TrendScale.Week), today)
+        assertEquals(80.0, week[0].value!!, 0.001)
+        assertNull(week[1].value)
+        assertEquals(7, week.size)
+    }
+}

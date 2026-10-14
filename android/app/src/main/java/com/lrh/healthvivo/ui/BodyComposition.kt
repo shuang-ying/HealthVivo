@@ -130,30 +130,3 @@ import java.time.LocalDate
         TextButton(onClick = { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(BodyMetrics.FAT_SOURCE))) }) { Text("体脂率参考来源") }
     }
 }
-
-@Composable fun BodyFatTrend(entries: List<BodyFatEntry>, profile: Profile?, record: () -> Unit, delete: (String) -> Unit) {
-    Button(onClick = record) { Text("记录 / 更新体脂率") }
-    if(entries.isEmpty()) { Text("手动记录体脂率后显示趋势。", color = MaterialTheme.colorScheme.onSurfaceVariant); return }
-    val accent = MaterialTheme.colorScheme.primary
-    val line = MaterialTheme.colorScheme.outlineVariant
-    Canvas(Modifier.fillMaxWidth().height(144.dp)) {
-        val min = entries.minOf { it.percent } - .5; val max = entries.maxOf { it.percent } + .5
-        val first = LocalDate.parse(entries.first().day).toEpochDay(); val span = LocalDate.parse(entries.last().day).toEpochDay() - first
-        for(i in 0..2) { val y = 8f + i * (size.height - 16) / 2; drawLine(line, Offset(8f, y), Offset(size.width - 8f, y), 1.dp.toPx()) }
-        val points = entries.map { Offset(if(span == 0L) size.width / 2 else 8f + (LocalDate.parse(it.day).toEpochDay() - first).toFloat() / span * (size.width - 16), (size.height - 8 - (it.percent - min) / (max - min) * (size.height - 16)).toFloat()) }
-        points.zipWithNext().forEach { (a, b) -> drawLine(accent, a, b, 3.dp.toPx()) }
-        points.forEach { drawCircle(accent, 4.dp.toPx(), it) }
-    }
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) { Text(entries.first().day.substring(5), fontSize = 11.sp); Text(entries.last().day.substring(5), fontSize = 11.sp) }
-    val difference = entries.last().percent - entries.first().percent
-    Text("最近 ${entries.size} 次记录 · 变化 ${if(difference > 0) "+" else ""}${"%.1f".format(difference)} 个百分点", fontSize = 13.sp)
-    entries.takeLast(7).reversed().forEach { entry ->
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text("${entry.day.substring(5)} · ${"%.1f".format(entry.percent)}%", fontSize = 14.sp)
-                MetricStatus(BodyMetrics.fatStatus(entry.percent, profile))
-            }
-            TextButton(onClick = { delete(entry.day) }) { Text("删除") }
-        }
-    }
-}
