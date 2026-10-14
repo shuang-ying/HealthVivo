@@ -15,8 +15,19 @@ import java.util.UUID
  * MTU 23 payload), and every reply is read back from the same characteristic.
  */
 internal object LinkFrames {
-    val SERVICE: UUID = UUID.fromString("6f2a9c10-8b4d-4e77-9a35-1c0d7e5b3f82")
-    val CHARACTERISTIC: UUID = UUID.fromString("6f2a9c11-8b4d-4e77-9a35-1c0d7e5b3f82")
+    /**
+     * The service and characteristic UUIDs are deliberately the ones the validated diagnostic link
+     * used. Android caches a bonded device's whole attribute database, and this phone/watch pair is
+     * already on record reading a stale service catalogue when a new UUID was introduced (see
+     * docs/DIRECT_LINK_DEVICE_VALIDATION.md). Reusing the cached pair means an existing install
+     * finds the service on the very first discovery; a new UUID would strand every already-paired
+     * phone until the cache is invalidated, which no public Android API can do.
+     *
+     * The trade-off is that the standalone diagnostic probe app must not run at the same time as
+     * the production watch app, because they publish the same service.
+     */
+    val SERVICE: UUID = UUID.fromString("fa954400-48d6-4a12-b74b-4c5b5170360e")
+    val CHARACTERISTIC: UUID = UUID.fromString("fa954401-48d6-4a12-b74b-4c5b5170360e")
 
     const val PROTOCOL_VERSION = 1
 

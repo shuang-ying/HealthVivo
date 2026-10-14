@@ -9,8 +9,12 @@ import { createHash, createHmac, createCipheriv, createDecipheriv } from 'node:c
 import { crc32 } from 'node:zlib'
 import { createLinkServerCore } from '../src/lib/link/server-core.mjs'
 
-export const SERVICE = '6f2a9c10-8b4d-4e77-9a35-1c0d7e5b3f82'
-export const CHARACTERISTIC = '6f2a9c11-8b4d-4e77-9a35-1c0d7e5b3f82'
+// These are an intentional duplicate of the contract, not an import of the watch implementation:
+// if the production UUIDs ever drift from what this independent client expects, the suite fails.
+// The service and characteristic pair is the one Android already has cached for this watch, and
+// that decision is documented in watch/src/lib/link/frames.mjs.
+export const SERVICE = 'fa954400-48d6-4a12-b74b-4c5b5170360e'
+export const CHARACTERISTIC = 'fa954401-48d6-4a12-b74b-4c5b5170360e'
 export const OP = { BEGIN: 1, DATA: 2, END: 3, POLL: 4, RELEASE: 5, RESET: 6 }
 export const KIND = { HELLO: 1, BODY: 2, ENROLL: 3 }
 export const STATE = { OPEN: 1, READY: 2, RECEIVING: 3, SAVED: 4, FAILED: 5, REJECTED: 6, BUSY: 7, REPLY: 8 }

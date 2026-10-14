@@ -161,9 +161,16 @@ internal class LinkGatt(private val context: Context, private val device: Blueto
             try { withTimeout(DISCOVER_TIMEOUT) { pending.await() } }
             catch (_: TimeoutCancellationException) { error("读取手表应用服务超时，请重新打开手表活力记录") }
             val service = connection.getService(LinkFrames.SERVICE)
-            Log.i(TAG, "appServicePresent=${service != null} serviceCount=${connection.services.size}")
-            checkNotNull(service) { "未发现活力记录直连服务，请打开手表活力记录 0.7.0 或更新版本" }
-            characteristic = service.getCharacteristic(LinkFrames.CHARACTERISTIC) ?: error("手表直连服务不完整，请更新手表版")
+            // Log the whole catalogue: when the cached attribute database is stale this list is the
+            // only evidence of what the phone believes the watch exposes.
+            val discovered = connection.services.map { it.uuid.toString().lowercase() }
+            Log.i(TAG, "appServicePresent=${service != null} serviceCount=${discovered.size} services=$discovered")
+            checkNotNull(service) {
+                "未发现活力记录直连服务（手表暴露 ${discovered.size} 个服务）。请把手表活力记录更新到 0.7.0；" +
+                    "若已更新，请关闭再打开手机蓝牙以清除蓝牙服务缓存后重试"
+            }
+            characteristic = service.getCharacteristic(LinkFrames.CHARACTERISTIC) ?: error(
+                "活力记录服务已发现但缺少数据特征，通常是蓝牙服务缓存过期；请关闭再打开手机蓝牙后重试")
             discoveredVersion = version
             if (serviceVersion == version) return
         }

@@ -11,8 +11,18 @@
 
 import { bytes, join, u16, u32, u64, read16, read32, crc32 } from './bytes.mjs'
 
-export const SERVICE = '6f2a9c10-8b4d-4e77-9a35-1c0d7e5b3f82'
-export const CHARACTERISTIC = '6f2a9c11-8b4d-4e77-9a35-1c0d7e5b3f82'
+// The service and characteristic UUIDs are deliberately the ones the validated diagnostic link
+// used. Android caches a bonded device's whole attribute database, and this exact phone/watch pair
+// was already recorded reading a stale service catalogue when a new UUID was introduced
+// (see docs/DIRECT_LINK_DEVICE_VALIDATION.md). Reusing the cached pair means an existing install
+// finds the service on the first discovery; a new UUID would strand every already-paired phone
+// until the cache is invalidated, which no public Android API can do.
+//
+// The trade-off is that the standalone diagnostic probe app (probes/blueos-direct) must not run at
+// the same time as the production watch app, because they publish the same service. That was true
+// before this rewrite as well, and the probe is now only a historical tool.
+export const SERVICE = 'fa954400-48d6-4a12-b74b-4c5b5170360e'
+export const CHARACTERISTIC = 'fa954401-48d6-4a12-b74b-4c5b5170360e'
 
 /** BlueOS CharacteristicProperties enumerates read as 4 and write as 5. */
 export const CHARACTERISTIC_PROPERTIES = [4, 5]
