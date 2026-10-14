@@ -19,7 +19,11 @@ if ($DeviceTests) { $tasks += 'assembleDebugAndroidTest' }
 if ($LASTEXITCODE -ne 0) { throw 'Android build/tests failed.' }
 $artifactDir = Join-Path $projectRoot 'artifacts'
 New-Item -ItemType Directory -Force -Path $artifactDir | Out-Null
-$apkPath = Join-Path $artifactDir 'vitality-phone-0.14.1.apk'
+# Derive the artifact name from the version the build actually declares, so bumping the version
+# cannot leave a stale file name behind.
+$phoneVersion = [regex]::Match((Get-Content -LiteralPath (Join-Path $androidRoot 'app\build.gradle.kts') -Raw), 'versionName\s*=\s*"(\d+\.\d+\.\d+)"').Groups[1].Value
+if (!$phoneVersion) { throw 'Android versionName not found.' }
+$apkPath = Join-Path $artifactDir "vitality-phone-$phoneVersion.apk"
 Copy-Item -LiteralPath (Join-Path $androidRoot 'app\build\outputs\apk\debug\app-debug.apk') -Destination $apkPath -Force
 $signerPath = Join-Path $env:ANDROID_HOME 'build-tools\36.0.0\apksigner.bat'
 $signature = & $signerPath verify --print-certs $apkPath

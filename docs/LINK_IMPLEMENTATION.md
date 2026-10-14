@@ -1,4 +1,4 @@
-# 手表直连实现（0.14.1 / 0.7.1）
+# 手表直连实现（0.15.0 / 0.8.0）
 
 本轮把手机与手表之间的蓝牙连接重写为一套独立的持久化直连实现。协议细节见
 [LINK_PROTOCOL.md](LINK_PROTOCOL.md)；本文说明代码结构、为什么这样分层、怎么构建和验证。
@@ -192,8 +192,8 @@ Android 的这条缓存有几点必须记住：
 
 输出：
 
-- `artifacts/vitality-phone-0.14.1.apk`（调试签名，沿用本机既有签名）
-- `artifacts/health-vivo-watch-0.7.1.rpk`（BlueOS debug 构建）
+- `artifacts/vitality-phone-0.15.0.apk`（调试签名，沿用本机既有签名）
+- `artifacts/health-vivo-watch-0.8.0.rpk`（BlueOS debug 构建）
 
 手表编译器即使退出码为 0 但打印 `[ERROR]`，构建脚本也会拒绝复制产物。
 
@@ -213,7 +213,8 @@ Android 的这条缓存有几点必须记住：
 
 **真机结果（2026-10-14，vivo X80 + iQOO WATCH GT2 / BlueOS 3）**
 
-手机 0.14.1（versionCode 23）、手表 0.7.1（versionCode 15）。首次接通前需要在手机上刷新一次过期的
+手机 0.14.1（versionCode 23）、手表 0.7.1（versionCode 15）。链路与协议自这次验证后没有改动，
+0.15.0 / 0.8.0 只增加了界面、热量口径与数据库列，尚未在真机复测。首次接通前需要在手机上刷新一次过期的
 服务缓存（见上一节：本次用 debug 专用的隐藏接口刷新，普通用户的做法是取消配对再重新配对），
 之后普通连接即可。日志证据：
 

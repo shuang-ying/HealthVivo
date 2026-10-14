@@ -12,8 +12,8 @@ android {
         applicationId = "com.lrh.healthvivo"
         minSdk = 26
         targetSdk = 36
-        versionCode = 23
-        versionName = "0.14.1"
+        versionCode = 24
+        versionName = "0.15.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildFeatures { compose = true; buildConfig = true }

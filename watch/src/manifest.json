@@ -2,8 +2,8 @@
   "package": "com.lrh.healthvivo.watch",
   "name": "活力记录",
   "icon": "/common/icon.png",
-  "versionName": "0.7.1",
-  "versionCode": 15,
+  "versionName": "0.8.0",
+  "versionCode": 16,
   "deviceTypeList": ["watch-square"],
   "appCategory": ["sports", "lifestyle"],
   "features": [

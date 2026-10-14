@@ -35,7 +35,7 @@ git push
 
 ## 准备 Release 附件
 
-两套软件版本独立，仓库以手机版本作为套件标签，例如 `v0.14.1`。每次发布说明列出当次配套的手机与手表版本。
+两套软件版本独立，仓库以手机版本作为套件标签，例如 `v0.15.0`。每次发布说明列出当次配套的手机与手表版本。
 
 ```powershell
 ./scripts/build-android.ps1
@@ -53,8 +53,8 @@ git push
 
 源码推送成功后：仓库页面 → **Releases** → **Draft a new release**。
 
-1. 创建标签（例如 `v0.14.1`），Target 选择 `main`，确认它指向准备本次附件的提交。
-2. 标题填写“活力记录 v0.14.1 · 预发布”。
+1. 创建标签（例如 `v0.15.0`），Target 选择 `main`，确认它指向准备本次附件的提交。
+2. 标题填写“活力记录 v0.15.0 · 预发布”。
 3. 复制 `docs/releases/<标签>.md` 的内容。
 4. 上传整理目录中的两个安装包、`SHA256SUMS.txt`、`INSTALL.md`、`LICENSE` 和 `THIRD_PARTY_NOTICES.md`。
 5. 勾选预发布，可先 **Save draft** 检查附件，再 **Publish release**。
@@ -72,19 +72,19 @@ GitHub 会自动提供该标签的源码归档，安装包需额外作为附件�
 gh auth login --hostname github.com --git-protocol https --web
 ```
 
-若远程已配置并推送，可使用生成的 `RELEASE_NOTES.md` 和附件建立草稿。标签先通过 `git tag -a v0.14.1 -m "Vitality suite v0.14.1"` 创建，再 `git push origin v0.14.1`。不要重复创建已有标签或移动已发布标签。
+若远程已配置并推送，可使用生成的 `RELEASE_NOTES.md` 和附件建立草稿。标签先通过 `git tag -a v0.15.0 -m "Vitality suite v0.15.0"` 创建，再 `git push origin v0.15.0`。不要重复创建已有标签或移动已发布标签。
 
 ```powershell
-gh release create v0.14.1 `
-  artifacts/releases/v0.14.1/vitality-phone-0.14.1.apk `
-  artifacts/releases/v0.14.1/health-vivo-watch-0.7.1.rpk `
-  artifacts/releases/v0.14.1/SHA256SUMS.txt `
-  artifacts/releases/v0.14.1/INSTALL.md `
-  artifacts/releases/v0.14.1/LICENSE `
-  artifacts/releases/v0.14.1/THIRD_PARTY_NOTICES.md `
+gh release create v0.15.0 `
+  artifacts/releases/v0.15.0/vitality-phone-0.15.0.apk `
+  artifacts/releases/v0.15.0/health-vivo-watch-0.8.0.rpk `
+  artifacts/releases/v0.15.0/SHA256SUMS.txt `
+  artifacts/releases/v0.15.0/INSTALL.md `
+  artifacts/releases/v0.15.0/LICENSE `
+  artifacts/releases/v0.15.0/THIRD_PARTY_NOTICES.md `
   --verify-tag --draft --prerelease `
-  --title "活力记录 v0.14.1 · 预发布" `
-  --notes-file artifacts/releases/v0.14.1/RELEASE_NOTES.md
+  --title "活力记录 v0.15.0 · 预发布" `
+  --notes-file artifacts/releases/v0.15.0/RELEASE_NOTES.md
 ```
 
 确认草稿附件后再发布。项目原创代码已采用根目录 `LICENSE` 中的 MIT 许可证；第三方 SDK、模板、依赖和数据保留各自条款，详见 `THIRD_PARTY_NOTICES.md`。准备 Release 时一并附上这两个文件；它们不代表重新授权第三方材料。

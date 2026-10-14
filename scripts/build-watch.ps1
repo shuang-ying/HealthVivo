@@ -45,11 +45,14 @@ try {
     if (!$rpk) { throw 'No RPK produced.' }
     $artifactDir = Join-Path $projectRoot 'artifacts'
     New-Item -ItemType Directory -Force -Path $artifactDir | Out-Null
-    $artifact = Join-Path $artifactDir 'health-vivo-watch-0.7.1.rpk'
+    # Derive the artifact name from the manifest, so a version bump cannot leave a stale file name.
+    $watchVersion = (Get-Content -LiteralPath (Join-Path $projectRoot 'watch\src\manifest.json') -Raw | ConvertFrom-Json).versionName
+    if ($watchVersion -notmatch '^\d+\.\d+\.\d+$') { throw 'Watch versionName not found.' }
+    $artifact = Join-Path $artifactDir "health-vivo-watch-$watchVersion.rpk"
     Copy-Item -LiteralPath $rpk.FullName -Destination $artifact -Force
     Write-Output ('RPK: ' + $artifact)
     if ($Install) {
-        & $adbPath -s $Serial push $artifact '/sdcard/Download/health-vivo-watch-0.7.1.rpk'
+        & $adbPath -s $Serial push $artifact "/sdcard/Download/health-vivo-watch-$watchVersion.rpk"
         if ($LASTEXITCODE -ne 0) { throw 'RPK transfer failed.' }
         Write-Output 'RPK copied to Download. Install it on the watch with the third-party OrbitV app (installer only).'
     }

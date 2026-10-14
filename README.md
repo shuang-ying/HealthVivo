@@ -1,4 +1,4 @@
-# 活力记录 · 手机 0.14.1 / 手表 0.7.1
+# 活力记录 · 手机 0.15.0 / 手表 0.8.0
 
 本仓库只包含两个应用：**手机 App（Android）** 和 **手表 App（BlueOS）**。两者之间通过原生 BLE GATT 直连，
 不依赖任何扩展程序、中转 App、健康平台接口或云端服务。旧版曾附带的 OrbitV 扩展（ovpkg）已废弃并移出代码树，
@@ -160,8 +160,8 @@ Android Studio 打开 `android`；Gradle 使用 JDK 17，API 36 / Build-Tools 36
 
 产物：
 
-- `artifacts/vitality-phone-0.14.1.apk`（调试签名，沿用本机既有签名）
-- `artifacts/health-vivo-watch-0.7.1.rpk`（BlueOS debug 构建）
+- `artifacts/vitality-phone-0.15.0.apk`（调试签名，沿用本机既有签名）
+- `artifacts/health-vivo-watch-0.8.0.rpk`（BlueOS debug 构建）
 
 RPK 需要装到手表上。仓库不再包含任何扩展程序，可继续用第三方 OrbitV 应用作为**安装器**（它不参与运行），
 或用 BlueOS Studio 的调试通道安装。
@@ -195,13 +195,12 @@ node scripts/generate-link-vectors.mjs
 只给运动表增加可空的「本次运动步数」列，旧记录该列为空，按未包含处理。旧手填运动热量口径未确认，不参与净消耗；
 旧 MET 值保留，步行/跑步默认标记包含在总步数中，可编辑。没有破坏性迁移或清空数据操作。
 
-升级到 0.14.1 后蓝牙连接信息使用新的存储键（手机 `link_connection` / `link_secret`，手表 `fitness.link.identity.v1`），
+从 0.14.1 起蓝牙连接信息使用新的存储键（手机 `link_connection` / `link_secret`，手表 `fitness.link.identity.v1`），
 所以需要一次首次连接；手表按天缓存（`fitness.index.v3` / `fitness.day.v3.*`）原样保留，历史日期不需要重新同步。
 
-按天版本账本保存在 `watch_revision_ledger`。**本版不迁移旧的账本**（旧版曾把它放在 `orbitv_companion` 里），
-因此从 0.12.3 / 0.5.3 直接升到 0.14.1 / 0.7.1 后，第一次同步会把手机里所有日期重新发送一遍：
-不丢记录、不重复入库，只是这一次传输量较大，之后照常只发新增和修改的日期。从 0.13.x 升级不受影响，
-因为那已经是直连版本，账本就在新键里。
+按天版本账本保存在 `watch_revision_ledger`。**从 0.14.1 起不再迁移旧的账本**（旧版曾把它放在 `orbitv_companion` 里），
+因此从 0.12.3 / 0.5.3 直接升到 0.14.1 / 0.7.1 或更晚的版本后，第一次同步会把手机里所有日期重新发送一遍：
+不丢记录、不重复入库，只是这一次传输量较大，之后照常只发新增和修改的日期。
 
 健康数据保存在应用私有目录，关闭 Android 自动备份；API 密钥用 Android Keystore 加密。应用不会读取计步、位置或其他 App 的私有数据。
 调试构建附带 PreviewActivity，用演示资料和模拟模型列表检查真实页面，禁止保存、不读取真实密钥、不打开正式数据库；发布构建不包含这个入口。
