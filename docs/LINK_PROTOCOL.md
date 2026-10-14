@@ -1,6 +1,6 @@
 # 活力直连协议 v1
 
-手机 **活力记录 0.15.2**（versionCode 26）与手表 **活力记录 0.9.2**（versionCode 19）之间的原生 BLE 协议。
+手机 **活力记录 1.0.0**（versionCode 27）与手表 **活力记录 1.0.0**（versionCode 20）之间的原生 BLE 协议。
 两套实现互为对照：手机端 `android/app/src/main/java/com/lrh/healthvivo/link/`，手表端 `watch/src/lib/link/`。
 
 本协议不使用 OrbitV、ovpkg、vivo 健康、`device-rpc.aar`、SDK 密钥或云端中转。旧诊断协议

@@ -1,4 +1,4 @@
-# 活力记录 · 手机 0.15.2 / 手表 0.9.2
+# 活力记录 · 手机 1.0.0 / 手表 1.0.0
 
 本仓库只包含两个应用：**手机 App（Android）** 和 **手表 App（BlueOS）**。两者之间通过原生 BLE GATT 直连，
 不依赖任何扩展程序、中转 App、健康平台接口或云端服务。旧版曾附带的 OrbitV 扩展（ovpkg）已废弃并移出代码树，
@@ -179,8 +179,8 @@ Android Studio 打开 `android`；Gradle 使用 JDK 17，API 36 / Build-Tools 36
 
 产物：
 
-- `artifacts/vitality-phone-0.15.2.apk`（调试签名，沿用本机既有签名）
-- `artifacts/health-vivo-watch-0.9.2.rpk`（BlueOS debug 构建）
+- `artifacts/vitality-phone-1.0.0.apk`（调试签名，沿用本机既有签名）
+- `artifacts/health-vivo-watch-1.0.0.rpk`（BlueOS debug 构建）
 
 RPK 需要装到手表上。仓库不再包含任何扩展程序，可继续用第三方 OrbitV 应用作为**安装器**（它不参与运行），
 或用 BlueOS Studio 的调试通道安装。
