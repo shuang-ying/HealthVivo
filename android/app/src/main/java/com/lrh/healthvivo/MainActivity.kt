@@ -180,10 +180,15 @@ open class MainActivity : ComponentActivity() {
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                                 Text(listOf("今日", "饮食", "运动", "趋势", "我的")[tab], fontSize = 30.sp, fontWeight = FontWeight.Bold)
                                 // The day's totals sit next to the page title, as the page's own summary card.
+                                // The exercise total is the whole recorded activity, steps included, so it adds up
+                                // with the step card and the workout cards shown below it.
                                 if(tab == 1) TotalCard("今日摄入合计", number(intake), "kcal")
-                                else if(tab == 2) TotalCard("今日运动消耗", number(activity.workoutKcal), "kcal")
+                                else if(tab == 2) TotalCard("今日运动消耗", number(activity.kcal), "kcal")
                             }
-                            Text(if(previewData != null) "演示数据 · 不写入正式记录" else listOf("让记录成为日常", "每一餐，都有迹可循", "记录每一次努力", "关注变化，保持节奏", "活力记录")[tab], fontSize = 12.sp, color = colors.onSurfaceVariant)
+                            Text(if(previewData != null) "演示数据 · 不写入正式记录" else when(tab) {
+                                2 -> "记录每一次努力 · 上方总计含运动与步数消耗"
+                                else -> listOf("让记录成为日常", "每一餐，都有迹可循", "记录每一次努力", "关注变化，保持节奏", "活力记录")[tab]
+                            }, fontSize = 12.sp, color = colors.onSurfaceVariant)
                         }
                         if(tab == 2) AddButton("添加运动") { exerciseType = null; editExercise = null; showExercise = true }
                         else if(tab == 4) IconButton(onClick = { showApi = true }) { AppIcon("settings", "AI 配置") }
