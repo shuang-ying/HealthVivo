@@ -85,8 +85,11 @@ private val tooltipLift = 30.dp
                 values.forEachIndexed { position, value ->
                     val left = barLeft(position)
                     if(value == null) {
-                        // A period with no records is drawn as a faint stub, never as a real zero.
-                        drawRect(axis.copy(alpha = .45f), Offset(left, zeroY - 1.5f), Size(barWidth(), 3f))
+                        // A period with no records is drawn as a faint stub, never as a real zero. It has
+                        // to sit above the baseline to be visible at all, since the baseline is the edge.
+                        val stub = 4f
+                        val stubTop = (zeroY - stub).coerceAtLeast(0f)
+                        drawRect(axis.copy(alpha = .55f), Offset(left, stubTop), Size(barWidth(), min(stub, heightPx - stubTop)))
                     } else {
                         val top = min(yOf(value), zeroY)
                         val bottom = max(yOf(value), zeroY)
@@ -134,8 +137,12 @@ private val tooltipLift = 30.dp
         }
         Text(if(index == null) "点击任意柱子可查看该${range.label}的准确数值。" else "已选中第 ${index + 1} 根柱子，点击其他柱子即可切换。", fontSize = 12.sp, color = muted)
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            // The average is taken over periods that actually hold a record: averaging the empty ones in
+            // would report a typical week far below anything the user ever recorded.
+            val recorded = buckets.filter { it.intakeKcal > 0 || it.activityKcal > 0 }
+            val meanValues = recorded.mapNotNull { valueOf(it, series) }
             TrendStat("合计/一${range.label}", known.sum())
-            TrendStat("均值/一${range.label}", known.takeIf { it.isNotEmpty() }?.let { it.sum() / it.size })
+            TrendStat("均值/一${range.label}", meanValues.takeIf { it.isNotEmpty() }?.let { it.sum() / it.size })
             TrendStat("最高/一${range.label}", known.maxByOrNull { abs(it) })
         }
         Text(when(series) {
@@ -143,7 +150,7 @@ private val tooltipLift = 30.dp
             1 -> "每${range.label}运动记录的活动净消耗合计，不含步数；步数消耗在运动页单独查看。"
             else -> "每${range.label}的消耗参考减登记摄入之和。紫色向上表示还有剩余，红色向下表示已超过参考。"
         }, fontSize = 12.sp, color = muted)
-        Text("横轴为${range.window}。完全没有记录的时间段画成浅色短线并按 0 统计，不代表那段时期真的没有摄入或消耗；当前${range.label}只统计到今天。", fontSize = 12.sp, color = muted)
+        Text("横轴为${range.window}。完全没有记录的时间段画成浅色短线并按 0 统计，不代表那段时期真的没有摄入或消耗；当前${range.label}只统计到今天。均值只按有记录的${range.label}计算。", fontSize = 12.sp, color = muted)
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             buckets.takeLast(6).reversed().forEachIndexed { position, bucket ->
                 val value = valueOf(bucket, series)
