@@ -1,4 +1,4 @@
-# 活力记录 · 手机 0.14.0 / 手表 0.7.0
+# 活力记录 · 手机 0.14.1 / 手表 0.7.1
 
 本版把手机与手表之间的蓝牙连接重写为独立的持久化直连实现：单特征 GATT 读写、CRC32 校验的分帧传输、首次登记后自动认证、双端自动重连，手表端另有广播看门狗。协议见 [LINK_PROTOCOL.md](docs/LINK_PROTOCOL.md)，实现与验证状态见 [LINK_IMPLEMENTATION.md](docs/LINK_IMPLEMENTATION.md)，使用说明见 [WATCH_GUIDE.md](docs/WATCH_GUIDE.md)。两端已编译通过，手表协议测试 40 项、手机 JVM 测试 49 项通过；真机完整同步保存确认与长期后台行为仍待验证。GitHub 发布说明见 [GITHUB_RELEASE.md](docs/GITHUB_RELEASE.md)，其中三套软件流程对应旧扩展版本；新版本尚未发布。
 
@@ -99,7 +99,7 @@ Android Studio 打开 android；Gradle 使用 JDK 17，API 36 / Build-Tools 36.0
 
 默认脚本只编译和打包，不运行测试；-UnitTests / -DeviceTests 为显式测试选项。
 
-当前产物 artifacts/vitality-phone-0.14.0.apk、artifacts/health-vivo-watch-0.7.0.rpk。包名保持兼容，应用名“活力记录”。本次不改变数据库版本4，保留旧记录、加密 API 配置、日期版本账本和手表缓存；新旧蓝牙连接信息分开保存（新键 `link_connection` / `link_secret`、手表 `fitness.link.identity.v1`），升级后需要一次首次连接，不需 ovpkg。专用协议测试：`node --test watch/test/link-wire.test.mjs watch/test/link-server.test.mjs`；跨语言向量：`node scripts/generate-link-vectors.mjs`；手机端 `./scripts/build-android.ps1 -UnitTests`。脚本默认仍只构建。
+当前产物 artifacts/vitality-phone-0.14.1.apk、artifacts/health-vivo-watch-0.7.1.rpk。包名保持兼容，应用名“活力记录”。本次不改变数据库版本4，保留旧记录、加密 API 配置、日期版本账本和手表缓存；新旧蓝牙连接信息分开保存（新键 `link_connection` / `link_secret`、手表 `fitness.link.identity.v1`），升级后需要一次首次连接，不需 ovpkg。专用协议测试：`node --test watch/test/link-wire.test.mjs watch/test/link-server.test.mjs`；跨语言向量：`node scripts/generate-link-vectors.mjs`；手机端 `./scripts/build-android.ps1 -UnitTests`。脚本默认仍只构建。
 
 本机数据库为 fitness-local.db，当前版本4；从0.3.0的数据库版本1迁移到版本2，保留个人资料、体重、三餐、自建食物和历史运动，移除活动系数并增加步数表。旧手填运动热量口径未确认，不参与净消耗；旧 MET 值保留，步行/跑步默认标记包含在总步数中，可编辑。没有破坏性迁移或清空数据操作。旧手机采集原型保留在 archive；手表现为手机数据看板。健康数据保存在应用私有目录，关闭 Android 自动备份；API 密钥用 Android Keystore 加密。应用不会读取计步、位置或其他 App 的私有数据。
 

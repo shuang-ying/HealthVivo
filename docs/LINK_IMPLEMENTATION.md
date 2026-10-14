@@ -1,4 +1,4 @@
-# 手表直连实现（0.14.0 / 0.7.0）
+# 手表直连实现（0.14.1 / 0.7.1）
 
 本轮把手机与手表之间的蓝牙连接重写为一套独立的持久化直连实现。协议细节见
 [LINK_PROTOCOL.md](LINK_PROTOCOL.md)；本文说明代码结构、为什么这样分层、怎么构建和验证。
@@ -133,7 +133,7 @@ console BroadcastChannel setTimeout clearTimeout setInterval clearInterval $styl
 - 旧诊断应用 `com.lrh.healthvivo.watch.directprobe` 与正式手表应用共用同一个服务 UUID，因此两者
   **不能同时运行**（重写之前也是如此）。探针现在只是历史工具，需要时可以卸载。
 - 手表按天缓存（`fitness.index.v3` / `fitness.day.v3.*`）原样保留，升级后不需要重新同步历史。
-- 如果手表还没更新到 0.7.0，手机会先找到服务、读问候，然后提示“请将手表活力记录更新到 0.7.0 或更新版本”
+- 如果手表还没更新到 0.7.1，手机会先找到服务、读问候，然后提示“请将手表活力记录更新到 0.7.1 或更新版本”
   —— 这正是版本不匹配的判别信号，而不是一直停在“找不到服务”。
 
 ## 只构建
@@ -148,8 +148,8 @@ console BroadcastChannel setTimeout clearTimeout setInterval clearInterval $styl
 
 输出：
 
-- `artifacts/vitality-phone-0.14.0.apk`（调试签名，沿用本机既有签名）
-- `artifacts/health-vivo-watch-0.7.0.rpk`（BlueOS debug 构建）
+- `artifacts/vitality-phone-0.14.1.apk`（调试签名，沿用本机既有签名）
+- `artifacts/health-vivo-watch-0.7.1.rpk`（BlueOS debug 构建）
 
 手表编译器即使退出码为 0 但打印 `[ERROR]`，构建脚本也会拒绝复制产物。
 

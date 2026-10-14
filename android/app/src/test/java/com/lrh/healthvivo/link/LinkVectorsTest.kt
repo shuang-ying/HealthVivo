@@ -178,7 +178,7 @@ class LinkVectorsTest {
         val greeting = hex("frames.greeting")
         val otherVersion = greeting.copyOf().also { it[1] = 2 }
         try { LinkProtocol.greeting(otherVersion); fail("another protocol version was accepted") }
-        catch (expected: IllegalArgumentException) { assertTrue(expected.message!!.contains("0.7.0")) }
+        catch (expected: IllegalArgumentException) { assertTrue(expected.message!!.contains("0.7.1")) }
         val zeroEpoch = greeting.copyOf().also { for (index in 3 until 11) it[index] = 0 }
         try { LinkProtocol.greeting(zeroEpoch); fail("a zero epoch was accepted") }
         catch (expected: IllegalArgumentException) { }

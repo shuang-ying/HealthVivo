@@ -166,7 +166,7 @@ internal class LinkGatt(private val context: Context, private val device: Blueto
             val discovered = connection.services.map { it.uuid.toString().lowercase() }
             Log.i(TAG, "appServicePresent=${service != null} serviceCount=${discovered.size} services=$discovered")
             checkNotNull(service) {
-                "未发现活力记录直连服务（手表暴露 ${discovered.size} 个服务）。请把手表活力记录更新到 0.7.0；" +
+                "未发现活力记录直连服务（手表暴露 ${discovered.size} 个服务）。请把手表活力记录更新到 0.7.1；" +
                     "若已更新，请关闭再打开手机蓝牙以清除蓝牙服务缓存后重试"
             }
             characteristic = service.getCharacteristic(LinkFrames.CHARACTERISTIC) ?: error(

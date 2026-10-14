@@ -45,11 +45,11 @@ try {
     if (!$rpk) { throw 'No RPK produced.' }
     $artifactDir = Join-Path $projectRoot 'artifacts'
     New-Item -ItemType Directory -Force -Path $artifactDir | Out-Null
-    $artifact = Join-Path $artifactDir 'health-vivo-watch-0.7.0.rpk'
+    $artifact = Join-Path $artifactDir 'health-vivo-watch-0.7.1.rpk'
     Copy-Item -LiteralPath $rpk.FullName -Destination $artifact -Force
     Write-Output ('RPK: ' + $artifact)
     if ($Install) {
-        & $adbPath -s $Serial push $artifact '/sdcard/Download/health-vivo-watch-0.7.0.rpk'
+        & $adbPath -s $Serial push $artifact '/sdcard/Download/health-vivo-watch-0.7.1.rpk'
         if ($LASTEXITCODE -ne 0) { throw 'RPK transfer failed.' }
         Write-Output 'RPK copied to Download. Use OrbitV to install it on the watch.'
     }

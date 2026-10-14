@@ -26,7 +26,7 @@
 
 ## 复现工具
 
-~~`scripts/live-watch-simulator.mjs`~~ 运行当时的 `ble-transport.mjs` 和 `Home/index.ux` 的方法。TCP 和网页控制只监听 `127.0.0.1`，网页控制需要本次运行生成的本地令牌。确认码未核对时不会自动批准手机。该脚本与被它驱动的传输模块已在 0.7.0 随直连协议重写一并删除；当前的协议仿真见 [活力直连协议 v1](LINK_PROTOCOL.md) 的“测试”一节。
+~~`scripts/live-watch-simulator.mjs`~~ 运行当时的 `ble-transport.mjs` 和 `Home/index.ux` 的方法。TCP 和网页控制只监听 `127.0.0.1`，网页控制需要本次运行生成的本地令牌。确认码未核对时不会自动批准手机。该脚本与被它驱动的传输模块已在 0.7.1 随直连协议重写一并删除；当前的协议仿真见 [活力直连协议 v1](LINK_PROTOCOL.md) 的“测试”一节。
 
 `scripts/start-windows-ble.ps1` 使用 Windows PowerShell 5.1 编译 `WindowsBlePeripheral.cs`，将 Windows 的真实 GATT 读写事件转交模拟器。编译引用 Microsoft.Windows.SDK.Contracts 10.0.26100.1，缓存目录 `.tools/windows-contracts/ref/netstandard2.0`。先用 `probe-windows-ble.ps1` 检查无线电状态和 Peripheral 支持，结束后恢复原状态。
 

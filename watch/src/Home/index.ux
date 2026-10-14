@@ -54,7 +54,7 @@
       <text class="caption">{{connectionText}}</text>
       <input class="button" type="button" value="{{updateButton}}" onclick="refresh" />
       <input class="settings-button" type="button" value="连接管理" onclick="connection" />
-      <text class="footnote">活力记录 0.7.0 · 蓝牙直连</text>
+      <text class="footnote">活力记录 0.7.1 · 蓝牙直连</text>
     </list-item>
   </list>
 </template>

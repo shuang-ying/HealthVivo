@@ -43,7 +43,7 @@ internal object LinkProtocol {
         require(value.size == LinkFrames.GREETING_SIZE && value[0].toInt() and 0xff == LinkFrames.GREETING_MARK) {
             "手表未回应直连服务，请打开手表活力记录"
         }
-        require(value[1].toInt() and 0xff == LinkFrames.PROTOCOL_VERSION) { "请将手表活力记录更新到 0.7.0 或更新版本" }
+        require(value[1].toInt() and 0xff == LinkFrames.PROTOCOL_VERSION) { "请将手表活力记录更新到 0.7.1 或更新版本" }
         require(value[2].toInt() in 0..1) { "手表连接状态无效" }
         val epoch = LinkBytes.read64(value, 3)
         require(epoch in 1..9007199254740991L) { "手表连接版本无效" }
