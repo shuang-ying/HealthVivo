@@ -88,6 +88,48 @@ console BroadcastChannel setTimeout clearTimeout setInterval clearInterval $styl
 - `watch/test/link-runtime.test.mjs` 机械地禁止这些构造回到代码里，并且额外验证
   「不注入任何定时器对象也能完成注册、广播与一次完整登记」。
 
+## Android 会缓存手表的服务目录（真机踩过的第二个坑）
+
+广播修好之后，手机能连上手表（`connection status=0 state=2`、`services status=0`），但服务发现
+返回的目录里没有我们的服务：
+
+```
+appServicePresent=false serviceCount=6
+services=[00001800(GAP), 00001801(GATT), 00002760-…, cc353442-…, 66841001-…, 0000180d(Heart Rate)]
+```
+
+用 Windows 侧的工具做**无缓存**发现（`BleakClient(..., winrt={"use_cached_services": False})`，
+即 `scripts/probe-gt2-windows-gatt.py --catalog-only`）读到的是 **7 个服务**，其中包含我们的：
+
+```json
+"serviceUuids": [ …, "fa954400-48d6-4a12-b74b-4c5b5170360e" ],
+"testCharacteristicFound": true
+```
+
+结论：**手表端完全正确**（服务与特征都在），手机读到的是过期的持久化缓存。原因很清楚——
+之前排查时手表应用启动就失败、GATT 服务从未注册，而手机此时照常连上去做了一次服务发现，
+于是把「没有应用服务」的目录写进了这台已配对设备的缓存。
+
+Android 的这条缓存有几点必须记住：
+
+- 它按**已配对设备**持久化，用来避免每次重连都重新发现；
+- **关闭再打开蓝牙不会清除它**（本项目实测无效：清除后仍是同样的 6 个服务）；
+- 也没有任何公开 API 可以清除它——`BluetoothGatt.refresh()` 是非公开接口，本项目明确不把它作为
+  产品策略（见 [DIRECT_LINK_DEVICE_VALIDATION.md](DIRECT_LINK_DEVICE_VALIDATION.md)）；
+- 只有两种公开途径会让它失效：**解除配对**（缓存随配对记录一起删除），或**手表主动发 Service Changed 指示**
+  （由协议栈的 Generic Attribute 服务发送，应用无法代发）。
+
+因此唯一的用户级解法是：在系统蓝牙设置里对这台手表**取消配对再重新配对**。手机端现在会在这种情况下
+直接给出这句话，面板上也有常驻提示。
+
+复发条件与自愈：只要手表应用在运行，它就会注册服务，手机每次发现都会把**正确**的目录写回缓存，
+所以正常使用不会复发。只有当手表应用没运行（或像修复前那样启动就失败）而手机又完成了一次服务发现时，
+缓存才会再次过期——这正是手表端「启动三阶段互相独立、任何失败都不阻止 GATT 服务注册」这条设计的价值。
+
+顺带确认了另一件与发现有关的事实：`testServiceAdvertised=false`、`advertisedServiceUuids=[]`——
+**GT2 的广播包里不含服务 UUID**，所以手机不能只用服务 UUID 做扫描过滤，必须先按设备名发现
+（手机端的扫描逻辑已经同时接受两者）。
+
 ## 连接持久化的具体做法
 
 官方文档在几处留了空白，这些空白正是连接会“悄悄断掉”的原因，实现在对应位置做了防御：

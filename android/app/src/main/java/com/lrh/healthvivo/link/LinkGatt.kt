@@ -166,11 +166,14 @@ internal class LinkGatt(private val context: Context, private val device: Blueto
             val discovered = connection.services.map { it.uuid.toString().lowercase() }
             Log.i(TAG, "appServicePresent=${service != null} serviceCount=${discovered.size} services=$discovered")
             checkNotNull(service) {
-                "未发现活力记录直连服务（手表暴露 ${discovered.size} 个服务）。请把手表活力记录更新到 0.7.1；" +
-                    "若已更新，请关闭再打开手机蓝牙以清除蓝牙服务缓存后重试"
+                // Android persists the whole attribute database per bonded device and only refreshes
+                // it when the bond is dropped or the watch sends Service Changed. Toggling Bluetooth
+                // is measurably not enough (see docs/LINK_IMPLEMENTATION.md), so name the real remedy.
+                "未发现活力记录直连服务（手机读到 ${discovered.size} 个服务）。这是手机的蓝牙服务缓存过期：" +
+                    "请在系统蓝牙设置中对这台手表“取消配对”，然后重新配对并回到本页连接"
             }
             characteristic = service.getCharacteristic(LinkFrames.CHARACTERISTIC) ?: error(
-                "活力记录服务已发现但缺少数据特征，通常是蓝牙服务缓存过期；请关闭再打开手机蓝牙后重试")
+                "活力记录服务缺少数据特征，同样是蓝牙服务缓存过期：请对手表“取消配对”后重新配对")
             discoveredVersion = version
             if (serviceVersion == version) return
         }

@@ -67,6 +67,8 @@ import java.time.format.DateTimeFormatter
             }
             Text("连接由前台服务持有，断线按 1、2、4、8 秒递增重试，最高 30 秒；手表端有广播看门狗，" +
                 "手机随时可以重新连上。连接本身不传输记录。", fontSize = 13.sp, color = muted)
+            Text("若一直停留在“未发现活力记录直连服务”：Android 会按设备缓存蓝牙服务目录，请在系统蓝牙设置里" +
+                "对这台手表“取消配对”再重新配对。", fontSize = 12.sp, color = muted)
             if (state.busy) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             if (!state.busy) state.devices.forEach { device ->
                 OutlinedButton(onClick = { manager.connect(device.address) }, modifier = Modifier.fillMaxWidth()) { Text(device.name) }
