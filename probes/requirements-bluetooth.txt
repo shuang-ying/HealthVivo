@@ -1,0 +1,3 @@
+bumble==0.0.235
+grpcio==1.84.0
+protobuf==7.36.2

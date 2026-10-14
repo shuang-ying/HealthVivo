@@ -1,8 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
     <application>
         <activity android:name=".debug.OrbitBridgeProbeActivity" android:exported="true" />
         <activity android:name=".debug.PreviewActivity" android:exported="true" />
         <activity android:name=".debug.WatchDiagnosticsActivity" android:exported="true" />
         <activity android:name=".debug.ClassicSppProbeActivity" android:exported="true" />
+        <activity android:name=".debug.DirectGattProbeActivity" android:exported="true" />
+        <activity android:name=".debug.SppEmulatorProbeActivity" android:exported="true" />
+        <service android:name=".debug.SppEmulatorProbeService" android:exported="false" android:foregroundServiceType="connectedDevice" />
     </application>
 </manifest>

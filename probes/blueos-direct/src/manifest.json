@@ -1,0 +1,17 @@
+{
+  "package": "com.lrh.healthvivo.watch.directprobe",
+  "name": "通信接口验证",
+  "icon": "/common/icon.png",
+  "versionName": "0.1.2",
+  "versionCode": 3,
+  "deviceTypeList": ["watch-square"],
+  "features": [
+    { "name": "blueos.bluetooth.ble" },
+    { "name": "blueos.hardware.display.brightness" },
+    { "name": "blueos.network.fetch" }
+  ],
+  "permissions": [{ "name": "blueos.permission.BLUETOOTH" }],
+  "config": { "designWidth": 432 },
+  "router": { "entry": "Home", "pages": { "Home": { "component": "index" } } },
+  "display": { "backgroundColor": "#111018" }
+}

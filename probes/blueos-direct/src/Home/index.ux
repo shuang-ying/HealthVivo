@@ -1,0 +1,113 @@
+<template>
+  <div class="page">
+    <text class="title">通信接口验证 0.1.2</text>
+    <text class="status">{{ message }}</text>
+    <text class="counts">读 {{ reads }} · 写 {{ writes }} · 回应 {{ replies }}</text>
+    <text class="hold" onclick="holdScreen">{{ screenMessage }}</text>
+    <text class="hint">独立诊断：没有健康记录或 OrbitV 扩展程序。</text>
+  </div>
+</template>
+<script>
+import ble from '@blueos.bluetooth.ble'
+import fetch from '@blueos.network.fetch'
+import brightness from '@blueos.hardware.display.brightness'
+
+const SERVICE = 'fa954400-48d6-4a12-b74b-4c5b5170360e'
+const CHARACTERISTIC = 'fa954401-48d6-4a12-b74b-4c5b5170360e'
+const ascii = value => new Uint8Array(value.split('').map(char => char.charCodeAt(0))).buffer
+const text = buffer => Array.from(new Uint8Array(buffer)).map(byte => String.fromCharCode(byte)).join('')
+
+export default {
+  data: { message: '初始化原生接口…', reads: 0, writes: 0, replies: 0, screenMessage: '保持亮屏 90 秒' },
+  onInit() {
+    this.server = null
+    let response = 'PROBE:1'
+    const result = { version: '0.1.2', syntheticOnly: true, readCallbacks: 0, writeCallbacks: 0, pingReplies: 0 }
+    const publish = () => {
+      this.reads = result.readCallbacks
+      this.writes = result.writeCallbacks
+      this.replies = result.pingReplies
+      this.message = result.error ? '初始化失败：' + result.error :
+        result.pingReplies ? '已收到测试消息并生成 PONG' :
+          result.advertisingRequested ? '已请求广播。请在手机运行独立 GATT 探测。' : '正在启动服务…'
+      console.log('HEALTHVIVO_DIRECT_PROBE ' + JSON.stringify(result))
+      // Local diagnostics collector only; this HTTP request does not emulate a Bluetooth success.
+      fetch.fetch({ url: 'http://127.0.0.1:28561/result', method: 'POST',
+        data: JSON.stringify(result), responseType: 'json',
+        success: response => console.log('HEALTHVIVO_PROBE_COLLECTOR ' + response.code),
+        fail: (_, code) => console.log('HEALTHVIVO_PROBE_COLLECTOR_FAILED ' + code) })
+    }
+    try {
+      result.createGattServerAvailable = !!ble.BLE && typeof ble.BLE.createGattServer === 'function'
+      result.apiPath = 'bluetooth.BLE.createGattServer'
+      this.server = ble.BLE.createGattServer()
+      result.gattServerCreated = !!this.server
+      result.methods = ['addService', 'startAdvertising', 'subscribeCharacteristicRead',
+        'subscribeCharacteristicWrite', 'sendResponse'].filter(name => typeof this.server[name] === 'function')
+      result.addServiceReturn = this.server.addService({ serviceUuid: SERVICE, isPrimary: true,
+        characteristics: [{ serviceUuid: SERVICE, characteristicUuid: CHARACTERISTIC,
+          characteristicValue: ascii(response), descriptors: [], properties: [4, 5] }], includeServices: [] })
+      if (result.addServiceReturn === false) throw new Error('添加服务返回失败')
+      this.server.subscribeCharacteristicRead({ callback: request => {
+        result.readCallbacks = (result.readCallbacks || 0) + 1
+        const offset = request.offset || 0
+        const valid = request.characteristicUuid.toLowerCase() === CHARACTERISTIC && offset <= response.length
+        result.lastReadResponseReturn = this.server.sendResponse({ deviceId: request.deviceId,
+          transId: request.transId, status: valid ? 0 : 7, offset,
+          value: ascii(valid ? response.slice(offset) : '') })
+        publish()
+      }, fail: (_, code) => { result.readSubscriptionError = code; publish() } })
+      this.server.subscribeCharacteristicWrite({ callback: request => {
+        result.writeCallbacks = (result.writeCallbacks || 0) + 1
+        const value = text(request.value)
+        const valid = request.characteristicUuid.toLowerCase() === CHARACTERISTIC &&
+          !request.isPrep && !request.offset && /^PING:[0-9A-F]{6}:[0-9]{2}$/.test(value)
+        if (valid) {
+          response = 'PONG:' + value.slice(5)
+          result.pingReplies++
+        }
+        if (request.needRsp) this.server.sendResponse({ deviceId: request.deviceId,
+          transId: request.transId, status: valid ? 0 : 6, offset: request.offset || 0, value: new ArrayBuffer(0) })
+        publish()
+      }, fail: (_, code) => { result.writeSubscriptionError = code; publish() } })
+      const advertisingReturn = this.server.startAdvertising({ interval: 1600, txPower: -7,
+        connectable: true }, { serviceUuids: [SERVICE] })
+      // The official API does not specify a boolean return for startAdvertising.
+      result.advertisingReturn = advertisingReturn === undefined ? 'void' : advertisingReturn
+      result.advertisingRequested = advertisingReturn !== false
+      if (advertisingReturn === false) result.error = '广播返回失败'
+    } catch (error) {
+      result.error = error && error.message ? error.message : String(error)
+    }
+    publish()
+  },
+  onShow() { this.holdScreen() },
+  holdScreen() {
+    if (this.screenTimer) clearTimeout(this.screenTimer)
+    try {
+      brightness.setKeepScreenOn({ keepScreenOn: true,
+        success: () => { this.screenMessage = '已保持亮屏，90 秒后恢复' },
+        fail: (_, code) => { this.screenMessage = '保持亮屏失败 ' + code + '，请手动保持' } })
+      this.screenTimer = setTimeout(() => { this.releaseScreen(); this.screenMessage = '点击再次保持亮屏 90 秒' }, 90000)
+    } catch (_) { this.screenMessage = '请手动保持亮屏' }
+  },
+  releaseScreen() {
+    if (this.screenTimer) clearTimeout(this.screenTimer)
+    this.screenTimer = null
+    try { brightness.setKeepScreenOn({ keepScreenOn: false }) } catch (_) {}
+  },
+  onHide() { this.releaseScreen() },
+  onDestroy() {
+    this.releaseScreen()
+    try { if (this.server) { this.server.stopAdvertising(); this.server.close() } } catch (_) {}
+  }
+}
+</script>
+<style>
+.page { width: 432px; height: 514px; padding: 32px; background-color: #111018; flex-direction: column; justify-content: center; }
+.title { color: #FFFFFF; font-size: 26px; margin-bottom: 18px; }
+.status { color: #B9D7FF; font-size: 22px; text-align: center; }
+.counts { color: #FFFFFF; font-size: 20px; margin-top: 18px; text-align: center; }
+.hold { color: #A9D9FF; font-size: 18px; margin-top: 18px; text-align: center; }
+.hint { color: #A9A5B5; font-size: 16px; margin-top: 18px; }
+</style>
