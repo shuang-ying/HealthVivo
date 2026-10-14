@@ -112,28 +112,5 @@ object CalorieCalculator {
      */
     fun weightOn(sorted: List<WeightEntry>, day: String): Double? = sorted.lastOrNull { it.day <= day }?.kg
     fun weightAt(data: FitnessData, day: String): Double? = weightOn(data.weights.sortedBy { it.day }, day)
-    /**
-     * The last [days] days ending at [day], oldest first, for the intake / activity / remaining charts.
-     * Days with no records contribute zero activity and zero intake rather than being dropped, so the
-     * bars keep their calendar spacing; this is a chart convention, not a claim that nothing happened.
-     */
-    fun trend(data: FitnessData, day: String, days: Int = 14): List<TrendDay> {
-        require(days in 1..90)
-        val end = LocalDate.parse(day)
-        return (days - 1 downTo 0).map { offset ->
-            val date = end.minusDays(offset.toLong()).toString()
-            val workouts = data.exercises.filter { it.day == date }
-            val weight = weightAt(data, date)
-            val activity = activities(data.steps.firstOrNull { it.day == date }, workouts, weight)
-            val plan = data.profile?.takeIf { weight != null }?.copy(weightKg = weight!!)?.let { plan(it, activity.kcal ?: 0.0) }
-            TrendDay(date, data.meals.filter { it.day == date }.sumOf { it.kcal }, activity.kcal ?: 0.0, plan?.maintenanceKcal)
-        }
-    }
-    /**
-     * The same three series reduced to weeks, months or years, ending at [endDay].
-     *
-     * The calendar-bucketed charts the user navigates live in [Trends]; this fixed daily window is the
-     * one the watch receives with each day's snapshot.
-     */
     val exercises get() = ExerciseLibrary.items
 }

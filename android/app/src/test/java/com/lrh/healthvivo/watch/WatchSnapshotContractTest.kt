@@ -6,6 +6,7 @@ import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.io.File
+import java.time.LocalDate
 
 /**
  * Pins the JSON the phone sends to the file the watch validates.
@@ -34,15 +35,17 @@ class WatchSnapshotContractTest {
             category = "anaerobic", inputMode = "sets", sets = 4, reps = 10, loadKg = 40.0, netCalories = true)
         val data = FitnessData(
             profile = Profile(age = 30, heightCm = 175.0, weightKg = 70.0, sex = "male", goal = "lose", updatedAt = 1, targetWeightKg = 65.0),
-            weights = listOf(WeightEntry(day, 70.0, 1)),
+            weights = listOf(WeightEntry("2026-10-05", 71.0, 1), WeightEntry(day, 70.0, 2)),
             meals = listOf(
+                MealEntry("meal-0", "2026-10-11", "dinner", "杂粮饭", 200.0, 260.0, source = "database", recordedAt = 1),
                 MealEntry("meal-1", day, "breakfast", "燕麦粥", 250.0, 70.0, source = "database", sourceReference = "USDA", recordedAt = 1),
                 MealEntry("meal-2", day, "lunch", "鸡胸肉", 150.0, 165.0, source = "manual", recordedAt = 2)),
             exercises = listOf(run, strength),
-            steps = listOf(DailySteps(day, 10000, 70.0, 1)),
-            bodyFats = listOf(BodyFatEntry(day, 21.5, 1)))
-        // generatedAt cannot be reproduced, so it is pinned before comparing.
-        return WatchSnapshot.create(data, day, 7, null).also { it.put("generatedAt", fixedGeneratedAt) }
+            steps = listOf(DailySteps("2026-10-11", 4000, 71.0, 1), DailySteps(day, 10000, 70.0, 1)),
+            bodyFats = listOf(BodyFatEntry("2026-10-08", 22.0, 1), BodyFatEntry(day, 21.5, 2)))
+        // generatedAt cannot be reproduced, so it is pinned before comparing; the day is pinned too, or
+        // the history would change shape depending on when the test happens to run.
+        return WatchSnapshot.create(data, day, 7, null, LocalDate.parse(day)).also { it.put("generatedAt", fixedGeneratedAt) }
     }
     /**
      * A key-order-independent rendering of the snapshot. org.json orders keys by hash, so comparing
@@ -72,7 +75,9 @@ class WatchSnapshotContractTest {
         assertEquals(10000, value.getInt("steps"))
         assertEquals(3000, value.getInt("workoutSteps"))
         assertEquals(7000, value.getInt("recordedSteps"))
-        assertEquals(14, value.getJSONArray("trend").length())
+        assertEquals(2, value.getJSONObject("history").getJSONArray("days").length())
+        assertEquals(2, value.getJSONObject("history").getJSONArray("weights").length())
+        assertEquals(2, value.getJSONObject("history").getJSONArray("fats").length())
         assertEquals(4, value.getJSONObject("energy").getJSONArray("mealKcal").length())
         assertEquals(2, value.getInt("exerciseCount"))
         assertEquals(2, value.getJSONArray("exercises").length())

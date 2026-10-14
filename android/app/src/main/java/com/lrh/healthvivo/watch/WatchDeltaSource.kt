@@ -24,8 +24,7 @@ class WatchDeltaSource(private val repository: FitnessRepository, private val ad
         val edit = preferences.edit()
         for(day in days) {
             val snapshot = WatchSnapshot.create(data, day, 1, advice.load(day))
-            snapshot.remove("revision"); snapshot.remove("generatedAt")
-            val hash = MessageDigest.getInstance("SHA-256").digest(snapshot.toString().toByteArray(Charsets.UTF_8))
+            val hash = MessageDigest.getInstance("SHA-256").digest(WatchSnapshot.revisionMaterial(snapshot).toByteArray(Charsets.UTF_8))
                 .joinToString("") { "%02x".format(it) }
             val same = preferences.getString("hash.$day", null) == hash
             val old = preferences.getLong("version.$day", 0)

@@ -4,13 +4,16 @@ import com.lrh.healthvivo.ai.*
 import com.lrh.healthvivo.fitness.*
 import org.json.JSONArray
 import org.json.JSONObject
+import java.time.LocalDate
 
 /** A display-only daily snapshot. Credentials, photographs and profile details never enter it. */
 object WatchSnapshot {
     const val CLIENT = "com.lrh.healthvivo.watch"
-    /** Days covered by the trend histograms, counted back from the snapshot's own day. */
-    const val TREND_DAYS = 14L
-    fun create(data: FitnessData, day: String, revision: Long, saved: SavedAdvice?): JSONObject {
+    /** Days of history, and measurement records, that travel with each day's snapshot. */
+    const val HISTORY_LIMIT = 500
+    const val MEASUREMENT_LIMIT = 500
+    fun create(data: FitnessData, day: String, revision: Long, saved: SavedAdvice?,
+        today: LocalDate = LocalDate.now()): JSONObject {
         val meals = data.meals.filter { it.day == day }.sortedWith(compareBy<MealEntry> { it.recordedAt }.thenBy { it.id })
         val workouts = data.exercises.filter { it.day == day }.sortedWith(compareBy<ExerciseEntry> { it.recordedAt }.thenBy { it.id })
         val steps = data.steps.firstOrNull { it.day == day }
@@ -20,16 +23,23 @@ object WatchSnapshot {
         val activity = CalorieCalculator.activities(steps, workouts, weight)
         val plan = data.profile?.takeIf { weight != null }?.copy(weightKg = weight!!)?.let { CalorieCalculator.plan(it, activity.kcal ?: 0.0) }
         fun n(value: Any?) = value ?: JSONObject.NULL
-        // The watch draws the same three histograms as the phone, so it gets the same daily series.
-        val trend = CalorieCalculator.trend(data, day, TREND_DAYS.toInt()).map { point ->
-            JSONObject().put("day", point.day).put("intakeKcal", point.intakeKcal)
-                .put("activityKcal", point.activityKcal).put("referenceKcal", n(point.referenceKcal))
-        }
+        // The watch draws the same calendar charts as the phone. It gets the sparse per-day figures with
+        // every energy rule already applied, plus the measurement records, so it only has to add up the
+        // days of whichever period is on screen - the rules are never implemented twice.
+        //
+        // The window ends on this snapshot's own day, not on today. The synchroniser hashes the whole
+        // snapshot to decide which days to re-send, so a block that were identical for every day would
+        // make logging one meal invalidate every day in the index; ending it here keeps an edit to the
+        // days from that edit onwards, which is all the ledger needs to notice.
+        val history = Trends.history(data, HISTORY_LIMIT, today).filter { it.day <= day }
+        fun measurements(rows: List<Pair<String, Double>>) = JSONArray(rows.takeLast(MEASUREMENT_LIMIT).map { (day, value) ->
+            JSONObject().put("day", day).put("value", value) })
         fun scale(definition: BodyReferenceScale?, value: Double?): Any = definition?.let {
             JSONObject().put("min", it.min).put("max", it.max).put("breaks", JSONArray(it.breaks)).put("labels", JSONArray(it.labels))
                 .put("colors", JSONArray(it.colors)).put("unit", it.unit).put("value", n(value))
         } ?: JSONObject.NULL
-        return JSONObject().put("schema", 2).put("client", CLIENT).put("day", day).put("revision", revision)
+        return JSONObject().put("schema", 3).put("client", CLIENT).put("day", day).put("revision", revision)
+            .put("today", today.toString())
             .put("generatedAt", System.currentTimeMillis()).put("steps", n(steps?.steps))
             .put("workoutSteps", activity.workoutSteps).put("recordedSteps", n(activity.recordedSteps))
             .put("weightKg", n(weight)).put("targetWeightKg", n(data.profile?.targetWeightKg))
@@ -42,7 +52,12 @@ object WatchSnapshot {
                 .put("mealKcal", JSONArray(listOf("breakfast", "lunch", "dinner", "snack").map { kind -> meals.filter { it.meal == kind }.sumOf { it.kcal } }))
                 .put("referenceKcal", n(plan?.maintenanceKcal)).put("pendingCount", activity.pendingCount)
                 .put("overlapHandled", activity.overlapHandled))
-            .put("trend", JSONArray(trend))
+            .put("history", JSONObject()
+                .put("days", JSONArray(history.map { point ->
+                    JSONObject().put("day", point.day).put("intakeKcal", point.intakeKcal)
+                        .put("activityKcal", point.activityKcal).put("referenceKcal", n(point.referenceKcal)) }))
+                .put("weights", measurements(data.weights.sortedBy { it.day }.map { it.day to it.kg }))
+                .put("fats", measurements(data.bodyFats.sortedBy { it.day }.map { it.day to it.percent })))
             .put("meals", JSONArray(listOf("breakfast", "lunch", "dinner", "snack").map { kind ->
                 val rows = meals.filter { it.meal == kind }
                 JSONObject().put("kind", kind).put("count", rows.size)
@@ -56,14 +71,30 @@ object WatchSnapshot {
                 .put("category", row.category).put("minutes", n(row.minutes)).put("distanceKm", n(row.distanceKm))
                 .put("sets", n(row.sets)).put("reps", n(row.reps)).put("loadKg", n(row.loadKg))
                 .put("kcal", n(row.kcal)).put("net", row.netCalories).put("estimated", row.method == "ai")
-                .put("includedInSteps", row.includedInSteps) }))
+                .put("includedInSteps", row.includedInSteps).put("steps", n(row.steps)) }))
             .put("advice", n(saved?.let { JSONObject().put("generatedAt", it.generatedAt)
                 .put("stale", it.fingerprint != AdviceSummary.create(data, day).fingerprint)
                 .put("content", JSONObject().put("food", it.advice.food).put("exercise", it.advice.exercise)) }))
     }
+    /**
+     * Fields that belong to the session rather than to the day's content, and so must not take part in
+     * the revision the watch stores.
+     *
+     * - `revision` and `generatedAt` are assigned by the synchroniser itself, so hashing them would be
+     *   circular and would make every check look like a change.
+     * - `today` is what the watch compares a column against to draw it as not-yet-reached. It advances
+     *   for every day at midnight at once; hashing it would report the whole index as edited once a day,
+     *   and all a stale value can do is colour one stub differently until something real moves.
+     */
+    private val VOLATILE_FIELDS = listOf("revision", "generatedAt", "today")
+    /** The text a day's revision is derived from: the snapshot without its session fields. */
+    fun revisionMaterial(snapshot: JSONObject): String {
+        val copy = JSONObject(snapshot.toString())
+        VOLATILE_FIELDS.forEach { copy.remove(it) }
+        return copy.toString()
+    }
     // Retained for historical prototype tools; production synchronization uses the direct link.
-    fun checksum(text: String): String {
-        var hash = 5381
+    fun checksum(text: String): String {        var hash = 5381
         text.forEach { hash = hash * 31 + it.code }
         return Integer.toUnsignedString(hash, 16)
     }

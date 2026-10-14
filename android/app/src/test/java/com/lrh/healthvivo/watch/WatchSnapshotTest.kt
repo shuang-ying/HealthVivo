@@ -45,17 +45,48 @@ class WatchSnapshotTest {
         assertEquals(0.0, meals.getDouble(2), 0.001)
         assertEquals(0.0, meals.getDouble(3), 0.001)
     }
-    @Test fun trendCoversAFortnightOldestFirstAndEndsOnTheSnapshotDay() {
-        val trend = snapshot().getJSONArray("trend")
-        assertEquals(14, trend.length())
-        assertEquals("2026-09-29", trend.getJSONObject(0).getString("day"))
-        val last = trend.getJSONObject(13)
+    @Test fun theRevisionIgnoresSessionFieldsButNotContent() {
+        val snapshot = snapshot()
+        val material = WatchSnapshot.revisionMaterial(snapshot)
+        // The synchroniser's own bookkeeping must not look like a change, and neither must tomorrow.
+        val touched = org.json.JSONObject(snapshot.toString()).put("revision", 999L).put("generatedAt", 1L)
+            .put("today", "2026-11-01")
+        assertEquals(material, WatchSnapshot.revisionMaterial(touched))
+        // A real change still moves it, so the field list cannot be widened until nothing is compared.
+        assertNotEquals(material, WatchSnapshot.revisionMaterial(
+            org.json.JSONObject(snapshot.toString()).put("steps", 20000)))
+    }
+    @Test fun aLaterRecordNeverChangesAnEarlierDaysSnapshot() {
+        // The synchroniser hashes a whole day's snapshot to decide whether to re-send it. If the history
+        // ran to today rather than to the day itself, logging one meal would invalidate every day in the
+        // index; this pins the property that keeps an edit's blast radius to the edit and later days.
+        val dayBefore = "2026-10-11"
+        val base = FitnessData(profile = Profile(age = 30, heightCm = 175.0, weightKg = 70.0, sex = "male", updatedAt = 1),
+            weights = listOf(WeightEntry(dayBefore, 70.0, 1)),
+            meals = listOf(MealEntry("m0", dayBefore, "lunch", "米饭", 100.0, 130.0, source = "manual", recordedAt = 1)))
+        val later = base.copy(meals = base.meals + MealEntry("m1", day, "dinner", "面条", 200.0, 260.0, source = "manual", recordedAt = 2))
+        fun earlier(data: FitnessData) = WatchSnapshot.create(data, dayBefore, 1, null).getJSONObject("history").toString()
+        assertEquals(earlier(base), earlier(later))
+        // The later day does see it, so the property is not just "history is always empty".
+        val laterDays = WatchSnapshot.create(later, day, 2, null).getJSONObject("history").getJSONArray("days")
+        assertEquals(day, laterDays.getJSONObject(laterDays.length() - 1).getString("day"))
+        assertEquals(2, laterDays.length())
+    }
+    @Test fun historyCarriesTheRecordedDaysAndTheMeasurements() {
+        val history = snapshot().getJSONObject("history")
+        val days = history.getJSONArray("days")
+        assertTrue(days.length() > 0)
+        val last = days.getJSONObject(days.length() - 1)
         assertEquals(day, last.getString("day"))
         assertEquals(190.0, last.getDouble("intakeKcal"), 0.001)
         assertEquals(521.5, last.getDouble("activityKcal"), 0.001)
         assertFalse(last.isNull("referenceKcal"))
-        // Days before any record still occupy their slot and carry no reference.
-        assertTrue(trend.getJSONObject(0).isNull("referenceKcal"))
+        // Only days with a record travel; the watch adds up a period from them.
+        for(position in 0 until days.length()) assertTrue(days.getJSONObject(position).getString("day") <= day)
+        val weights = history.getJSONArray("weights")
+        assertEquals(1, weights.length())
+        assertEquals(70.0, weights.getJSONObject(0).getDouble("value"), 0.001)
+        assertEquals("2026-10-12", weights.getJSONObject(0).getString("day"))
     }
     @Test fun aDayWithoutStepsOrWorkoutsStillProducesAValidSnapshot() {
         val bare = WatchSnapshot.create(FitnessData(
@@ -65,6 +96,7 @@ class WatchSnapshotTest {
         assertTrue(bare.isNull("recordedSteps"))
         assertEquals(0, bare.getInt("workoutSteps"))
         assertFalse(bare.getJSONObject("energy").getBoolean("overlapHandled"))
-        assertEquals(14, bare.getJSONArray("trend").length())
+        // No records at all: an empty history rather than a run of zero days.
+        assertEquals(0, bare.getJSONObject("history").getJSONArray("days").length())
     }
 }

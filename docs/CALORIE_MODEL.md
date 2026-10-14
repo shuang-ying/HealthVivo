@@ -103,6 +103,13 @@ https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_sr_legacy_food_csv_2018-0
 标签按粒度取固定间隔（周＝每天，月＝每 5 天，年＝每两个月），**严格居中于所属柱子**，两位数日期不会被列宽截断。
 体重与体脂按**稀疏测量**处理：只有测量的日期才有点，没测量不画点也不当成 0；按年显示时每个月取该月最后一次记录。
 
+### 手表端不重算这些规则
+
+手表拿到的是手机**已经按上面全部规则算好**的稀疏逐日序列（`history.days`：只含有记录的那天，每条含摄入、已记录活动、
+当天消耗参考，参考为空表示那天没有可用的体重），它只负责把落在某一列里的天数相加。这样"哪天用哪个体重""哪些天计入"
+这类规则只在手机实现一次，不会在两种语言里各写一遍而对不上；手表端要重算的只有日历换算（周／月／年、列标签、分组求和），
+这部分由 `watch/test/fixtures/trend-vectors.json` 与手表端 `trend-vectors.test.mjs` 逐字段锁定。
+
 ## 三餐与运动共用 API
 
 根据 [官方 OpenAI Chat Completions 格式](https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create) 和 [图像输入格式](https://developers.openai.com/api/docs/guides/images-vision?api-mode=chat) 实现可配置兼容接口，用户自行选择服务商、模型和密钥；未选择默认付费服务商。

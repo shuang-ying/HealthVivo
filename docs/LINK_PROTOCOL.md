@@ -122,8 +122,26 @@ state(1) | 传输标识(4) | 标志(2) | HMAC-SHA256(receiptKey, 前 7 字节)[0
 | `days` | `days`（最多 1 个日期快照）、`final` | state 4（存储提交后）；最后一批评为 `final` 时同时清除手表的更新请求标志 |
 | `ping` | 无 | state 2，用于连接自检（一次完整的加密往返） |
 
-日期正文结构沿用看板 schema 2（步数、运动、三餐摘要、能量、体重/BMI、体脂率、目标、AI 建议），
+日期正文结构为看板 **schema 3**（步数、运动、三餐摘要、能量、体重/BMI、体脂率、目标、AI 建议，以及 `history`），
 校验规则见 `watch/src/lib/dashboard.mjs` 与 `WatchSnapshot.kt`。
+
+### schema 3：history 取代逐日 trend
+
+schema 2 里的 `trend` 是"倒数 14 天的定长窗口"，只够画固定的日柱。schema 3 改成 **`history`**：
+
+| 字段 | 含义 |
+| --- | --- |
+| `days[]` | **只含有记录的那天**，`{day, intakeKcal, activityKcal, referenceKcal}`，由旧到新，且不晚于手机当天的日期 |
+| `weights[]` / `fats[]` | 体重的测量记录 `{day, value}`，由旧到新 |
+| `today` | 手机的当天日期，用于判断某一列是否"还没到" |
+
+`history` 是**稀疏**的：没有记录的那天不是一行零，而是根本不存在——空白日对任何周期都不贡献，
+这样一年的历史也能跟着每天的摘要一起发送。**每一条能量规则（哪天的体重生效、哪些天计入）都在手机侧算完**，
+手表只负责把落在某一列里的天数相加，所以规则不会在两种语言里各写一遍。
+运动记录新增可空的 `steps`（本次运动归属的步数）。
+
+手表侧的周期换算（周／月／年、列的标签与分组求和）用 `watch/test/fixtures/trend-vectors.json` 锁定：
+该文件由手机端 `TrendVectorsTest` 用 `Trends` 生成，手表端 `trend-vectors.test.mjs` 用 JS 重算并逐字段比对。
 
 ## 一次更新的完整流程
 

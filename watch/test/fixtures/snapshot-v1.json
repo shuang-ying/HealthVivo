@@ -1,94 +1,44 @@
 {
-  "schema": 2,
+  "schema": 3,
   "targetWeightKg": 65,
-  "trend": [
-    {
-      "activityKcal": 0,
-      "referenceKcal": null,
-      "intakeKcal": 0,
-      "day": "2026-09-29"
-    },
-    {
-      "activityKcal": 0,
-      "referenceKcal": null,
-      "intakeKcal": 0,
-      "day": "2026-09-30"
-    },
-    {
-      "activityKcal": 0,
-      "referenceKcal": null,
-      "intakeKcal": 0,
-      "day": "2026-10-01"
-    },
-    {
-      "activityKcal": 0,
-      "referenceKcal": null,
-      "intakeKcal": 0,
-      "day": "2026-10-02"
-    },
-    {
-      "activityKcal": 0,
-      "referenceKcal": null,
-      "intakeKcal": 0,
-      "day": "2026-10-03"
-    },
-    {
-      "activityKcal": 0,
-      "referenceKcal": null,
-      "intakeKcal": 0,
-      "day": "2026-10-04"
-    },
-    {
-      "activityKcal": 0,
-      "referenceKcal": null,
-      "intakeKcal": 0,
-      "day": "2026-10-05"
-    },
-    {
-      "activityKcal": 0,
-      "referenceKcal": null,
-      "intakeKcal": 0,
-      "day": "2026-10-06"
-    },
-    {
-      "activityKcal": 0,
-      "referenceKcal": null,
-      "intakeKcal": 0,
-      "day": "2026-10-07"
-    },
-    {
-      "activityKcal": 0,
-      "referenceKcal": null,
-      "intakeKcal": 0,
-      "day": "2026-10-08"
-    },
-    {
-      "activityKcal": 0,
-      "referenceKcal": null,
-      "intakeKcal": 0,
-      "day": "2026-10-09"
-    },
-    {
-      "activityKcal": 0,
-      "referenceKcal": null,
-      "intakeKcal": 0,
-      "day": "2026-10-10"
-    },
-    {
-      "activityKcal": 0,
-      "referenceKcal": null,
-      "intakeKcal": 0,
-      "day": "2026-10-11"
-    },
-    {
-      "activityKcal": 613.375,
-      "referenceKcal": 2262.125,
-      "intakeKcal": 422.5,
-      "day": "2026-10-12"
-    }
-  ],
   "advice": null,
   "workoutSteps": 3000,
+  "history": {
+    "fats": [
+      {
+        "day": "2026-10-08",
+        "value": 22
+      },
+      {
+        "day": "2026-10-12",
+        "value": 21.5
+      }
+    ],
+    "days": [
+      {
+        "activityKcal": 100.82,
+        "referenceKcal": 1759.57,
+        "intakeKcal": 520,
+        "day": "2026-10-11"
+      },
+      {
+        "activityKcal": 613.375,
+        "referenceKcal": 2262.125,
+        "intakeKcal": 422.5,
+        "day": "2026-10-12"
+      }
+    ],
+    "weights": [
+      {
+        "day": "2026-10-05",
+        "value": 71
+      },
+      {
+        "day": "2026-10-12",
+        "value": 70
+      }
+    ]
+  },
   "body": {
     "fatStatus": "参考偏高",
     "bmiStatus": "正常",
@@ -153,7 +103,8 @@
       "estimated": false,
       "distanceKm": null,
       "category": "aerobic",
-      "net": true
+      "net": true,
+      "steps": 3000
     },
     {
       "kcal": 91.875,
@@ -166,10 +117,12 @@
       "estimated": false,
       "distanceKm": null,
       "category": "anaerobic",
-      "net": true
+      "net": true,
+      "steps": null
     }
   ],
   "exerciseCount": 2,
+  "today": "2026-10-12",
   "generatedAt": 1760000000000,
   "client": "com.lrh.healthvivo.watch",
   "omittedExercises": 0,

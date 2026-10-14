@@ -40,6 +40,9 @@ data class TrendBucket(val startDay: String, val label: String, val shortText: S
     val intakeKcal: Double, val activityKcal: Double, val referenceKcal: Double?,
     val recorded: Boolean, val future: Boolean)
 
+/** One day of the sparse history the watch aggregates: only days that actually hold a record. */
+data class TrendHistoryDay(val day: String, val intakeKcal: Double, val activityKcal: Double, val referenceKcal: Double?)
+
 /** One point of a measurement chart, which is sparse by nature: many columns hold no measurement. */
 data class TrendPoint(val startDay: String, val label: String, val shortText: String, val rangeText: String,
     val value: Double?, val future: Boolean)
@@ -103,6 +106,33 @@ object Trends {
     private fun columnShort(period: TrendPeriod, start: LocalDate): String = when (period.scale) {
         TrendScale.Week, TrendScale.Month -> "%d/%d".format(start.monthValue, start.dayOfMonth)
         TrendScale.Year -> "%d月".format(start.monthValue)
+    }
+
+    /**
+     * The per-day figures the watch builds its charts from, oldest first.
+     *
+     * Sparse on purpose: a day with no record contributes nothing to any period, so it is left out
+     * rather than sent as a row of zeros - which also keeps a year of history small enough to travel
+     * with every day's snapshot. Every energy rule is applied here, on the phone: which weight is in
+     * force, which days count, and what a day's reference is. The watch only has to add up the days of
+     * the period it is showing, so no rule is implemented twice and the two cannot drift apart.
+     */
+    fun history(data: FitnessData, limit: Int = 500, today: LocalDate = LocalDate.now()): List<TrendHistoryDay> {
+        require(limit in 1..2000)
+        val mealsByDay = data.meals.groupBy { it.day }
+        val workoutsByDay = data.exercises.groupBy { it.day }
+        val stepsByDay = data.steps.associateBy { it.day }
+        val weights = data.weights.sortedBy { it.day }
+        val profile = data.profile
+        val days = (mealsByDay.keys + workoutsByDay.keys + stepsByDay.keys)
+            .filter { it <= today.toString() }.sorted().takeLast(limit)
+        return days.map { day ->
+            val weight = CalorieCalculator.weightOn(weights, day)
+            val activity = CalorieCalculator.activities(stepsByDay[day], workoutsByDay[day] ?: emptyList(), weight)
+            val plan = profile?.takeIf { weight != null }?.copy(weightKg = weight!!)
+                ?.let { CalorieCalculator.plan(it, activity.kcal ?: 0.0) }
+            TrendHistoryDay(day, mealsByDay[day]?.sumOf { it.kcal } ?: 0.0, activity.kcal ?: 0.0, plan?.maintenanceKcal)
+        }
     }
 
     /**
