@@ -7,6 +7,10 @@
 // explicitly. The snapshot's own `today` is what decides which columns have happened yet: a day after
 // it may not appear in the history at all.
 //
+// The series is app-wide: `history` travels with the newest day's snapshot (and is an explicit null on
+// every other day), so `rows` takes it as its own argument and the tests below pass it that way - the
+// page must never be drawn from the day that happens to be on screen.
+//
 // The arithmetic itself is pinned against the phone by trend-vectors.test.mjs; these tests pin the
 // rows the page renders.
 
@@ -50,8 +54,10 @@ function historyDays() {
   return days
 }
 function history(days, weights, fats) { return { days: days || [], weights: weights || [], fats: fats || [] } }
+// The series is an input of its own: the phone sends it with the newest day's snapshot alone, so the
+// page is handed whatever the archive is holding rather than anything read out of the day on screen.
 function homeRows(overrides) { return dashboard.rows(dashboard.validate(snapshot(overrides)), 'home') }
-function pageRows(page, overrides) { return dashboard.rows(dashboard.validate(snapshot(overrides)), page) }
+function pageRows(page, overrides) { const value = dashboard.validate(snapshot(overrides)); return dashboard.rows(value, page, value.history) }
 function chartOf(page, overrides) { return pageRows(page, overrides).filter(item => item.bars)[0] }
 function exercise(steps, includedInSteps) {
   return { name: '跑步', category: 'aerobic', minutes: 32, distanceKm: null, sets: null, reps: null, loadKg: null,
@@ -126,6 +132,20 @@ test('a history validates and a malformed one is rejected', () => {
   // A weight may be dated after the snapshot's today - the phone keeps the whole series, not only the
   // days up to the one being viewed - so only the record order is checked for the measurements.
   assert.equal(dashboard.validate(snapshot({ history: history([], [{ day: '2026-10-20', value: 70 }]) })).history.weights.length, 1)
+  // The phone attaches the series to its own today's snapshot and sends an explicit null with every
+  // other day, so null is a value the watch has to accept. A key that is missing altogether is still
+  // refused: only the phone's own two shapes are legal.
+  assert.equal(dashboard.validate(snapshot({ history: null })).history, null)
+  const absent = snapshot(); delete absent.history
+  assert.throws(() => dashboard.validate(absent), /history/)
+  // A history read back from the watch's own storage has no snapshot left to be bounded by: every day
+  // it holds was legal when the phone sent it, so only its shape, its order and its caps are checked.
+  const carried = history([{ day: '2027-01-02', intakeKcal: 1, activityKcal: 1, referenceKcal: 1 }])
+  dashboard.validateHistory(carried)
+  assert.equal(carried.days.length, 1)
+  assert.throws(() => dashboard.validateHistory({ days: [{ day: '2027-01-02', intakeKcal: 1, activityKcal: 1, referenceKcal: 1 },
+    { day: '2027-01-01', intakeKcal: 1, activityKcal: 1, referenceKcal: 1 }], weights: [], fats: [] }), /history day/)
+  assert.throws(() => dashboard.validateHistory(null), /history/)
 
   const cases = [
     ['no history at all', undefined],
@@ -348,8 +368,10 @@ test('the axis clears the tallest column by a fraction of the range and keeps th
   assert.equal(chart.axisBottom, '轴底 0 千卡')
   assert.equal(chart.axisTop, '轴顶 1080 千卡')
   assert.equal(Math.max.apply(null, chart.bars.map(bar => bar.height)), 111)
-  const caption = items.filter(item => item.title.indexOf('纵轴 ') === 0)[0]
-  assert.equal(caption.title, '纵轴 0–1080 千卡')
+  // The bounds beside the plot are the axis speaking for itself; the caption that used to explain them
+  // is gone, and nothing else takes its place.
+  assert.equal(items.filter(item => item.title.indexOf('纵轴 ') === 0).length, 0)
+  assert.equal(items.filter(item => /起算|浅色短线|点击下方|已选中/.test(item.body)).length, 0)
   const daily = chart.bars.filter(bar => bar.height > 3)
   assert.equal(daily.length, 1)
   assert.equal(daily[0].top, 9, 'the tallest bar clears the frame without touching it')
@@ -363,7 +385,7 @@ test('a measurement axis starts just below the lowest reading and never at zero'
   const chart = weight.filter(item => item.bars)[0]
   assert.equal(chart.axisBottom, '轴底 69.8 kg')
   assert.equal(chart.axisTop, '轴顶 72.2 kg')
-  assert.equal(weight.filter(item => item.title.indexOf('纵轴 ') === 0)[0].title, '纵轴 69.8–72.2 kg')
+  assert.equal(weight.filter(item => /余量|不强制包含|没有测量的日期/.test(item.body)).length, 0)
   const heights = chart.bars.filter(bar => bar.height > 3).map(bar => bar.height)
   assert.equal(heights.length, 2)
   // A two-kilogram change must not be flattened into the margin.
@@ -397,7 +419,7 @@ test('the value shown by default is the last column that recorded something', ()
   assert.equal(measure.filter(item => item.title === '10/12 周一' && item.highlight && !item.action)[0].body, '70 kg')
 })
 
-test('a tapped column is the one the page shows, and it is marked in the chart and the list', () => {
+test('a tapped column is the one the page shows, and it is marked in the chart', () => {
   const page = 'trend:meals:month:' + DAY
   const items = pageRows(page + ':4', { history: history(historyDays()) })
   const chart = items.filter(item => item.bars)[0]
@@ -407,10 +429,10 @@ test('a tapped column is the one the page shows, and it is marked in the chart a
   assert.equal(chart.marker, true)
   assert.ok(chart.markerLeft > 0 && chart.markerLeft < 360)
   assert.equal(items.filter(item => item.title === '10/5' && item.highlight && !item.action)[0].body, '1600 千卡')
-  const selected = items.filter(item => item.action === page + ':4')
-  assert.equal(selected.length, 1)
-  assert.equal(selected[0].cardClass, 'tab-on')
-  assert.equal(selected[0].active, true)
+  // Nothing in the page's own rows selects a column any more: the dated list under the chart is gone,
+  // and the bar itself is the tap target.
+  assert.equal(items.filter(item => /:\d+$/.test(item.action)).length, 0)
+  assert.equal(chart.bars[4].action, page + ':4')
   // An index past the end of the period is clamped rather than crashing the page.
   assert.equal(pageRows(page + ':40', { history: history(historyDays()) }).filter(item => item.title === '10/31' && item.highlight && !item.action).length, 1)
   // The index is a column of whichever period the anchor lands in: the same index in February, which
@@ -420,29 +442,32 @@ test('a tapped column is the one the page shows, and it is marked in the chart a
   assert.equal(february.filter(item => item.title === '2/28' && item.highlight && !item.action).length, 1)
 })
 
-test('the column list shows the most recent handful and always the selected one', () => {
-  const listOf = (base, index) => pageRows(index === undefined ? base : base + ':' + index, { history: history(historyDays()) })
-    .filter(item => item.action.indexOf(base + ':') === 0)
-  // The default selection is the last column that recorded something, and it is added to the six most
-  // recent ones, so a month shows seven rows here.
-  const recent = listOf('trend:meals:month:' + DAY)
-  assert.equal(recent.length, 7)
-  assert.equal(recent[0].action, 'trend:meals:month:' + DAY + ':13')
-  assert.equal(recent[0].cardClass, 'tab-on')
-  assert.equal(recent[1].action, 'trend:meals:month:' + DAY + ':25')
-  assert.equal(recent[6].action, 'trend:meals:month:' + DAY + ':30')
-  // A selection inside the window does not add a row.
-  const inWindow = listOf('trend:meals:month:' + DAY, 30)
-  assert.equal(inWindow.length, 6)
-  assert.equal(inWindow[5].action, 'trend:meals:month:' + DAY + ':30')
-  // A selected column older than the window is still reachable, and sits first.
-  const withOld = listOf('trend:meals:month:' + DAY, 4)
-  assert.equal(withOld.length, 7)
-  assert.equal(withOld[0].action, 'trend:meals:month:' + DAY + ':4')
-  assert.equal(withOld[0].cardClass, 'tab-on')
-  // A week is itself a handful, so all seven columns stay tappable.
-  assert.equal(listOf('trend:meals:week:' + DAY).length, 7)
-  assert.equal(listOf('trend:balance:year:' + DAY).length, 6)
+// Every column is reachable without a dated list under the chart: the bar for that column is the tap
+// target, and the page it names is the same page name the router already accepts.
+test('every bar selects its own column and no dated row list is left', () => {
+  const barsOf = (base, index, series) => pageRows(index === undefined ? base : base + ':' + index, { history: series || history(historyDays()) })
+  const month = barsOf('trend:meals:month:' + DAY).filter(item => item.bars)[0].bars
+  assert.equal(month.length, 31)
+  month.forEach((bar, index) => {
+    assert.equal(bar.action, 'trend:meals:month:' + DAY + ':' + index)
+    assert.ok(dashboard.parse(bar.action), 'a bar names a page the router opens')
+  })
+  // The month's rows are the tabs, the chips, the period, the chart, the readout and its detail: no
+  // row is a date the user could tap to switch column, and no hint invites them to.
+  const rows = barsOf('trend:meals:month:' + DAY)
+  assert.equal(rows.filter(item => /:\d+$/.test(item.action)).length, 0)
+  assert.equal(rows.filter(item => /点击下方|任一时段|查看这一天/.test(item.body + item.hint)).length, 0)
+  // The selected column is the one the bar names, in every scale and on the measurement pages too.
+  const tapped = barsOf('trend:meals:month:' + DAY, 4).filter(item => item.bars)[0].bars
+  assert.equal(tapped.filter(bar => bar.color === '#F2C14E').length, 1)
+  assert.equal(tapped[4].color, '#F2C14E')
+  const reading = history([], [{ day: '2026-10-14', value: 70 }], [])
+  const week = barsOf('measure:weight:week:' + DAY, 2, reading).filter(item => item.bars)[0].bars
+  assert.equal(week.length, 7)
+  assert.equal(week[2].action, 'measure:weight:week:' + DAY + ':2')
+  assert.equal(week[2].color, '#F2C14E')
+  const year = barsOf('trend:balance:year:' + DAY).filter(item => item.bars)[0].bars
+  assert.equal(year[0].action, 'trend:balance:year:' + DAY + ':0')
 })
 
 // The cursor is a date, so the scale chips keep the calendar place instead of a period count, and a
@@ -519,11 +544,74 @@ test('a day without a history says it is not synced instead of drawing an empty 
   const text = items.map(item => item.title + ' ' + item.body).join(' | ')
   assert.match(text, /趋势数据待同步/)
   assert.match(text, /更新到手表/)
+  // The history the phone now sends with every day but the newest is an explicit null, and the watch
+  // has never received one: the page reports that rather than drawing an empty chart. This holds for
+  // both charts, and the day's own snapshot is irrelevant to it.
+  const valued = dashboard.validate(snapshot({ history: null }))
+  assert.equal(valued.history, null)
+  assert.equal(dashboard.rows(valued, 'trend:exercise:week:' + DAY, null).filter(item => item.bars).length, 0)
+  assert.ok(dashboard.rows(valued, 'trend:exercise:week:' + DAY, null).some(item => item.title === '趋势数据待同步'))
+  assert.equal(dashboard.rows(valued, 'measure:weight:week:' + DAY, null).filter(item => item.bars).length, 0)
+  assert.ok(dashboard.rows(valued, 'measure:fat:week:' + DAY, null).some(item => item.title === '趋势数据待同步'))
   // A history that is present but empty is a calendar with nothing in it, not a missing sync.
   const empty = pageRows('trend:exercise:week:' + DAY, { history: history([]) })
   assert.equal(empty.filter(item => item.bars)[0].bars.length, 7)
   assert.equal(empty.filter(item => item.bars)[0].bars.filter(bar => bar.height > 3).length, 0)
   assert.equal(empty.filter(item => item.title === '这一段没有记录').length, 1)
+})
+
+// The series belongs to the app, not to the day on screen. The phone now attaches it to the snapshot
+// whose day is its own today and sends null with every other day, so a page drawn from the day's own
+// snapshot would simply have no series for the 12th - which is exactly how the 14th's weight went
+// missing while the 12th was viewed.
+test('a trend page is drawn from the series it is handed, whichever day is on screen', () => {
+  const older = dashboard.validate(snapshot({ history: null }))
+  const days = historyDays()
+  const newer = history(days, [{ day: '2026-10-05', value: 71 }, { day: '2026-10-12', value: 70 }, { day: '2026-10-14', value: 69.5 }],
+    [{ day: '2026-10-08', value: 22 }, { day: '2026-10-14', value: 21.5 }])
+  // The 12th's own snapshot is an older day: its `today` is the 12th and it carries no series at all.
+  assert.equal(older.day, DAY)
+  assert.equal(older.today, DAY)
+  const week = dashboard.rows(older, 'measure:weight:week:' + DAY, newer)
+  const chart = week.filter(item => item.bars)[0]
+  assert.equal(chart.bars.length, 7)
+  // 10/14 is the Wednesday of that week, and its reading is drawn even though the snapshot on screen
+  // knows nothing past the 12th.
+  assert.equal(chart.bars[2].color, '#F2C14E')
+  assert.notEqual(chart.bars[2].color, '#3A3448')
+  assert.equal(week.filter(item => item.title === '10/14 周三' && item.highlight && !item.action)[0].body, '69.5 kg')
+  assert.equal(week.filter(item => item.title === '这一段变化')[0].body, '−0.5 kg · 2 次记录')
+  const trend = dashboard.rows(older, 'trend:meals:week:' + DAY, newer)
+  const bars = trend.filter(item => item.bars)[0].bars
+  assert.equal(bars[2].color, '#F2C14E')
+  assert.equal(trend.filter(item => item.title === '10/14 周三' && item.highlight && !item.action)[0].body, '2500 千卡')
+  // The series handed in is the only one read: a different one changes the page even though the day's
+  // own snapshot never changes.
+  const other = dashboard.rows(older, 'trend:meals:week:' + DAY, history([{ day: '2026-10-12', intakeKcal: 0, activityKcal: 0, referenceKcal: null }]))
+  assert.equal(other.filter(item => item.title === '10/12 周一' && item.highlight && !item.action)[0].body, '0 千卡')
+})
+
+test('a series that has not reached the day on screen leaves the tail missing, not zero', () => {
+  // The watch keeps the last series it received, and the phone had nothing recorded after the 12th.
+  // The day on screen is the 14th, whose own `today` is the 14th: the columns after the 12th have no
+  // record, so they are gaps rather than measured zeros, and the readout does not invent one for them.
+  const days = []
+  for (let index = 0; index < 12; index++) days.push({ day: '2026-10-' + ('0' + (index + 1)).slice(-2),
+    intakeKcal: 1200 + index * 100, activityKcal: 200, referenceKcal: 1800 })
+  const value = dashboard.validate(snapshot({ history: null }))
+  const items = dashboard.rows(value, 'trend:meals:week:' + DAY, history(days, [], []))
+  const chart = items.filter(item => item.bars)[0]
+  assert.equal(chart.bars.length, 7)
+  // 10/12 recorded; 10/13 onwards is past the last day the series holds.
+  assert.notEqual(chart.bars[0].color, '#3A3448')
+  chart.bars.slice(1).forEach(bar => {
+    assert.equal(bar.color, '#3A3448', 'a column with no record is a pale stub')
+    assert.equal(bar.height, 3)
+    assert.equal(bar.top, 117)
+  })
+  // The default readout is the last column that recorded something - not a zero for the tail.
+  assert.equal(items.filter(item => item.title === '10/12 周一' && item.highlight && !item.action)[0].body, '2300 千卡')
+  assert.equal(items.filter(item => item.title === '10/14 周三' && item.highlight).length, 0)
 })
 
 test('an exercise row says whether its steps are already in the day total', () => {
@@ -562,14 +650,14 @@ test('a snapshot shaped like an empty day from the phone validates and renders',
   }))
   assert.equal(value.steps, null)
   assert.equal(dashboard.rows(value, 'home')[0].body, '未记录')
-  const items = dashboard.rows(value, 'trend:balance:week:' + DAY)
+  const items = dashboard.rows(value, 'trend:balance:week:' + DAY, value.history)
   const bars = items.filter(item => item.bars)[0].bars
   assert.equal(bars.length, 7)
   assert.equal(bars[2].color, '#3A3448')
   assert.equal(bars[2].height, 3)
   assert.equal(bars[2].top, 117)
   assert.equal(items.filter(item => item.title === '10/14 周三' && item.highlight)[0].body, '待补全')
-  const measure = dashboard.rows(value, 'measure:weight:week:' + DAY)
+  const measure = dashboard.rows(value, 'measure:weight:week:' + DAY, value.history)
   assert.equal(measure.filter(item => item.bars).length, 0)
   assert.equal(measure.filter(item => item.title === '这一段没有记录').length, 1)
 })
@@ -592,15 +680,61 @@ test('the page names the router accepts, including the two old ones', () => {
     'trend:meals:week:2026-13-05', 'trend:meals:week:2026-02-31', 'measure:bogus:week:2026-10-05',
     'measure:weight:week:2026-10-05:1000000']
   rejected.forEach(page => assert.equal(dashboard.parse(page), null, page + ' is not a chart page'))
-  // Every action a row offers must be a page the router can open.
+  // Every action a row offers must be a page the router can open, and so must every bar of a chart.
   const value = dashboard.validate(snapshot({ history: history(historyDays(), [{ day: '2026-10-05', value: 71 }], [{ day: '2026-10-08', value: 22 }]) }))
   SERIES_PAGES.concat(['measure:weight:month:' + DAY]).forEach(page => {
-    dashboard.rows(value, page).forEach(item => {
+    const items = dashboard.rows(value, page, value.history)
+    items.forEach(item => {
       if (!item.action) return
       assert.ok(dashboard.parse(item.action) || ['energy', 'exercise', 'meals', 'advice', 'connection'].indexOf(item.action) >= 0,
         item.action + ' is offered but the router would refuse it')
     })
+    items.forEach(item => (item.bars || []).forEach(bar => {
+      assert.ok(dashboard.parse(bar.action), bar.action + ' is a bar the router would refuse')
+    }))
   })
+})
+
+// The watch keeps its scroll offset across a redraw that only changes the card's content, and starts
+// at the top for a real move. `sameChart` is that decision, kept out of the page so it can be pinned.
+test('a redraw inside one card keeps the scroll, a real move starts at the top', () => {
+  const chart = 'trend:meals:month:2026-10-14'
+  ;['trend:meals:week:2026-10-14', 'trend:exercise:month:2026-10-14', 'trend:balance:month:2026-10-14:3',
+    'trend:meals:month:2026-08-14'].forEach(next => assert.equal(dashboard.sameChart(chart, next), true, next + ' stays in the chart'))
+  assert.equal(dashboard.sameChart('measure:weight:month:2026-10-14', 'measure:fat:month:2026-10-14'), true)
+  assert.equal(dashboard.sameChart('measure:weight:month:2026-10-14', 'measure:weight:year:2026-10-14'), true)
+  assert.equal(dashboard.sameChart('trend:meals:week:2026-10-14', 'measure:weight:week:2026-10-14'), false)
+  assert.equal(dashboard.sameChart('home', chart), false)
+  assert.equal(dashboard.sameChart(chart, 'home'), false)
+  assert.equal(dashboard.sameChart('home', 'energy'), false)
+  assert.equal(dashboard.sameChart(chart, 'trend:bogus:week:2026-10-14'), false)
+})
+
+// The list is the only scroller in the app, so the position it must return to is recorded from the
+// list itself. These assertions pin the wiring the runtime offers: an absolute `startoffset`, the
+// `onscroll` callback that reports `scrollY` while the user drags (with `scrollindex` as the range the
+// watch documents on its own), and one tap target per bar.
+test('the list is wired to keep and restore its own scroll offset', () => {
+  const template = readFileSync(new URL('../src/Home/index.ux', import.meta.url), 'utf8')
+  assert.match(template, /<list id="dashboard-list"[^>]*startoffset="\{\{scrollOffset\}\}"/,
+    'the list binds its absolute scroll offset')
+  assert.match(template, /<list id="dashboard-list"[^>]*onscroll="onScroll"/,
+    'the list reports where it is while the user scrolls it')
+  assert.match(template, /<list id="dashboard-list"[^>]*onscrollindex="onScrollIndex"/,
+    'the list also reports its visible index range')
+  assert.match(template, /for="\{\{bar in card\.bars\}\}"[^>]*onclick="select\(bar\.action\)"/,
+    'every bar taps through to its own column')
+  assert.match(template, /scrollOffset: ''/, 'the offset starts empty, which is the top')
+  // The offset is recorded from the events rather than read when a tap arrives, and it is applied only
+  // for a redraw inside the same card.
+  const script = template.slice(template.indexOf('<script>'))
+  assert.match(script, /onScroll\(event\)[\s\S]*?event\.scrollY[\s\S]*?this\.runtime\.scrollY = value/)
+  assert.match(script, /onScrollIndex\(event\)[\s\S]*?event\.first[\s\S]*?this\.runtime\.scrollIndex = value/)
+  assert.match(script, /const keep = dashboard\.sameChart\(this\.runtime\.page, page\)/)
+  assert.match(script, /restoreScroll\(keep\)[\s\S]*?this\.runtime\.scrollY > 0[\s\S]*?String\(this\.runtime\.scrollY\)/)
+  // The fallback restores the item at the top of the view, which the list clamps to its own end.
+  assert.match(script, /this\.runtime\.scrollIndex > 0[\s\S]*?scrollTo\(\{ index: this\.runtime\.scrollIndex, behavior: 'instant' \}\)/)
+  assert.match(script, /if \(!keep\)[\s\S]*?this\.runtime\.scrollY = 0; this\.runtime\.scrollIndex = 0[\s\S]*?scrollTo\(\{ index: 0 \}\)/)
 })
 
 test('the dashboard avoids globals and syntax the watch runtime may not provide', () => {

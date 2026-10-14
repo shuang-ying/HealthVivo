@@ -1,5 +1,12 @@
 <template>
-  <list id="dashboard-list" class="page">
+  <!--
+    `startoffset` is the list's own absolute scroll offset (documented for list, and the only control
+    that survives a redraw which rebuilds the items). `onscroll` reports where the list is while the
+    user drags it, which is when the offset has to be recorded - by the time a tap repaints the list it
+    is already too late to ask. `onscrollindex` carries the visible index range, recorded alongside it
+    for a runtime that reports the range but not the pixel offset.
+  -->
+  <list id="dashboard-list" class="page" startoffset="{{scrollOffset}}" onscroll="onScroll" onscrollindex="onScrollIndex">
     <list-item type="header" class="header">
       <text class="eyebrow">VITALITY · 活力记录</text>
       <text class="title">{{pageTitle}}</text>
@@ -62,7 +69,7 @@
         <text class="trend-marker" if="{{card.marker}}" style="left: {{card.markerLeft}}px;">▼</text>
       </div>
       <div class="trend-plot" if="{{card.bars}}">
-        <div class="trend-bar" for="{{bar in card.bars}}" style="margin-top: {{bar.top}}px; width: {{bar.width}}px; height: {{bar.height}}px; background-color: {{bar.color}};"></div>
+        <div class="trend-bar" for="{{bar in card.bars}}" style="margin-top: {{bar.top}}px; width: {{bar.width}}px; height: {{bar.height}}px; background-color: {{bar.color}};" onclick="select(bar.action)"></div>
       </div>
       <div class="trend-labels" if="{{card.bars}}">
         <text class="{{bar.labelClass}}" for="{{bar in card.bars}}" style="width: {{bar.width}}px;">{{bar.label}}</text>
@@ -90,7 +97,7 @@ function today() { const value = new Date(); return value.getFullYear() + '-' + 
 export default {
   data: { pageTitle: '今日总览', dayText: '', savedText: '', detail: false, pairMode: false, items: [],
     connectionText: '正在启动直连服务…', updateButton: '获取更新', backLabel: '‹ 返回总览',
-    confirmDisconnect: false },
+    confirmDisconnect: false, scrollOffset: '' },
   staticData: { runtime: {} },
   onInit() {
     const link = this.$app.$def.getLinkRuntime()
@@ -99,6 +106,7 @@ export default {
     this.runtime.loaded = false; this.runtime.busy = false; this.runtime.pending = false; this.runtime.connected = false
     this.runtime.dayGeneration = 0; this.runtime.screenTimer = null
     this.runtime.snapshot = null; this.runtime.savedAt = 0; this.runtime.archive = link.archive
+    this.runtime.scrollY = 0; this.runtime.scrollIndex = 0
     this.runtime.savedCount = -1
     this.runtime.unsubscribe = link.subscribe(state => {
       this.runtime.loaded = state.ready; this.runtime.busy = state.busy; this.runtime.pending = state.pending
@@ -157,15 +165,52 @@ export default {
   connection() { this.confirmDisconnect = false; this.select('connection') },
   select(page) {
     if (!page) return
-    if (page.indexOf('day:') === 0) { this.runtime.day = page.slice(4); this.runtime.page = 'home'; this.loadDay(); return }
+    if (page.indexOf('day:') === 0) { this.runtime.day = page.slice(4); this.runtime.page = 'home'; this.restoreScroll(false); this.loadDay(); return }
     // The trend pages carry their own state in their name (series, scale, how many periods back, which
     // column was tapped), so the router asks the dashboard rather than keeping a list that cannot know
     // about tomorrow's scale.
     if (['home', 'connection', 'energy', 'exercise', 'meals', 'advice', 'dates',
       'meal:breakfast', 'meal:lunch', 'meal:dinner', 'meal:snack'].indexOf(page) < 0 && !dashboard.parse(page)) return
     if (page !== 'connection') this.confirmDisconnect = false
-    this.runtime.page = page; this.updateDisplay()
-    try { this.$element('dashboard-list').scrollTo({ index: 0 }) } catch (_) {}
+    // A series tab, a scale chip, a period step and a column tap all redraw the card the user is
+    // already standing on. Only a real move starts at the top.
+    const keep = dashboard.sameChart(this.runtime.page, page)
+    this.runtime.page = page; this.updateDisplay(); this.restoreScroll(keep)
+  },
+  /**
+   * Put the list back where it was when a tap only redraws the chart card the user is already in.
+   *
+   * The position is carried by the list's own `startoffset`: an absolute pixel offset, which is the
+   * one control that survives a redraw that rebuilds the items. The runtime owns the scroll range and
+   * clamps a restore that no longer fits into shorter content, and `onScroll` records whatever
+   * position the list actually reached - so the offset the watch holds is never one the list refused.
+   * When the runtime reports the visible index range instead of a pixel offset, the top item is the
+   * position to return to and the list clamps an index past its own end.
+   */
+  restoreScroll(keep) {
+    if (!keep) {
+      this.runtime.scrollY = 0; this.runtime.scrollIndex = 0
+      this.scrollOffset = ''
+      try { this.$element('dashboard-list').scrollTo({ index: 0 }) } catch (_) {}
+      return
+    }
+    if (this.runtime.scrollY > 0) { this.scrollOffset = String(this.runtime.scrollY); return }
+    this.scrollOffset = ''
+    if (this.runtime.scrollIndex > 0) {
+      try { this.$element('dashboard-list').scrollTo({ index: this.runtime.scrollIndex, behavior: 'instant' }) } catch (_) {}
+    }
+  },
+  /** Where the list is while the user drags it, so a redraw has somewhere to return to. */
+  onScroll(event) {
+    const value = event && typeof event.scrollY === 'number' ? event.scrollY : null
+    if (value === null || !(value >= 0)) return
+    this.runtime.scrollY = value
+  },
+  /** The visible index range, for the runtimes that report a range rather than a pixel offset. */
+  onScrollIndex(event) {
+    const value = event && typeof event.first === 'number' ? event.first : null
+    if (value === null || !(value >= 0)) return
+    this.runtime.scrollIndex = value
   },
   updateDisplay() {
     const titles = { home: '每日总览', connection: '连接管理', energy: '每日能量参考', exercise: '运动记录',
@@ -178,7 +223,9 @@ export default {
     this.savedText = this.runtime.savedAt ? '保存于 ' + dashboard.time(this.runtime.savedAt) : '该日暂无已同步记录'
     if (this.pairMode) this.items = []
     else if (this.runtime.page === 'dates') this.items = this.runtime.archive.dates().map(day => ({ title: day, body: '查看这一天', action: 'day:' + day, highlight: false, cardClass: 'card', hint: '点击查看 ›' }))
-    else this.items = dashboard.rows(this.runtime.snapshot, this.runtime.page)
+    // The series belongs to the app, not to the day on screen: the archive keeps the last one the phone
+    // sent, so viewing the 12th still draws the 14th's reading.
+    else this.items = dashboard.rows(this.runtime.snapshot, this.runtime.page, this.runtime.archive.history())
   },
   askClearPhone() { this.confirmDisconnect = true },
   cancelClearPhone() { this.confirmDisconnect = false },

@@ -16,10 +16,6 @@ const TREND_MISSING = '#3A3448'
 const TREND_ZERO = '#51485E'
 const TREND_NEGATIVE = '#913643'
 const TREND_MARK = '#F2C14E'
-// A month can hold 31 columns, so the tappable list shows the most recent handful. A week holds only
-// seven, which is already a handful, so all of them stay reachable.
-const TREND_LIST = 6
-const TREND_LIST_SHORT = 7
 const TREND_PLOT_MIN_SPAN = 100
 const SERIES_TABS = [
   { key: 'meals', title: '饮食', label: '每日摄入', color: '#7955D8' },
@@ -227,16 +223,25 @@ function measure(values, model, today) {
       rangeText: columnText(model.scale, column[0]), value: value, future: limit !== null && column[0] > limit }
   })
 }
+/**
+ * The app-wide sparse series: the days that hold an energy record, plus the weight and body-fat
+ * measurements. The phone attaches it to the one snapshot whose `day` is its own today and sends an
+ * explicit null with every other day, so a history read back from the watch's own storage has no
+ * snapshot to be bounded by - `today` is then omitted and only the shape, the order and the caps are
+ * checked. Everything the phone can derive a figure for was already bounded when it was received.
+ */
 function validateHistory(history, today) {
   if (!history || typeof history !== 'object' || Array.isArray(history)) throw new Error('history')
   if (!Array.isArray(history.days) || history.days.length > HISTORY_LIMIT ||
       !Array.isArray(history.weights) || history.weights.length > MEASUREMENT_LIMIT ||
       !Array.isArray(history.fats) || history.fats.length > MEASUREMENT_LIMIT) throw new Error('history')
+  const limit = DATE.test(today || '') ? today : null
   let previous = ''
   history.days.forEach(entry => {
     // The phone sends only days that hold a record, oldest first and never past its own today; a day
     // after today would be a date the phone cannot have derived an energy figure for.
-    if (!entry || typeof entry.day !== 'string' || !DATE.test(entry.day) || entry.day <= previous || entry.day > today ||
+    if (!entry || typeof entry.day !== 'string' || !DATE.test(entry.day) || entry.day <= previous ||
+        (limit !== null && entry.day > limit) ||
         !optionalNumber(entry.intakeKcal) || entry.intakeKcal === null ||
         !optionalNumber(entry.activityKcal) || entry.activityKcal === null || !optionalNumber(entry.referenceKcal)) throw new Error('history day')
     previous = entry.day
@@ -303,7 +308,10 @@ function validate(value) {
   if (energy.mealKcal !== undefined) energy.mealKcal.forEach(meal => {
     if (typeof meal !== 'number' || !isFinite(meal) || meal < 0) throw new Error('energy meal')
   })
-  validateHistory(value.history, value.today)
+  // The series belongs to the whole app rather than to a day: the phone attaches it to the snapshot
+  // whose day is its own today and sends an explicit null with every other day. A key that is missing
+  // altogether is still refused - the phone's own contract always writes one of the two.
+  if (value.history !== null) validateHistory(value.history, value.today)
   if (!Array.isArray(value.meals) || value.meals.length !== 4 || !Array.isArray(value.exercises) || value.exercises.length > 20 ||
       !integer(value.exerciseCount) || value.exerciseCount < 0 || !integer(value.omittedExercises) || value.omittedExercises < 0 ||
       value.exerciseCount !== value.exercises.length + value.omittedExercises) throw new Error('records')
@@ -432,6 +440,45 @@ function title(page) {
   if (state.kind === 'measure') return state.series === 'fat' ? '体脂率趋势' : '体重趋势'
   return seriesTab(state.series).title + '趋势'
 }
+/**
+ * Whether [next] stays inside the same card as [page].
+ *
+ * A series tab, a scale chip, a period step and a column tap all redraw the chart page the user is
+ * already standing on, so the list must keep the scroll offset it has - only leaving the card (or
+ * opening one from the dashboard) is a move worth starting at the top for.
+ */
+function sameChart(page, next) {
+  const before = parse(page); const after = parse(next)
+  return !!before && !!after && before.kind === after.kind
+}
+/** The three series of the app-wide history, or null when the watch has never received one. */
+function historySeries(history) {
+  if (!history || typeof history !== 'object') return null
+  if (!Array.isArray(history.days) || !Array.isArray(history.weights) || !Array.isArray(history.fats)) return null
+  return history
+}
+/** The newest day a sparse series actually holds, or '' when it holds nothing. */
+function newestDay(entries) {
+  let newest = ''
+  if (Array.isArray(entries)) entries.forEach(entry => {
+    if (entry && typeof entry.day === 'string' && entry.day > newest) newest = entry.day
+  })
+  return newest
+}
+/**
+ * The day the columns are measured against: the later of the snapshot's own `today` and the newest
+ * day the series being drawn holds.
+ *
+ * The phone writes a day's snapshot when that day's *content* changes, not at every midnight, so a
+ * cached day can carry a `today` older than the history the watch now keeps. Measuring against that
+ * stale bound would draw the newest reading - the 14th's weight, seen while the 12th is on screen - as
+ * "not yet happened". The last entry of the series is a floor for the phone's today, so the later of
+ * the two is used; a column with no record either way is still a gap rather than a measured zero.
+ */
+function historyToday(snapshot, entries) {
+  const newest = newestDay(entries)
+  return newest > snapshot.today ? newest : snapshot.today
+}
 function seriesValue(series, bucket) {
   if (series === 'exercise') return bucket.activityKcal
   if (series === 'balance') return bucket.referenceKcal === null ? null : bucket.referenceKcal - bucket.intakeKcal
@@ -518,7 +565,15 @@ function periodRows(row, model, previous, next, reset) {
   return item
 }
 function scaleName(scale) { return scale === 'week' ? '周' : scale === 'month' ? '月' : '年' }
-function rows(snapshot, page) {
+/**
+ * The rows of one dashboard page.
+ *
+ * [history] is the app-wide series the archive keeps (the `history` of the newest snapshot the phone
+ * sent, or null when none has ever arrived). It is an input rather than something read out of
+ * [snapshot], because the series does not belong to the day on screen: viewing the 12th must still
+ * draw the 14th's reading, which only the newest day's snapshot carried.
+ */
+function rows(snapshot, page, history) {
   const result = []
   function row(title, body, action, highlight) { const item = { id: String(result.length), title, body, action: action || '', highlight: !!highlight, cardClass: 'card', hint: action ? '点击查看 ›' : '' }; result.push(item); return item }
   function paragraphs(title, text) {
@@ -547,8 +602,13 @@ function rows(snapshot, page) {
     const recorded = missing ? Math.max(0, snapshot.steps - snapshot.workoutSteps) : snapshot.recordedSteps
     row('每日步数', number(snapshot.steps, ' 步') + '\n运动 ' + number(snapshot.workoutSteps) + ' + 记录 ' + number(recorded), '', true)
   }
-  /** The chart itself: one bar per column, proportional inside the axis, with the marked column named. */
-  function trendChart(series, buckets, values, selected, model) {
+  /**
+   * The chart itself: one bar per column, proportional inside the axis, with the marked column named.
+   *
+   * Every column is a tap target of its own - the bar carries the page name that selects it - because
+   * the dated list that used to sit under the chart read as a second date switcher and is gone.
+   */
+  function trendChart(series, buckets, values, selected, model, named) {
     const tab = seriesTab(series)
     const width = barWidth(buckets.length)
     const axis = energyAxis(series, values)
@@ -570,28 +630,13 @@ function rows(snapshot, page) {
       }
       return { width: width, top: box.top, height: box.height, color: color,
         label: index % stride === 0 || marked ? bucket.label : '',
-        labelClass: marked ? 'trend-label trend-label-on' : 'trend-label' }
+        labelClass: marked ? 'trend-label trend-label-on' : 'trend-label',
+        action: named(index) }
     })
     chart.marker = selected !== null
     chart.markerLeft = selected === null ? 0 : markerLeft(buckets.length, width, selected)
     chart.axisTop = '轴顶 ' + number(axis.top) + ' 千卡'
     chart.axisBottom = '轴底 ' + number(axis.low) + ' 千卡'
-    row('纵轴 ' + number(axis.low) + '–' + number(axis.top) + ' 千卡', series === 'balance'
-      ? '以 0 线为准：向上表示还有剩余，向下表示已经超过参考。完全没有记录或还没到的日期画成浅色短线，不代表那天真的没有摄入或消耗。'
-      : '从 0 起算，柱长与数值成正比；完全没有记录或还没到的日期画成浅色短线，不代表那天真的没有摄入或消耗。')
-  }
-  /** The tappable column list: the most recent handful, and always the column being viewed. */
-  function columnRows(list, selected, action, amount) {
-    const count = list.length
-    const start = count > TREND_LIST_SHORT ? Math.max(0, count - TREND_LIST) : 0
-    const indexes = []
-    for (let index = start; index < count; index++) indexes.push(index)
-    if (selected !== null && indexes.indexOf(selected) < 0) indexes.unshift(selected)
-    indexes.forEach(index => {
-      const item = row(list[index].rangeText, amount(index), action(index), true)
-      item.cardClass = index === selected ? 'tab-on' : 'card'
-      item.active = index === selected
-    })
   }
   function trendPage() {
     const named = index => pageName('trend', state.series, state.scale, state.anchor, index)
@@ -604,21 +649,20 @@ function rows(snapshot, page) {
       state.canForward ? pageName('trend', state.series, state.scale, state.nextAnchor) : '',
       pageName('trend', state.series, state.scale, snapshot.day))
     if (!state.atCurrent) row('回到当前时段', '点这里回到最近的' + scaleName(state.scale), pageName('trend', state.series, state.scale, snapshot.day))
-    if (!snapshot.history) { row('趋势数据待同步', '请在手机点击“更新到手表”后查看'); return }
-    const buckets = energy(snapshot.history.days, state.model, snapshot.today)
+    const series = historySeries(history)
+    if (!series) { row('趋势数据待同步', '请在手机点击“更新到手表”后查看'); return }
+    const buckets = energy(series.days, state.model, historyToday(snapshot, series.days))
     const values = buckets.map(bucket => seriesValue(state.series, bucket))
     const tapped = clamped(state.index, buckets.length)
     const shown = tapped === null ? lastFilled(buckets, bucket => bucket.recorded) : tapped
-    trendChart(state.series, buckets, values, shown, state.model)
+    trendChart(state.series, buckets, values, shown, state.model, named)
     if (shown === null) row('这一段没有记录', '可在手机录入后点击更新，或在此点击获取更新。')
     else {
       const bucket = buckets[shown]
       row(bucket.rangeText, bucket.future ? '还没到这段日期' : trendAmount(state.series, values[shown]), '', true)
       row('当日明细', '摄入 ' + kcal(bucket.intakeKcal) + ' · 运动 ' + kcal(bucket.activityKcal) +
         ' · 剩余 ' + trendAmount('balance', bucket.referenceKcal === null ? null : bucket.referenceKcal - bucket.intakeKcal))
-      row('查看方式', (state.index === null ? '默认显示最后一个有记录的时段。' : '已选中「' + bucket.rangeText + '」。') + '点击下方任一时段可查看它。')
     }
-    columnRows(buckets, shown, named, index => buckets[index].recorded ? trendAmount(state.series, values[index]) : '未记录')
   }
   function measurePage() {
     const tab = measureTab(state.series)
@@ -632,8 +676,10 @@ function rows(snapshot, page) {
       state.canForward ? pageName('measure', state.series, state.scale, state.nextAnchor) : '',
       pageName('measure', state.series, state.scale, snapshot.day))
     if (!state.atCurrent) row('回到当前时段', '点这里回到最近的' + scaleName(state.scale), pageName('measure', state.series, state.scale, snapshot.day))
-    const source = state.series === 'fat' ? snapshot.history && snapshot.history.fats : snapshot.history && snapshot.history.weights
-    const points = measure(Array.isArray(source) ? source : [], state.model, snapshot.today)
+    const series = historySeries(history)
+    if (!series) { row('趋势数据待同步', '请在手机点击“更新到手表”后查看'); return }
+    const source = state.series === 'fat' ? series.fats : series.weights
+    const points = measure(source, state.model, historyToday(snapshot, source))
     const present = []
     points.forEach(point => { if (point.value !== null) present.push(point.value) })
     if (!present.length) {
@@ -659,24 +705,20 @@ function rows(snapshot, page) {
       const box = filled ? floorBox(point.value, axis) : { top: TREND_PLOT - TREND_STUB, height: TREND_STUB }
       return { width: width, top: box.top, height: box.height, color: filled ? (marked ? TREND_MARK : tab.color) : TREND_MISSING,
         label: index % stride === 0 || marked ? point.label : '',
-        labelClass: marked ? 'trend-label trend-label-on' : 'trend-label' }
+        labelClass: marked ? 'trend-label trend-label-on' : 'trend-label',
+        action: named(index) }
     })
     chart.marker = shown !== null
     chart.markerLeft = shown === null ? 0 : markerLeft(points.length, width, shown)
     chart.axisTop = '轴顶 ' + number(axis.top) + tab.unit
     chart.axisBottom = '轴底 ' + number(axis.low) + tab.unit
     const change = present[present.length - 1] - present[0]
-    row('纵轴 ' + number(axis.low) + '–' + number(axis.top) + tab.unit,
-      '只比最低与最高记录各多留一点余量，不强制包含 0；没有测量的日期不画柱，也不会当成 0。' +
-      (state.scale === 'year' ? '按年显示时，每个月取该月最后一次记录。' : ''))
     row('这一段变化', (change > 0 ? '+' : change < 0 ? '−' : '') + number(Math.abs(change)) + tab.unit + ' · ' + present.length + ' 次记录')
     if (shown === null) row('尚未记录' + tab.title, '在手机记录后获取更新')
     else {
       const point = points[shown]
       row(point.rangeText, point.future ? '还没到这段日期' : number(point.value, tab.unit), '', true)
-      row('查看方式', (state.index === null ? '默认显示最后一个有记录的时段。' : '已选中「' + point.rangeText + '」。') + '点击下方任一时段可查看它。')
     }
-    columnRows(points, shown, named, index => points[index].value === null ? '未记录' : number(points[index].value, tab.unit))
   }
   if (page === 'home') {
     stepsRow()
@@ -743,4 +785,5 @@ function rows(snapshot, page) {
   return result
 }
 export default { CLIENT: CLIENT, checksum: checksum, validate: validate, assembler: assembler, rows: rows, time: time,
-  period: period, energy: energy, measure: measure, parse: parse, title: title }
+  period: period, energy: energy, measure: measure, parse: parse, title: title, sameChart: sameChart,
+  validateHistory: validateHistory }
