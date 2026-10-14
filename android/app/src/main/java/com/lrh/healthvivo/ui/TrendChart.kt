@@ -1,7 +1,6 @@
 package com.lrh.healthvivo.ui
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -81,10 +80,13 @@ private class PeriodState(val scale: TrendScale, val period: com.lrh.healthvivo.
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
     val axisColor = MaterialTheme.colorScheme.outlineVariant
     // Bars grow from a real baseline: a bar measured from anything else would no longer be proportional
-    // to its value. Only the top of the axis is chosen to fit the data.
-    val top = niceTop(known.maxOrNull() ?: 0.0)
-    val low = if(series == 2) min(known.minOrNull() ?: 0.0, 0.0) else 0.0
-    val ticks = tickValues(low, top, 1.0)
+    // to its value. Only the top clears the tallest bar, by a fixed fraction of the range.
+    val rawLow = if(series == 2) min(known.minOrNull() ?: 0.0, 0.0) else 0.0
+    val rawHigh = if(series == 2) max(known.maxOrNull() ?: 0.0, 0.0) else (known.maxOrNull() ?: 0.0)
+    val axis = axisFor(rawLow, rawHigh, minStep = 1.0, minSpan = 100.0, keepLow = true)
+    val low = axis.low
+    val top = axis.top
+    val ticks = axis.ticks
     val index = selected?.coerceIn(0, max(buckets.size - 1, 0))
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         ScaleChips(state.scale, state.setScale)
@@ -154,10 +156,13 @@ private class PeriodState(val scale: TrendScale, val period: com.lrh.healthvivo.
         return
     }
     // A measurement axis must not start at zero, or a two-kilogram change would vanish into the margin.
-    val lowValue = present.minOf { it.value!! }; val highValue = present.maxOf { it.value!! }
-    val spread = if(highValue - lowValue < 0.001) 1.0 else (highValue - lowValue) * 1.25
-    val low = lowValue - spread * .125; val top = lowValue + spread * .875
-    val ticks = tickValues(low, top, 1.0 / 10.0.pow(decimals))
+    // Both ends clear the readings by the same fraction, so the lowest point is not drawn on the frame
+    // either. minSpan keeps a single reading from collapsing the axis to nothing.
+    val axis = axisFor(present.minOf { it.value!! }, present.maxOf { it.value!! },
+        minStep = 1.0 / 10.0.pow(decimals), minSpan = 10.0 / 10.0.pow(decimals), keepLow = false)
+    val low = axis.low
+    val top = axis.top
+    val ticks = axis.ticks
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         ScaleChips(state.scale, state.setScale)
         PeriodBar(state)
@@ -188,8 +193,8 @@ private class PeriodState(val scale: TrendScale, val period: com.lrh.healthvivo.
         val difference = present.last().value!! - present.first().value!!
         Text("这一段有 ${present.size} 次记录 · 变化 ${if(difference > 0) "+" else ""}${format(difference, decimals)}$unit",
             fontSize = 13.sp, color = muted)
-        Text(if(state.scale == TrendScale.Year) "纵轴 ${format(low, decimals)}–${format(top, decimals)}$unit，按这一段的最低与最高记录取范围，不强制包含 0。按年显示时，每个月取该月最后一次记录。"
-            else "纵轴 ${format(low, decimals)}–${format(top, decimals)}$unit，按这一段的最低与最高记录取范围，不强制包含 0；每根竖线对应一天，没有测量的日期不画点，也不会当成 0。",
+        Text(if(state.scale == TrendScale.Year) "纵轴 ${format(low, decimals)}–${format(top, decimals)}$unit，在最低与最高记录之外各留一点余量，不强制包含 0。按年显示时，每个月取该月最后一次记录。"
+            else "纵轴 ${format(low, decimals)}–${format(top, decimals)}$unit，在最低与最高记录之外各留一点余量，不强制包含 0；每根竖线对应一天，没有测量的日期不画点，也不会当成 0。",
             fontSize = 12.sp, color = muted)
     }
 }
@@ -225,7 +230,8 @@ private class Plot(val left: Float, val width: Float, val slot: Float, val barWi
     val labelWidth = 34.dp
     val labelWidthPx = with(density) { labelWidth.toPx() }
     val labelHalfPx = labelWidthPx / 2f
-    val markerHalfPx = with(density) { 2.5.dp.toPx() }
+    val arrowHalf = with(density) { 5.dp.toPx() }
+    val arrowHeight = with(density) { 9.dp.toPx() }
     val plotWidth = (width - gutterPx).coerceAtLeast(1f)
     val slot = if(count <= 0) plotWidth else plotWidth / count
     val labels = axis()
@@ -257,6 +263,14 @@ private class Plot(val left: Float, val width: Float, val slot: Float, val barWi
                         ticks.forEach { tick -> val y = plot.y(tick)
                             drawLine(activeColor, Offset(0f, y), Offset(size.width, y), strokeWidth = 1f) }
                         draw(plot)
+                        // The day being viewed is pointed at from above rather than marked on the axis:
+                        // the axis labels move with the stride, the arrow always lands on its own column.
+                        if(marker in 0 until count) {
+                            val centre = each * marker + each / 2f
+                            drawPath(Path().apply {
+                                moveTo(centre - arrowHalf, 0f); lineTo(centre + arrowHalf, 0f); lineTo(centre, arrowHeight); close()
+                            }, markerColor)
+                        }
                     }
                 }
             }
@@ -280,17 +294,11 @@ private class Plot(val left: Float, val width: Float, val slot: Float, val barWi
             labels.forEachIndexed { position, label ->
                 if(position % stride == 0) {
                     Text(label, fontSize = 10.sp, maxLines = 1, softWrap = false, textAlign = TextAlign.Center,
-                        color = if(position == marker) markerColor else tickColor,
-                        fontWeight = if(position == marker) FontWeight.Bold else FontWeight.Normal,
+                        color = tickColor,
                         modifier = Modifier.width(labelWidth).offset { IntOffset(
                             (gutterPx + position * slot + slot / 2f - labelHalfPx).roundToInt(), 0) })
                 }
             }
-            // The viewed column is marked even when its own label is skipped by the stride.
-            if(marker in labels.indices) Box(Modifier
-                .offset { IntOffset((gutterPx + marker * slot + slot / 2f - markerHalfPx).roundToInt(), 0) }
-                .padding(top = 12.dp).size(5.dp)
-                .background(markerColor, RoundedCornerShape(50)))
         }
     }
 }
@@ -361,26 +369,6 @@ private fun labelStride(scale: TrendScale) = when(scale) {
     TrendScale.Month -> 5
     TrendScale.Year -> 2
 }
-/** The range text of the column that holds [anchorDay] in the current scale. */
-private fun barY(value: Double, low: Double, top: Double) = 0f
-
-/** Round the top of an axis up to a readable number so the labels are not arbitrary figures. */
-private fun niceTop(value: Double): Double {
-    if(value <= 0) return 100.0
-    val step = niceStep(value / 3)
-    return ceil(value / step) * step
-}
-/** Values from [low] to [top] at a readable interval, never closer than [minStep]. */
-private fun tickValues(low: Double, top: Double, minStep: Double): List<Double> {
-    if(top <= low) return listOf(low)
-    var step = niceStep((top - low) / 3)
-    var result = ticksAt(low, top, step)
-    // Two grid lines are the minimum for the axis to read as a scale. Subdividing stops at the smallest
-    // step the labels can still show distinctly, or two ticks would print the same number.
-    while(result.size < 2 && step > minStep) { step = max(step / 2, minStep); result = ticksAt(low, top, step) }
-    // Inserting the axis bounds would put a grid line off the step grid and make the spacing uneven.
-    return result
-}
 private fun ticksAt(low: Double, top: Double, step: Double): List<Double> {
     val result = mutableListOf<Double>()
     var value = ceil(low / step) * step
@@ -393,6 +381,32 @@ private fun niceStep(raw: Double): Double {
     val factor = when { normalized <= 1 -> 1.0; normalized <= 2 -> 2.0; normalized <= 2.5 -> 2.5; normalized <= 5 -> 5.0; else -> 10.0 }
     return factor * base
 }
+
+/** A vertical axis: the range the plot shows and the grid lines worth labelling. */
+private class Axis(val low: Double, val top: Double, val ticks: List<Double>)
+
+/**
+ * An axis that clears the data instead of touching it.
+ *
+ * The bounds are the data's own range plus [PAD] of headroom at the top, so the tallest bar or the
+ * highest reading always sits inside the frame with a visible gap. The bounds are deliberately *not*
+ * snapped to the tick grid: snapping is what forces a maximum of 1973 either to graze the top line or
+ * to jump a whole step to 2500. The grid lines are then placed on readable numbers inside the frame.
+ *
+ * [keepLow] pins the floor to the data's own low value, which a bar chart needs - a bar measured from
+ * anywhere but its zero baseline is no longer proportional to its value - while a line chart is
+ * allowed to start below its lowest reading, or a two-kilogram change would be flattened into nothing.
+ */
+private fun axisFor(rawLow: Double, rawHigh: Double, minStep: Double, minSpan: Double, keepLow: Boolean): Axis {
+    val span = (rawHigh - rawLow).takeIf { it > 1e-9 } ?: minSpan
+    val low = if(keepLow) rawLow else rawLow - span * PAD
+    val top = rawHigh + span * PAD
+    var step = niceStep((top - low) / 4)
+    if(step < minStep) step = minStep
+    val ticks = ticksAt(low, top, step).ifEmpty { listOf(rawHigh) }
+    return Axis(low, top, ticks)
+}
+private const val PAD = 0.08
 private fun number(value: Double?) = if(value == null) "—" else "%.0f".format(value)
 private fun signed(value: Double?) = if(value == null) "—" else (if(value >= 0) "+" else "−") + "%.0f".format(abs(value))
 private fun format(value: Double, decimals: Int) = if(decimals <= 0) "%.0f".format(value) else "%.${decimals}f".format(value)

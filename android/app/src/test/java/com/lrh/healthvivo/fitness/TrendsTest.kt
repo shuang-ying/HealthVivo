@@ -78,13 +78,14 @@ class TrendsTest {
     }
 
     @Test fun aRecordLandsInItsOwnColumnAndNotInTheNeighbouringPeriod() {
+        // Every date here is on or before the selected day: a future date would be excluded outright.
         val data = FitnessData(profile(), meals = listOf(
             meal("a", "2026-10-12", 500.0),
-            meal("b", "2026-10-18", 300.0),
+            meal("b", "2026-10-13", 300.0),
             meal("c", "2026-10-11", 900.0)))
         val week = Trends.energy(data, Trends.period("2026-10-14", TrendScale.Week), today)
         assertEquals(500.0, week[0].intakeKcal, 0.001)
-        assertEquals(300.0, week[6].intakeKcal, 0.001)
+        assertEquals(300.0, week[1].intakeKcal, 0.001)
         assertEquals(0.0, week[3].intakeKcal, 0.001)
         // The previous Sunday belongs to the previous week, not this one.
         assertEquals(week.sumOf { it.intakeKcal }, 800.0, 0.001)
@@ -125,6 +126,40 @@ class TrendsTest {
         assertEquals("12月", year.last().label)
         assertEquals("12月", year.last().shortText)
         assertEquals("2026年12月", year.last().rangeText)
+    }
+
+    @Test fun onlyDaysThatHappenedAndHoldARecordContributeAReference() {
+        // The weight from 10-12 is carried forward, so any later day would be credited with a whole day
+        // of resting metabolism - including the seventeen days of October that have not happened, and
+        // the blank days that hold no record at all.
+        val data = FitnessData(profile(),
+            weights = listOf(WeightEntry("2026-10-12", 70.0, 1)),
+            meals = listOf(meal("a", "2026-10-13", 100.0), meal("b", "2026-10-14", 100.0)),
+            steps = listOf(DailySteps("2026-10-12", 10000, 70.0, 1)))
+        val october = Trends.energy(data, Trends.period("2026-10-14", TrendScale.Month), today)
+        assertEquals(1648.75 + 245.0, october[11].referenceKcal!!, 0.001)   // 10-12: steps, and a weight
+        assertEquals(1648.75, october[12].referenceKcal!!, 0.001)           // 10-13: a meal
+        assertEquals(1648.75, october[13].referenceKcal!!, 0.001)           // 10-14: a meal, today
+        assertNull(october[10].referenceKcal)                               // 10-11: nothing recorded
+        assertFalse(october[10].recorded)
+        assertNull(october[14].referenceKcal)                               // 10-15 has not happened
+        assertTrue(october[14].future)
+        assertEquals(1648.75 * 3 + 245.0, october.mapNotNull { it.referenceKcal }.sum(), 0.001)
+    }
+
+    @Test fun theProfileWeightIsNotAMeasurementSoItProducesNoReference() {
+        // The profile carries a weight from setup. Using it would invent a burn for a day the user never
+        // weighed themselves on, so a day whose weight is only the default contributes no reference.
+        val data = FitnessData(profile(), meals = listOf(meal("a", "2026-10-14", 500.0)))
+        val week = Trends.energy(data, Trends.period("2026-10-14", TrendScale.Week), today)
+        val todayBucket = week[2]
+        assertTrue(todayBucket.recorded)
+        assertEquals(500.0, todayBucket.intakeKcal, 0.001)
+        assertNull(todayBucket.referenceKcal)
+        // A weight recorded on the day itself is a measurement, and then the reference appears.
+        val weighed = FitnessData(profile(), weights = listOf(WeightEntry("2026-10-14", 70.0, 1)),
+            meals = listOf(meal("a", "2026-10-14", 500.0)))
+        assertEquals(1648.75, Trends.energy(weighed, Trends.period("2026-10-14", TrendScale.Week), today)[2].referenceKcal!!, 0.001)
     }
 
     @Test fun aSparseMeasurementKeepsItsGapsAndAYearTakesTheMonthEnd() {

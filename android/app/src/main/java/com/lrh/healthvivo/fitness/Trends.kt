@@ -119,21 +119,27 @@ object Trends {
         val stepsByDay = data.steps.associateBy { it.day }
         val weights = data.weights.sortedBy { it.day }
         val profile = data.profile
-        fun weightOf(day: String) = weights.lastOrNull { it.day <= day }?.kg
-            ?: profile?.weightKg?.takeIf { day >= today.toString() }
         return columns(period).map { (columnStart, columnEnd) ->
             var intake = 0.0; var activity = 0.0; var reference = 0.0; var referenceKnown = false; var recorded = false
             var cursor = columnStart
-            while (cursor <= columnEnd) {
+            // Only days that have happened and that actually hold a record. A blank day is not evidence
+            // that nothing was eaten, so it may not contribute a day of resting metabolism either: that
+            // is how a month-to-date balance came out tens of thousands of kcal in credit.
+            while (cursor <= columnEnd && cursor <= today) {
                 val key = cursor.toString()
-                val weight = weightOf(key)
-                val dayActivity = CalorieCalculator.activities(stepsByDay[key], workoutsByDay[key] ?: emptyList(), weight)
-                intake += mealsByDay[key]?.sumOf { it.kcal } ?: 0.0
-                activity += dayActivity.kcal ?: 0.0
-                if (mealsByDay[key] != null || workoutsByDay[key] != null || stepsByDay[key] != null) recorded = true
-                val dayPlan = profile?.takeIf { weight != null }?.copy(weightKg = weight!!)
-                    ?.let { CalorieCalculator.plan(it, dayActivity.kcal ?: 0.0) }
-                if (dayPlan != null) { reference += dayPlan.maintenanceKcal; referenceKnown = true }
+                val hasRecord = mealsByDay[key] != null || workoutsByDay[key] != null || stepsByDay[key] != null
+                if (hasRecord) {
+                    recorded = true
+                    // The weight has to be one the user recorded. The profile's own weight is a default
+                    // filled in at setup, not a measurement, so it cannot stand in for a day's burn.
+                    val weight = weights.lastOrNull { it.day <= key }?.kg
+                    val dayActivity = CalorieCalculator.activities(stepsByDay[key], workoutsByDay[key] ?: emptyList(), weight)
+                    intake += mealsByDay[key]?.sumOf { it.kcal } ?: 0.0
+                    activity += dayActivity.kcal ?: 0.0
+                    val dayPlan = profile?.takeIf { weight != null }?.copy(weightKg = weight!!)
+                        ?.let { CalorieCalculator.plan(it, dayActivity.kcal ?: 0.0) }
+                    if (dayPlan != null) { reference += dayPlan.maintenanceKcal; referenceKnown = true }
+                }
                 cursor = cursor.plusDays(1)
             }
             TrendBucket(columnStart.toString(), columnLabel(period, columnStart), columnShort(period, columnStart),
