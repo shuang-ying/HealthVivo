@@ -185,7 +185,11 @@ node scripts/generate-link-vectors.mjs
 
 升级到 0.14.1 后蓝牙连接信息使用新的存储键（手机 `link_connection` / `link_secret`，手表 `fitness.link.identity.v1`），
 所以需要一次首次连接；手表按天缓存（`fitness.index.v3` / `fitness.day.v3.*`）原样保留，历史日期不需要重新同步。
-旧的按天版本账本会从 `orbitv_companion` 一次性迁移到 `watch_revision_ledger`，避免升级后重传全部日期。
+
+按天版本账本保存在 `watch_revision_ledger`。**本版不迁移旧的账本**（旧版曾把它放在 `orbitv_companion` 里），
+因此从 0.12.3 / 0.5.3 直接升到 0.14.1 / 0.7.1 后，第一次同步会把手机里所有日期重新发送一遍：
+不丢记录、不重复入库，只是这一次传输量较大，之后照常只发新增和修改的日期。从 0.13.x 升级不受影响，
+因为那已经是直连版本，账本就在新键里。
 
 健康数据保存在应用私有目录，关闭 Android 自动备份；API 密钥用 Android Keystore 加密。应用不会读取计步、位置或其他 App 的私有数据。
 调试构建附带 PreviewActivity，用演示资料和模拟模型列表检查真实页面，禁止保存、不读取真实密钥、不打开正式数据库；发布构建不包含这个入口。
