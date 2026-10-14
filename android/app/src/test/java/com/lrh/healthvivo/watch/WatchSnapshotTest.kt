@@ -3,6 +3,7 @@ package com.lrh.healthvivo.watch
 import com.lrh.healthvivo.fitness.*
 import org.junit.Assert.*
 import org.junit.Test
+import java.time.LocalDate
 
 /**
  * The snapshot is the contract with the watch, so the split step count, the energy breakdown and the
@@ -18,7 +19,7 @@ class WatchSnapshotTest {
         meals = listOf(MealEntry("m1", day, "breakfast", "燕麦", 50.0, 380.0, source = "manual", recordedAt = 1)),
         exercises = listOf(run),
         steps = listOf(DailySteps(day, 10000, 70.0, 1)))
-    private fun snapshot() = WatchSnapshot.create(data(), day, 7, null)
+    private fun snapshot() = WatchSnapshot.create(data(), day, 7, null, LocalDate.parse(day))
 
     @Test fun dailyStepsCarryBothTheirTotalAndTheirSplit() {
         val value = snapshot()
@@ -57,20 +58,17 @@ class WatchSnapshotTest {
             org.json.JSONObject(snapshot.toString()).put("steps", 20000)))
     }
     @Test fun aLaterRecordNeverChangesAnEarlierDaysSnapshot() {
-        // The synchroniser hashes a whole day's snapshot to decide whether to re-send it. If the history
-        // ran to today rather than to the day itself, logging one meal would invalidate every day in the
-        // index; this pins the property that keeps an edit's blast radius to the edit and later days.
+        // The synchroniser hashes a whole day's snapshot to decide whether to re-send it. Only the newest
+        // day carries the series, so a past day cannot be invalidated by a record made after it: this is
+        // the property that keeps one edit from re-sending the index.
         val dayBefore = "2026-10-11"
+        val today = LocalDate.parse(day)
         val base = FitnessData(profile = Profile(age = 30, heightCm = 175.0, weightKg = 70.0, sex = "male", updatedAt = 1),
             weights = listOf(WeightEntry(dayBefore, 70.0, 1)),
             meals = listOf(MealEntry("m0", dayBefore, "lunch", "米饭", 100.0, 130.0, source = "manual", recordedAt = 1)))
         val later = base.copy(meals = base.meals + MealEntry("m1", day, "dinner", "面条", 200.0, 260.0, source = "manual", recordedAt = 2))
-        fun earlier(data: FitnessData) = WatchSnapshot.create(data, dayBefore, 1, null).getJSONObject("history").toString()
+        fun earlier(data: FitnessData) = WatchSnapshot.revisionMaterial(WatchSnapshot.create(data, dayBefore, 1, null, today))
         assertEquals(earlier(base), earlier(later))
-        // The later day does see it, so the property is not just "history is always empty".
-        val laterDays = WatchSnapshot.create(later, day, 2, null).getJSONObject("history").getJSONArray("days")
-        assertEquals(day, laterDays.getJSONObject(laterDays.length() - 1).getString("day"))
-        assertEquals(2, laterDays.length())
     }
     @Test fun historyCarriesTheRecordedDaysAndTheMeasurements() {
         val history = snapshot().getJSONObject("history")
@@ -88,10 +86,25 @@ class WatchSnapshotTest {
         assertEquals(70.0, weights.getJSONObject(0).getDouble("value"), 0.001)
         assertEquals("2026-10-12", weights.getJSONObject(0).getString("day"))
     }
+    @Test fun onlyTheNewestDayCarriesTheSeriesAndItIsTheWholeSeries() {
+        // The history is the series itself, not part of a day: it travels with today's snapshot, and a
+        // day whose snapshot is drawn from it still sees readings recorded after that day.
+        val base = FitnessData(profile = Profile(age = 30, heightCm = 175.0, weightKg = 70.0, sex = "male", updatedAt = 1),
+            weights = listOf(WeightEntry("2026-10-12", 70.0, 1), WeightEntry("2026-10-14", 69.0, 2)),
+            meals = listOf(MealEntry("m0", "2026-10-12", "lunch", "米饭", 100.0, 130.0, source = "manual", recordedAt = 1)))
+        val today = java.time.LocalDate.parse("2026-10-14")
+        val newest = WatchSnapshot.create(base, "2026-10-14", 1, null, today)
+        val older = WatchSnapshot.create(base, "2026-10-12", 2, null, today)
+        assertFalse(newest.isNull("history"))
+        assertTrue(older.isNull("history"))
+        // The series reaching past the older day is exactly what stops the 14th's reading disappearing.
+        val weights = newest.getJSONObject("history").getJSONArray("weights")
+        assertEquals("2026-10-14", weights.getJSONObject(weights.length() - 1).getString("day"))
+    }
     @Test fun aDayWithoutStepsOrWorkoutsStillProducesAValidSnapshot() {
         val bare = WatchSnapshot.create(FitnessData(
             profile = Profile(age = 30, heightCm = 175.0, weightKg = 70.0, sex = "male", updatedAt = 1)),
-            day, 8, null)
+            day, 8, null, LocalDate.parse(day))
         assertTrue(bare.isNull("steps"))
         assertTrue(bare.isNull("recordedSteps"))
         assertEquals(0, bare.getInt("workoutSteps"))

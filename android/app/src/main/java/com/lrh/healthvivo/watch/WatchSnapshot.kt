@@ -27,11 +27,14 @@ object WatchSnapshot {
         // every energy rule already applied, plus the measurement records, so it only has to add up the
         // days of whichever period is on screen - the rules are never implemented twice.
         //
-        // The window ends on this snapshot's own day, not on today. The synchroniser hashes the whole
-        // snapshot to decide which days to re-send, so a block that were identical for every day would
-        // make logging one meal invalidate every day in the index; ending it here keeps an edit to the
-        // days from that edit onwards, which is all the ledger needs to notice.
-        val history = Trends.history(data, HISTORY_LIMIT, today).filter { it.day <= day }
+        // The history is the whole series, not part of any one day, so it travels with the newest day's
+        // snapshot alone. Three things follow, and all three matter:
+        //   - a period crossing into days after the day being viewed still has its readings, which is
+        //     what makes the 14th's weight appear while the 12th is on screen;
+        //   - an edit anywhere changes one snapshot rather than every day in the index, because the days
+        //     that no longer carry it cannot be invalidated by it;
+        //   - the transfer does not repeat the series once per cached day.
+        val history = if(day == today.toString()) Trends.history(data, HISTORY_LIMIT, today) else null
         fun measurements(rows: List<Pair<String, Double>>) = JSONArray(rows.takeLast(MEASUREMENT_LIMIT).map { (day, value) ->
             JSONObject().put("day", day).put("value", value) })
         fun scale(definition: BodyReferenceScale?, value: Double?): Any = definition?.let {
@@ -52,12 +55,12 @@ object WatchSnapshot {
                 .put("mealKcal", JSONArray(listOf("breakfast", "lunch", "dinner", "snack").map { kind -> meals.filter { it.meal == kind }.sumOf { it.kcal } }))
                 .put("referenceKcal", n(plan?.maintenanceKcal)).put("pendingCount", activity.pendingCount)
                 .put("overlapHandled", activity.overlapHandled))
-            .put("history", JSONObject()
-                .put("days", JSONArray(history.map { point ->
+            .put("history", history?.let { days -> JSONObject()
+                .put("days", JSONArray(days.map { point ->
                     JSONObject().put("day", point.day).put("intakeKcal", point.intakeKcal)
                         .put("activityKcal", point.activityKcal).put("referenceKcal", n(point.referenceKcal)) }))
                 .put("weights", measurements(data.weights.sortedBy { it.day }.map { it.day to it.kg }))
-                .put("fats", measurements(data.bodyFats.sortedBy { it.day }.map { it.day to it.percent })))
+                .put("fats", measurements(data.bodyFats.sortedBy { it.day }.map { it.day to it.percent })) } ?: JSONObject.NULL)
             .put("meals", JSONArray(listOf("breakfast", "lunch", "dinner", "snack").map { kind ->
                 val rows = meals.filter { it.meal == kind }
                 JSONObject().put("kind", kind).put("count", rows.size)
