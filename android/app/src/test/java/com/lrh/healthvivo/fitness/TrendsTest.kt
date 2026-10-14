@@ -204,6 +204,48 @@ class TrendsTest {
         assertEquals("三", week[2].label)
     }
 
+    @Test fun theWeightOnAnyDayIsTheLatestRecordOnOrBeforeIt() {
+        // The three cases above are examples of one rule rather than a table, so this sweeps every day
+        // of a year against the rule itself: any number of records, at any dates, with any gaps.
+        val records = listOf(
+            WeightEntry("2026-01-15", 102.0, 1), WeightEntry("2026-02-28", 101.0, 2),
+            WeightEntry("2026-03-01", 100.5, 3), WeightEntry("2026-04-01", 100.5, 4),
+            WeightEntry("2026-06-30", 95.0, 5), WeightEntry("2026-07-01", 94.0, 6),
+            WeightEntry("2026-12-31", 90.0, 7))
+        val data = FitnessData(profile(), weights = records)
+        fun expected(day: String) = records.filter { it.day <= day }.maxByOrNull { it.day }?.kg
+        var day = LocalDate.parse("2026-01-01")
+        while (day <= LocalDate.parse("2027-01-31")) {
+            val key = day.toString()
+            assertEquals("weight on $key", expected(key), CalorieCalculator.weightAt(data, key))
+            // The record's own day already uses the new value, and the day before it does not.
+            records.firstOrNull { it.day == key }?.let { record ->
+                assertEquals(record.kg, CalorieCalculator.weightAt(data, key)!!, 0.001)
+                assertEquals(expected(day.minusDays(1).toString()), CalorieCalculator.weightAt(data, day.minusDays(1).toString()))
+            }
+            day = day.plusDays(1)
+        }
+    }
+
+    @Test fun backfillingOrDeletingARecordReshapesOnlyTheStepsAroundIt() {
+        val records = listOf(WeightEntry("2026-10-10", 100.0, 1), WeightEntry("2026-10-20", 98.0, 2))
+        fun weightOf(weights: List<WeightEntry>, day: String) =
+            CalorieCalculator.weightAt(FitnessData(profile(), weights = weights), day)
+        assertEquals(100.0, weightOf(records, "2026-10-17")!!, 0.001)
+        assertEquals(98.0, weightOf(records, "2026-10-20")!!, 0.001)
+        // Backfilling the 15th carves a middle step out of the first one, and the 20th still takes over.
+        val backfilled = records + WeightEntry("2026-10-15", 99.0, 3)
+        assertEquals(100.0, weightOf(backfilled, "2026-10-14")!!, 0.001)
+        assertEquals(99.0, weightOf(backfilled, "2026-10-15")!!, 0.001)
+        assertEquals(99.0, weightOf(backfilled, "2026-10-19")!!, 0.001)
+        assertEquals(98.0, weightOf(backfilled, "2026-10-20")!!, 0.001)
+        // Deleting the 20th's record leaves the 15th's value in force from then on.
+        val deleted = backfilled.filterNot { it.day == "2026-10-20" }
+        assertEquals(99.0, weightOf(deleted, "2026-10-25")!!, 0.001)
+        // Deleting the earliest record leaves the days before the next one with no weight at all.
+        assertNull(weightOf(listOf(WeightEntry("2026-10-20", 98.0, 1)), "2026-10-19"))
+    }
+
     @Test fun aSparseMeasurementKeepsItsGapsAndAYearTakesTheMonthEnd() {
         val values = mapOf("2026-01-05" to 80.0, "2026-01-20" to 78.0, "2026-03-02" to 77.0, "2025-12-31" to 81.0)
         val year = Trends.measure(values, Trends.period("2026-10-14", TrendScale.Year), today)
