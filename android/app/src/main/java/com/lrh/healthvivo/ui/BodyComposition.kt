@@ -122,6 +122,14 @@ import java.time.LocalDate
     }
 }
 
+/**
+ * The body-fat reference scale on its own, for the trend card: the chart's own readout carries the
+ * value, so this is only the coloured band and where the reading falls in it.
+ */
+@Composable fun BodyFatScale(value: Double?, profile: Profile?) {
+    BodyMetrics.fatScale(profile)?.let { ReferenceScale(value, it, "体脂率") }
+}
+
 @Composable fun BodyMetricReferences() {
     val context = LocalContext.current
     Text("BMI 与体脂率为参考指标，范围正常不代表整体健康；体脂率参考表来自 Gallagher 等（2000），不同人群及测量设备会有差异。", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)

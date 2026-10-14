@@ -327,6 +327,9 @@ open class MainActivity : ComponentActivity() {
                                 Button(onClick = { showBodyFat = true }) { Text("记录 / 更新体脂率") }
                                 if (measured.isEmpty()) Text("手动记录体脂率后显示趋势。", color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 else {
+                                    // The reference band belongs above the chart: it says what the line is
+                                    // moving through, and it was lost when the old body-fat card was replaced.
+                                    BodyFatScale(BodyMetrics.bodyFatAt(data, dayString)?.percent, data.profile)
                                     MeasureTrendCard(measured.associate { it.day to it.percent }, dayString, "%", 1)
                                     measured.sortedByDescending { it.day }.take(7).forEach { entry ->
                                         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {

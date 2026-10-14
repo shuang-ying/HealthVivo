@@ -115,13 +115,18 @@ private class PeriodState(val scale: TrendScale, val period: com.lrh.healthvivo.
                     }
                 }
             })
-        val shown = buckets.getOrNull(index ?: buckets.indexOfLast { it.recorded })
+        // Without a tap, the readout describes the column the arrow points at - the day being viewed -
+        // whenever that column holds something. Falling back to the last recorded column would put the
+        // arrow on one column and the value under it from another, which reads as a bug.
+        val fallback = buckets.indexOfFirst { it.startDay == anchorDay }.takeIf { it >= 0 && buckets[it].recorded }
+            ?: buckets.indexOfLast { it.recorded }
+        val shown = buckets.getOrNull(index ?: fallback)
         Readout(shown?.rangeText, when {
             shown == null -> null
             shown.future -> "还没到这段日期"
             else -> energyAmount(series, energyValue(shown, series))
         }, shown?.let { "摄入 ${number(it.intakeKcal)} · 运动 ${number(it.activityKcal)} · 剩余 ${signed(energyValue(it, 2))} 千卡" },
-            if(index == null) "点击任意柱子查看该${state.scale.label}的准确数值。" else "已选中「${shown?.rangeText}」。")
+            if(index == null) null else "已选中「${shown?.rangeText}」。")
         val recorded = buckets.filter { it.recorded }
         val meanValues = recorded.mapNotNull { energyValue(it, series) }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -134,7 +139,6 @@ private class PeriodState(val scale: TrendScale, val period: com.lrh.healthvivo.
             1 -> "每根柱子是那一天（按年时是那个月）运动记录的活动净消耗合计，不含步数；步数消耗在运动页单独查看。"
             else -> "每根柱子是那一天（按年时是那个月）的消耗参考减登记摄入。紫色向上表示还有剩余，红色向下表示已超过参考。"
         }, fontSize = 12.sp, color = muted)
-        Text("纵轴 ${number(low)}–${number(top)} 千卡，从 0 起算，柱长与数值成正比。完全没有记录或还没到的日期画成浅色短线并按 0 参与合计，不代表那天真的没有摄入或消耗；均值只按有记录的柱子计算。", fontSize = 12.sp, color = muted)
     }
 }
 
@@ -187,15 +191,14 @@ private class PeriodState(val scale: TrendScale, val period: com.lrh.healthvivo.
                     drawCircle(if(position == index) negativeColor else trendAccent, 4.dp.toPx(), centre)
                 }
             })
-        val shown = points.getOrNull(index ?: points.indexOfLast { it.value != null })
+        val fallback = points.indexOfFirst { it.startDay == anchorDay }.takeIf { it >= 0 && points[it].value != null }
+            ?: points.indexOfLast { it.value != null }
+        val shown = points.getOrNull(index ?: fallback)
         Readout(shown?.rangeText, shown?.value?.let { format(it, decimals) + unit }, null,
-            if(index == null) "点击任意数据点查看该${state.scale.label}的数值。" else "已选中「${shown?.rangeText}」。")
+            if(index == null) null else "已选中「${shown?.rangeText}」。")
         val difference = present.last().value!! - present.first().value!!
         Text("这一段有 ${present.size} 次记录 · 变化 ${if(difference > 0) "+" else ""}${format(difference, decimals)}$unit",
             fontSize = 13.sp, color = muted)
-        Text(if(state.scale == TrendScale.Year) "纵轴 ${format(low, decimals)}–${format(top, decimals)}$unit，在最低与最高记录之外各留一点余量，不强制包含 0。按年显示时，每个月取该月最后一次记录。"
-            else "纵轴 ${format(low, decimals)}–${format(top, decimals)}$unit，在最低与最高记录之外各留一点余量，不强制包含 0；每根竖线对应一天，没有测量的日期不画点，也不会当成 0。",
-            fontSize = 12.sp, color = muted)
     }
 }
 
@@ -336,7 +339,7 @@ private class Plot(val left: Float, val width: Float, val slot: Float, val barWi
     }
 }
 
-@Composable private fun Readout(title: String?, value: String?, detail: String?, hint: String) {
+@Composable private fun Readout(title: String?, value: String?, detail: String?, hint: String?) {
     if(title != null) Surface(shape = RoundedCornerShape(14.dp), color = MaterialTheme.colorScheme.surfaceVariant) {
         Column(Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(title, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -344,7 +347,7 @@ private class Plot(val left: Float, val width: Float, val slot: Float, val barWi
             detail?.let { Text(it, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant) }
         }
     }
-    Text(hint, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    hint?.let { Text(it, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant) }
 }
 
 @Composable private fun TrendStat(label: String, value: Double?) {
