@@ -1,6 +1,9 @@
 package com.lrh.healthvivo.fitness
 
+import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.YearMonth
+import java.time.temporal.TemporalAdjusters
 
 data class EnergyPlan(val restingKcal: Double, val maintenanceKcal: Double,
     val targetKcal: Double, val adjustmentKcal: Double)
@@ -18,6 +21,13 @@ data class ActivityEstimate(val kcal: Double?, val stepsKcal: Double?, val worko
 data class ExerciseEstimate(val kcal: Double?, val method: String, val met: Double? = null, val note: String)
 /** One column of the intake / activity / remaining histograms, shared by the phone and the watch. */
 data class TrendDay(val day: String, val intakeKcal: Double, val activityKcal: Double, val referenceKcal: Double?)
+/** How wide one column of a histogram is. Weekly, monthly and yearly columns answer different questions. */
+enum class TrendRange(val label: String, val buckets: Int, val window: String) {
+    Week("周", 12, "近 12 周"), Month("月", 12, "近 12 个月"), Year("年", 5, "近 5 年");
+}
+/** One column of a histogram: a whole week, month or year reduced to a single bar. */
+data class TrendBucket(val label: String, val rangeText: String, val intakeKcal: Double,
+    val activityKcal: Double, val referenceKcal: Double?)
 
 object CalorieCalculator {
     // Resting + recorded net activity is a partial expenditure reference, not a full TDEE or diet target.
@@ -117,6 +127,65 @@ object CalorieCalculator {
             val activity = activities(data.steps.firstOrNull { it.day == date }, workouts, weight)
             val plan = data.profile?.takeIf { weight != null }?.copy(weightKg = weight!!)?.let { plan(it, activity.kcal ?: 0.0) }
             TrendDay(date, data.meals.filter { it.day == date }.sumOf { it.kcal }, activity.kcal ?: 0.0, plan?.maintenanceKcal)
+        }
+    }
+    /**
+     * The same three series reduced to weeks, months or years, ending at [endDay].
+     *
+     * A bucket sums its days, so a weekly bar is that week's intake, that week's recorded activity and
+     * what was left of that week's references. The bucket containing [endDay] stops at [endDay] and is
+     * therefore a partial period - the bars stay comparable because intake, activity and the reference
+     * are all cut at the same day. Days with nothing recorded add zero, matching the daily chart.
+     */
+    fun trendBuckets(data: FitnessData, endDay: String, range: TrendRange): List<TrendBucket> {
+        val end = LocalDate.parse(endDay)
+        val mealsByDay = data.meals.groupBy { it.day }
+        val workoutsByDay = data.exercises.groupBy { it.day }
+        val stepsByDay = data.steps.associateBy { it.day }
+        val weights = data.weights.sortedBy { it.day }
+        val profile = data.profile
+        fun weightOf(day: String) = weights.lastOrNull { it.day <= day }?.kg
+            ?: profile?.weightKg?.takeIf { day >= LocalDate.now().toString() }
+        return (range.buckets - 1 downTo 0).map { back ->
+            val start: LocalDate
+            val endExclusive: LocalDate
+            val label: String
+            when (range) {
+                TrendRange.Week -> {
+                    start = end.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).minusWeeks(back.toLong())
+                    endExclusive = start.plusWeeks(1)
+                    label = "%d/%d".format(start.monthValue, start.dayOfMonth)
+                }
+                TrendRange.Month -> {
+                    val month = YearMonth.from(end).minusMonths(back.toLong())
+                    start = month.atDay(1); endExclusive = month.plusMonths(1).atDay(1)
+                    label = "%d月".format(month.monthValue)
+                }
+                TrendRange.Year -> {
+                    start = LocalDate.of(end.year - back, 1, 1); endExclusive = start.plusYears(1)
+                    label = start.year.toString()
+                }
+            }
+            var intake = 0.0; var activity = 0.0; var reference = 0.0; var referenceKnown = false
+            var cursor = start
+            while (cursor < endExclusive && cursor <= end) {
+                val key = cursor.toString()
+                val weight = weightOf(key)
+                val dayActivity = activities(stepsByDay[key], workoutsByDay[key] ?: emptyList(), weight)
+                intake += mealsByDay[key]?.sumOf { it.kcal } ?: 0.0
+                activity += dayActivity.kcal ?: 0.0
+                val dayPlan = profile?.takeIf { weight != null }?.copy(weightKg = weight!!)
+                    ?.let { plan(it, dayActivity.kcal ?: 0.0) }
+                if (dayPlan != null) { reference += dayPlan.maintenanceKcal; referenceKnown = true }
+                cursor = cursor.plusDays(1)
+            }
+            val last = minOf(endExclusive.minusDays(1), end)
+            val rangeText = when (range) {
+                TrendRange.Week -> "%d/%d–%d/%d".format(start.monthValue, start.dayOfMonth, last.monthValue, last.dayOfMonth)
+                TrendRange.Month -> YearMonth.from(start).toString()
+                TrendRange.Year -> start.year.toString()
+            }
+            TrendBucket(label, rangeText, intake, activity, reference.takeIf { referenceKnown })
         }
     }
     val exercises get() = ExerciseLibrary.items

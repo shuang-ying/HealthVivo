@@ -197,11 +197,10 @@ open class MainActivity : ComponentActivity() {
             }) { padding ->
                 val scroll = remember(tab) { ScrollState(0) }
                 Column(Modifier.fillMaxSize().padding(padding).then(if(tab == 0) Modifier else Modifier.verticalScroll(scroll)).padding(horizontal = if(tab == 0) 12.dp else 20.dp, vertical = if(tab == 0) 0.dp else 16.dp), verticalArrangement = Arrangement.spacedBy(if(tab == 0) 0.dp else 18.dp)) {
-                    if (tab in 1..3) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                        IconButton(onClick = { selectedDay = day.minusDays(1) }, modifier = Modifier.size(40.dp)) { AppIcon("left", "前一天", modifier = Modifier.size(18.dp)) }
-                        TextButton(onClick = { selectedDay = null }) { Text(if(day == today) "今天 · ${day.monthValue}月${day.dayOfMonth}日" else "${day.year}年${day.monthValue}月${day.dayOfMonth}日", fontSize = 13.sp, color = colors.onSurface) }
-                        IconButton(onClick = { selectedDay = day.plusDays(1) }, enabled = day < today, modifier = Modifier.size(40.dp)) { AppIcon("right", "后一天", modifier = Modifier.size(18.dp)) }
-                    }
+                    // Date switching lives on the 今日 page only; the other pages follow the day it selects
+                    // and just say which day that is, so a past day is never mistaken for today.
+                    if (tab in 1..3) Text(if(day == today) "今天 · ${day.monthValue}月${day.dayOfMonth}日" else "${day.year}年${day.monthValue}月${day.dayOfMonth}日",
+                        fontSize = 12.sp, color = colors.onSurfaceVariant)
                     when (tab) {
                         0 -> {
                             HomeModules(listOf(
@@ -238,29 +237,21 @@ open class MainActivity : ComponentActivity() {
                                 Text("填写年龄、身高、体重等信息，计算个人热量参考值。")
                                 Button(onClick = { showProfile = true }) { Text("填写个人资料") }
                             } else {
-                                var showSpend by remember { mutableStateOf(false) }
-                                var showIntake by remember { mutableStateOf(false) }
                                 Panel("每日能量参考") {
-                                ValueRow("每日消耗参考", number(plan?.maintenanceKcal), "kcal")
-                                TextButton(onClick = { showSpend = !showSpend }) { Text(if(showSpend) "收起消耗来源" else "消耗来源：代谢 + 运动 + 步数") }
-                                if(showSpend) {
-                                    Breakdown("静息代谢估算", plan?.restingKcal, "按年龄、身高、当日体重与性别参数估算")
-                                    Breakdown("运动", activity.workoutKcal, if(dayExercises.isEmpty()) "当天没有运动记录" else "${dayExercises.size} 条运动记录的活动净消耗")
-                                    Breakdown("步数", activity.stepsKcal, when {
-                                        daySteps == null -> "未录入当天步数"
-                                        daySteps.stepLengthCm == null -> "需要填写步长才能计算步数消耗"
-                                        activity.workoutSteps > 0 -> "已扣除运动步数后的 ${activity.recordedSteps ?: 0} 步"
-                                        else -> "全天 ${daySteps.steps} 步" })
-                                    Text("三项相加就是每日消耗参考，不会重复计算同一次步行。", color = muted, fontSize = 12.sp)
-                                }
-                                ValueRow("当天登记摄入", number(intake), "kcal")
-                                TextButton(onClick = { showIntake = !showIntake }) { Text(if(showIntake) "收起摄入来源" else "摄入来源：三餐") }
-                                if(showIntake) {
-                                    listOf("breakfast" to "早餐", "lunch" to "午餐", "dinner" to "晚餐", "snack" to "加餐").forEach { (kind, label) ->
-                                        val rows = dayMeals.filter { it.meal == kind }
-                                        Breakdown(label, rows.sumOf { it.kcal }, if(rows.isEmpty()) "尚未记录" else "${rows.size} 项食物")
-                                    }
-                                    Text("加餐计入合计；同一餐的食物克数乘以每 100g 热量后求和。", color = muted, fontSize = 12.sp)
+                                // The sources are listed with their own numbers instead of hidden behind a
+                                // toggle: "reference kcal" alone does not say where the energy came from.
+                                EnergyTotal("每日消耗参考", plan?.maintenanceKcal)
+                                EnergyItem("静息代谢", plan?.restingKcal, "按年龄、身高、当日体重与性别参数估算")
+                                EnergyItem("运动", activity.workoutKcal, if(dayExercises.isEmpty()) "当天没有运动记录" else "${dayExercises.size} 条运动记录的活动净消耗")
+                                EnergyItem("步数", activity.stepsKcal, when {
+                                    daySteps == null -> "未录入当天步数"
+                                    daySteps.stepLengthCm == null -> "需要填写步长才能计算步数消耗"
+                                    activity.workoutSteps > 0 -> "已扣除运动步数后的 ${activity.recordedSteps ?: 0} 步"
+                                    else -> "全天 ${daySteps.steps} 步" })
+                                EnergyTotal("当天登记摄入", intake)
+                                listOf("breakfast" to "早餐", "lunch" to "午餐", "dinner" to "晚餐", "snack" to "加餐").forEach { (kind, label) ->
+                                    val rows = dayMeals.filter { it.meal == kind }
+                                    EnergyItem(label, rows.sumOf { it.kcal }, if(rows.isEmpty()) "尚未记录" else "${rows.size} 项食物")
                                 }
                                 val balance = plan?.let { it.maintenanceKcal - intake }
                                 val positive = balance != null && balance >= 0
@@ -271,7 +262,7 @@ open class MainActivity : ComponentActivity() {
                                     }
                                 }
                                 if (plan == null) Text("当前资料或当日体重不足以估算静息消耗，请继续记录。", fontSize = 13.sp)
-                                Text("消耗参考＝静息代谢＋运动＋步数（已按运动步数去重）；剩余＝消耗参考−登记摄入。", color = muted, fontSize = 12.sp)
+                                Text("代谢＋运动＋步数＝每日消耗参考，不会重复计算同一次步行；步数按已填写的运动步数去重。剩余＝消耗参考−登记摄入。", color = muted, fontSize = 12.sp)
                                 if (activity.overlapHandled) Text(stepSplitCaption(activity), color = muted, fontSize = 12.sp)
                                 if (activity.stepsExceeded) Text("填写的运动步数超过当天总步数，已按总步数计算；请检查步数与总步数是否填反。", fontSize = 12.sp)
                                 if (activity.pendingCount > 0) Text("${activity.pendingCount} 条运动待估算或热量口径未知，未计入活动合计。", fontSize = 12.sp)
@@ -334,7 +325,7 @@ open class MainActivity : ComponentActivity() {
                                 BodyMetricReferences()
                             }
                             Panel("饮食 · 运动 · 热量剩余趋势") {
-                                TrendCard(CalorieCalculator.trend(data, dayString, 14))
+                                TrendCard(data, dayString)
                             }
                         }
                         else -> {
@@ -528,14 +519,21 @@ open class MainActivity : ComponentActivity() {
             }
         }
     }
-    /** One indented line of an expanded energy breakdown. */
-    @Composable private fun Breakdown(label: String, value: Double?, note: String) {
-        Row(Modifier.fillMaxWidth().padding(start = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(label, fontSize = 14.sp)
+    /** The headline of an energy group: the number the items below it add up to. */
+    @Composable private fun EnergyTotal(label: String, value: Double?) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Bottom) {
+            Text(label, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+            Text("${number(value)} 千卡", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+        }
+    }
+    /** One source of that total, indented, with its own number spelled out. */
+    @Composable private fun EnergyItem(label: String, value: Double?, note: String) {
+        Row(Modifier.fillMaxWidth().padding(start = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(1.dp)) {
+                Text(label, fontSize = 13.sp)
                 Text(note, fontSize = 11.sp, color = muted)
             }
-            Text(number(value), fontSize = 15.sp, fontWeight = FontWeight.Medium)
+            Text("${number(value)} 千卡", fontSize = 14.sp)
         }
     }
     private fun backup(data: FitnessData): String {

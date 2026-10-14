@@ -51,6 +51,18 @@ https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_sr_legacy_food_csv_2018-0
 
 旧版和 CSV 的手填热量不能确认是否扣除了静息，所以保留原值并标记口径未知，暂不参加净消耗。未知/待估算记录不填成0。
 
+## 趋势统计口径
+
+趋势卡片把同一天的三条序列（登记摄入、已记录活动、消耗参考减摄入）按**周／月／年**重新分桶，柱高是该桶内各天之和：
+
+- **周**：周一到周日，近 12 周；桶标签用该周周一的日期，明细里给出 `起始–结束`。
+- **月**：自然月，近 12 个月；年：自然年，近 5 年。
+
+分桶只是把逐日数值相加，不引入新的公式，也不会把某天算进两个桶。**当前这个桶只统计到选中日期为止**，
+所以本周、本月、本年的柱子是「至今」的合计，比已经走完的桶短属于正常现象；摄入、活动与消耗参考都在同一天截断，
+三者仍然可比。完全没有记录的时间段按 0 参与统计并画成浅色短线，这是图表便于对齐日历的约定，
+不代表那段时期真的没有摄入或消耗。参考值为空（资料不足或该段时间之前没有任何体重记录）的桶不显示剩余。
+
 ## 三餐与运动共用 API
 
 根据 [官方 OpenAI Chat Completions 格式](https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create) 和 [图像输入格式](https://developers.openai.com/api/docs/guides/images-vision?api-mode=chat) 实现可配置兼容接口，用户自行选择服务商、模型和密钥；未选择默认付费服务商。
