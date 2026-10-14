@@ -178,14 +178,17 @@ export default {
     this.runtime.page = page; this.updateDisplay(); this.restoreScroll(keep)
   },
   /**
-   * Put the list back where it was when a tap only redraws the chart card the user is already in.
+   * A second line of defence for a redraw that only changes the chart card the user is already in.
    *
-   * The position is carried by the list's own `startoffset`: an absolute pixel offset, which is the
-   * one control that survives a redraw that rebuilds the items. The runtime owns the scroll range and
-   * clamps a restore that no longer fits into shorter content, and `onScroll` records whatever
-   * position the list actually reached - so the offset the watch holds is never one the list refused.
-   * When the runtime reports the visible index range instead of a pixel offset, the top item is the
-   * position to return to and the list clamps an index past its own end.
+   * The fix for the jump is the fixed row set the dashboard builds: the list resets its scroll offset
+   * when its items are inserted or deleted, so a page whose rows never change shape never resets. This
+   * runs only for the cases that can still move items (a sync landing while the chart is open, or a
+   * runtime that relayouts differently).
+   *
+   * Both controls are applied, because a path the runtime ignores fails silently: the item index is
+   * the one the list is known to accept (`scrollTo`), and `startoffset` is the exact pixel offset for
+   * a runtime that honours a bound attribute. With the row set fixed, an index recorded before the
+   * switch names the same row after it.
    */
   restoreScroll(keep) {
     if (!keep) {
@@ -194,8 +197,7 @@ export default {
       try { this.$element('dashboard-list').scrollTo({ index: 0 }) } catch (_) {}
       return
     }
-    if (this.runtime.scrollY > 0) { this.scrollOffset = String(this.runtime.scrollY); return }
-    this.scrollOffset = ''
+    this.scrollOffset = this.runtime.scrollY > 0 ? String(this.runtime.scrollY) : ''
     if (this.runtime.scrollIndex > 0) {
       try { this.$element('dashboard-list').scrollTo({ index: this.runtime.scrollIndex, behavior: 'instant' }) } catch (_) {}
     }

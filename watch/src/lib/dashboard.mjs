@@ -17,6 +17,9 @@ const TREND_ZERO = '#51485E'
 const TREND_NEGATIVE = '#913643'
 const TREND_MARK = '#F2C14E'
 const TREND_PLOT_MIN_SPAN = 100
+// The one sentence a chart page shows when the watch has never received the series, shared so that
+// "nothing has ever been synced" reads the same wherever it appears.
+const SYNC_PROMPT = '请在手机点击“更新到手表”后查看'
 const SERIES_TABS = [
   { key: 'meals', title: '饮食', label: '每日摄入', color: '#7955D8' },
   { key: 'exercise', title: '运动', label: '每日活动', color: '#42AC81' },
@@ -566,6 +569,27 @@ function periodRows(row, model, previous, next, reset) {
 }
 function scaleName(scale) { return scale === 'week' ? '周' : scale === 'month' ? '月' : '年' }
 /**
+ * The way back to the present period, which exists on every chart page and in every period.
+ *
+ * It is deliberately never omitted: a row that appeared only once the user had stepped away from the
+ * present would be an insertion into the list, and the list resets its scroll offset when its items
+ * appear or disappear (ScrollAdapterList "forceLayout: reset deleting/inserting"). At the present it
+ * is the state line instead of a button - the period value in the row above resets too.
+ */
+function resetRow(row, reset, atCurrent, scale) {
+  return atCurrent ? row('当前时段', '已在最近的' + scaleName(scale), '')
+    : row('回到当前时段', '点这里回到最近的' + scaleName(scale), reset)
+}
+/**
+ * What the readout says for one column: the figure when the column holds a record, "not recorded" for
+ * a gap inside the period, "not yet" for a column past the last day the phone has reached. A gap must
+ * never read as a measured zero, which is what the raw column value would print.
+ */
+function trendReadout(series, bucket, value) {
+  if (!bucket.recorded) return bucket.future ? '还没到这段日期' : '未记录'
+  return trendAmount(series, value)
+}
+/**
  * The rows of one dashboard page.
  *
  * [history] is the app-wide series the archive keeps (the `history` of the newest snapshot the phone
@@ -638,8 +662,20 @@ function rows(snapshot, page, history) {
     chart.axisTop = '轴顶 ' + number(axis.top) + ' 千卡'
     chart.axisBottom = '轴底 ' + number(axis.low) + ' 千卡'
   }
+  /**
+   * The energy chart page.
+   *
+   * The row set is fixed and identical in every series, every scale and every period: three tabs, the
+   * scale chips, the period, the way back, the chart, the readout and the day's breakdown, in that
+   * order. Only what is *inside* a row varies with the data. Nothing here may emit a row conditionally,
+   * because a row that appears or disappears is an insertion or a deletion in the list, and the list
+   * resets its scroll offset whenever its items change - which is what threw the user back to the top
+   * on every series and scale switch. The columns themselves are a repeat inside the chart's own div,
+   * so 7 -> 31 -> 12 bars never touches the row set.
+   */
   function trendPage() {
     const named = index => pageName('trend', state.series, state.scale, state.anchor, index)
+    const tab = seriesTab(state.series)
     SERIES_TABS.forEach(item => {
       const strip = row(item.title, item.key === state.series ? '当前显示' : '点击切换', pageName('trend', item.key, state.scale, state.anchor))
       strip.tab = true; strip.active = item.key === state.series; strip.cardClass = item.key === state.series ? 'tab-on' : 'tab-off'; strip.hint = ''
@@ -648,22 +684,32 @@ function rows(snapshot, page, history) {
     periodRows(row, state.model, pageName('trend', state.series, state.scale, shiftDate(state.anchor, state.scale, -1)),
       state.canForward ? pageName('trend', state.series, state.scale, state.nextAnchor) : '',
       pageName('trend', state.series, state.scale, snapshot.day))
-    if (!state.atCurrent) row('回到当前时段', '点这里回到最近的' + scaleName(state.scale), pageName('trend', state.series, state.scale, snapshot.day))
+    resetRow(row, pageName('trend', state.series, state.scale, snapshot.day), state.atCurrent, state.scale)
     const series = historySeries(history)
-    if (!series) { row('趋势数据待同步', '请在手机点击“更新到手表”后查看'); return }
+    if (!series) {
+      // No series has ever arrived, but the slots that will hold it are already here, so the sync that
+      // eventually delivers it changes their content rather than inserting rows.
+      row(tab.label, '尚无记录', '', true)
+      row('趋势数据待同步', SYNC_PROMPT)
+      row('当日明细', '—', '', true)
+      return
+    }
     const buckets = energy(series.days, state.model, historyToday(snapshot, series.days))
     const values = buckets.map(bucket => seriesValue(state.series, bucket))
     const tapped = clamped(state.index, buckets.length)
     const shown = tapped === null ? lastFilled(buckets, bucket => bucket.recorded) : tapped
+    const bucket = shown === null ? null : buckets[shown]
     trendChart(state.series, buckets, values, shown, state.model, named)
-    if (shown === null) row('这一段没有记录', '可在手机录入后点击更新，或在此点击获取更新。')
-    else {
-      const bucket = buckets[shown]
-      row(bucket.rangeText, bucket.future ? '还没到这段日期' : trendAmount(state.series, values[shown]), '', true)
-      row('当日明细', '摄入 ' + kcal(bucket.intakeKcal) + ' · 运动 ' + kcal(bucket.activityKcal) +
-        ' · 剩余 ' + trendAmount('balance', bucket.referenceKcal === null ? null : bucket.referenceKcal - bucket.intakeKcal))
-    }
+    if (bucket === null) row('这一段没有记录', '可在手机录入后点击更新，或在此点击获取更新。')
+    else row(bucket.rangeText, trendReadout(state.series, bucket, values[shown]), '', true)
+    row('当日明细', bucket === null ? '—' : '摄入 ' + kcal(bucket.intakeKcal) + ' · 运动 ' + kcal(bucket.activityKcal) +
+      ' · 剩余 ' + trendAmount('balance', bucket.referenceKcal === null ? null : bucket.referenceKcal - bucket.intakeKcal))
   }
+  /**
+   * The weight and body-fat chart page. Same rule as the energy page: the same rows in the same order
+   * in every series, scale and period, with the numbers moving inside them. A period with no reading
+   * at all still fills every slot - the chart slot simply arrives without its plot.
+   */
   function measurePage() {
     const tab = measureTab(state.series)
     const named = index => pageName('measure', state.series, state.scale, state.anchor, index)
@@ -675,49 +721,53 @@ function rows(snapshot, page, history) {
     periodRows(row, state.model, pageName('measure', state.series, state.scale, shiftDate(state.anchor, state.scale, -1)),
       state.canForward ? pageName('measure', state.series, state.scale, state.nextAnchor) : '',
       pageName('measure', state.series, state.scale, snapshot.day))
-    if (!state.atCurrent) row('回到当前时段', '点这里回到最近的' + scaleName(state.scale), pageName('measure', state.series, state.scale, snapshot.day))
+    resetRow(row, pageName('measure', state.series, state.scale, snapshot.day), state.atCurrent, state.scale)
     const series = historySeries(history)
-    if (!series) { row('趋势数据待同步', '请在手机点击“更新到手表”后查看'); return }
+    if (!series) {
+      row(tab.title, '这一段没有记录', '', true)
+      row('这一段变化', '—')
+      row('趋势数据待同步', SYNC_PROMPT)
+      return
+    }
     const source = state.series === 'fat' ? series.fats : series.weights
     const points = measure(source, state.model, historyToday(snapshot, source))
     const present = []
     points.forEach(point => { if (point.value !== null) present.push(point.value) })
-    if (!present.length) {
-      row('这一段没有记录', '在手机记录' + tab.title + '后点击更新，或在此点击获取更新。')
-      return
-    }
-    let lowest = present[0]; let highest = present[0]
-    present.forEach(value => { if (value < lowest) lowest = value; if (value > highest) highest = value })
-    let span = highest - lowest
-    if (!(span > 1e-9)) span = 1
-    // A measurement axis must not start at 0, or a two-kilogram change would vanish into the margin.
-    // Both ends clear the readings by the same fraction, so the lowest point is not drawn on the frame
-    // either; rounding outward keeps that true after the text has been rounded too.
-    const axis = { low: floorTo(lowest - span * AXIS_PAD, tab.decimals), top: ceilTo(highest + span * AXIS_PAD, tab.decimals) }
+    const chart = row(tab.title, present.length ? '这一段有 ' + present.length + ' 次记录' : '这一段没有记录', '', true)
     const tapped = clamped(state.index, points.length)
     const shown = tapped === null ? lastFilled(points, point => point.value !== null) : tapped
-    const width = barWidth(points.length)
-    const stride = labelStride(state.scale)
-    const chart = row(tab.title, '这一段有 ' + present.length + ' 次记录', '', true)
-    chart.bars = points.map((point, index) => {
-      const marked = index === shown
-      const filled = point.value !== null && !point.future
-      const box = filled ? floorBox(point.value, axis) : { top: TREND_PLOT - TREND_STUB, height: TREND_STUB }
-      return { width: width, top: box.top, height: box.height, color: filled ? (marked ? TREND_MARK : tab.color) : TREND_MISSING,
-        label: index % stride === 0 || marked ? point.label : '',
-        labelClass: marked ? 'trend-label trend-label-on' : 'trend-label',
-        action: named(index) }
-    })
-    chart.marker = shown !== null
-    chart.markerLeft = shown === null ? 0 : markerLeft(points.length, width, shown)
-    chart.axisTop = '轴顶 ' + number(axis.top) + tab.unit
-    chart.axisBottom = '轴底 ' + number(axis.low) + tab.unit
-    const change = present[present.length - 1] - present[0]
-    row('这一段变化', (change > 0 ? '+' : change < 0 ? '−' : '') + number(Math.abs(change)) + tab.unit + ' · ' + present.length + ' 次记录')
+    if (present.length) {
+      let lowest = present[0]; let highest = present[0]
+      present.forEach(value => { if (value < lowest) lowest = value; if (value > highest) highest = value })
+      let span = highest - lowest
+      if (!(span > 1e-9)) span = 1
+      // A measurement axis must not start at 0, or a two-kilogram change would vanish into the margin.
+      // Both ends clear the readings by the same fraction, so the lowest point is not drawn on the frame
+      // either; rounding outward keeps that true after the text has been rounded too.
+      const axis = { low: floorTo(lowest - span * AXIS_PAD, tab.decimals), top: ceilTo(highest + span * AXIS_PAD, tab.decimals) }
+      const width = barWidth(points.length)
+      const stride = labelStride(state.scale)
+      chart.bars = points.map((point, index) => {
+        const marked = index === shown
+        const filled = point.value !== null && !point.future
+        const box = filled ? floorBox(point.value, axis) : { top: TREND_PLOT - TREND_STUB, height: TREND_STUB }
+        return { width: width, top: box.top, height: box.height, color: filled ? (marked ? TREND_MARK : tab.color) : TREND_MISSING,
+          label: index % stride === 0 || marked ? point.label : '',
+          labelClass: marked ? 'trend-label trend-label-on' : 'trend-label',
+          action: named(index) }
+      })
+      chart.marker = shown !== null
+      chart.markerLeft = shown === null ? 0 : markerLeft(points.length, width, shown)
+      chart.axisTop = '轴顶 ' + number(axis.top) + tab.unit
+      chart.axisBottom = '轴底 ' + number(axis.low) + tab.unit
+    }
+    const change = present.length ? present[present.length - 1] - present[0] : null
+    row('这一段变化', change === null ? '—'
+      : (change > 0 ? '+' : change < 0 ? '−' : '') + number(Math.abs(change)) + tab.unit + ' · ' + present.length + ' 次记录')
     if (shown === null) row('尚未记录' + tab.title, '在手机记录后获取更新')
     else {
       const point = points[shown]
-      row(point.rangeText, point.future ? '还没到这段日期' : number(point.value, tab.unit), '', true)
+      row(point.rangeText, point.value === null ? (point.future ? '还没到这段日期' : '未记录') : number(point.value, tab.unit), '', true)
     }
   }
   if (page === 'home') {

@@ -470,6 +470,104 @@ test('every bar selects its own column and no dated row list is left', () => {
   assert.equal(year[0].action, 'trend:balance:year:' + DAY + ':0')
 })
 
+// The list the whole app scrolls in resets its own offset when an item is inserted or deleted
+// (ScrollAdapterList "forceLayout: reset deleting/inserting" in the watch runtime, with the DSL calling
+// notifyItemInserted/notifyItemRemoved rather than notifyItemChanged), so a row that only sometimes
+// exists is what threw the user back to the top on every series and scale switch. The row set of a
+// chart page is therefore fixed: the same rows, of the same kind, in the same order, in every series,
+// every scale and every period - only what is inside a row changes. This test is the thing that stops
+// a caption added later from quietly reintroducing an insert/delete.
+//
+// `type` is the list-item's own native type (the template's `card.scale ? 'body-scale' : 'record'`),
+// and the rest is the kind of control the row carries. The bars, the axis, the marker and the readout
+// text are inside their rows, so a 7 -> 31 -> 12 bar chart is not part of this shape.
+const TREND_SHAPE = ['record:tab', 'record:tab', 'record:tab', 'record:choices', 'record:period',
+  'record', 'record', 'record', 'record']
+const MEASURE_SHAPE = ['record:tab', 'record:tab', 'record:choices', 'record:period',
+  'record', 'record', 'record', 'record']
+function shapeOf(items) {
+  return items.map(item => [item.scale ? 'body-scale' : 'record', item.tab ? 'tab' : '',
+    item.choices ? 'choices' : '', item.periodText ? 'period' : ''].filter(Boolean).join(':'))
+}
+/** Every chart page of one card: all serieses, all scales and a present and a past anchor each. */
+function chartPages(kind, serieses) {
+  const pages = []
+  const anchors = [DAY, '2026-10-05', '2026-08-14', '2025-10-05', '2026-02-14']
+  serieses.forEach(series => ['week', 'month', 'year'].forEach(scale =>
+    anchors.forEach(anchor => pages.push(kind + ':' + series + ':' + scale + ':' + anchor))))
+  return pages
+}
+
+test('a chart page has the same rows in the same order in every series, scale and period', () => {
+  const held = dashboard.validate(snapshot({ history: history(historyDays(),
+    [{ day: '2026-10-05', value: 71 }, { day: '2026-10-12', value: 70 }, { day: '2026-10-14', value: 69.5 }],
+    [{ day: '2026-10-08', value: 22 }, { day: '2026-10-14', value: 21.5 }]) }))
+  const cases = [
+    ['the held series', held, held.history],
+    ['an empty series', held, history([], [], [])],
+    ['no series at all', held, null]
+  ]
+  cases.forEach(item => {
+    const value = item[1]; const series = item[2]
+    const trend = chartPages('trend', ['meals', 'exercise', 'balance'])
+    const base = shapeOf(dashboard.rows(value, trend[0], series))
+    assert.deepEqual(base, TREND_SHAPE, item[0] + ': the trend page row set')
+    trend.forEach(page => assert.deepEqual(shapeOf(dashboard.rows(value, page, series)), base,
+      item[0] + ': ' + page + ' is not the same row set'))
+    const measure = chartPages('measure', ['weight', 'fat'])
+    const measureBase = shapeOf(dashboard.rows(value, measure[0], series))
+    assert.deepEqual(measureBase, MEASURE_SHAPE, item[0] + ': the measurement page row set')
+    measure.forEach(page => assert.deepEqual(shapeOf(dashboard.rows(value, page, series)), measureBase,
+      item[0] + ': ' + page + ' is not the same row set'))
+  })
+  // The series and the scale really did change what is inside those rows.
+  const one = dashboard.rows(held, 'trend:meals:month:' + DAY, held.history)
+  const other = dashboard.rows(held, 'trend:exercise:year:2025-10-05', held.history)
+  assert.deepEqual(shapeOf(one), shapeOf(other))
+  assert.notEqual(one.filter(item => item.bars)[0].bars.length, other.filter(item => item.bars)[0].bars.length)
+  assert.equal(one.filter(item => item.bars)[0].bars.length, 31)
+  assert.equal(other.filter(item => item.bars)[0].bars.length, 12)
+})
+
+test('a period step changes neither the number of rows nor their kind', () => {
+  const value = dashboard.validate(snapshot({ history: history(historyDays(), [{ day: '2026-10-12', value: 70 }], [{ day: '2026-10-08', value: 22 }]) }))
+  const steps = ['trend:balance:month:2026-08-14', 'trend:balance:year:2025-10-05', 'measure:weight:week:2026-09-14']
+  steps.forEach(start => {
+    // Walk three periods forward and back through the rows the page itself offers, comparing every
+    // step with the page it came from: `previous` exists in every period, `next` stops at the present.
+    let page = start
+    const shapes = [shapeOf(dashboard.rows(value, page, value.history))]
+    for (let step = 0; step < 3; step++) {
+      const period = dashboard.rows(value, page, value.history).filter(item => item.periodText)[0]
+      page = period.previous
+      shapes.push(shapeOf(dashboard.rows(value, page, value.history)))
+    }
+    for (let step = 0; step < 3; step++) {
+      const period = dashboard.rows(value, page, value.history).filter(item => item.periodText)[0]
+      if (!period.canNext) break
+      page = period.next
+      shapes.push(shapeOf(dashboard.rows(value, page, value.history)))
+    }
+    shapes.forEach(shape => assert.deepEqual(shape, shapes[0], start + ' changed its row set while stepping'))
+  })
+  // Sorting the rows also holds for a series switch, which is the tap the user reported.
+  const meals = shapeOf(pageRows('trend:meals:week:' + DAY, { history: history(historyDays()) }))
+  const exercise = shapeOf(pageRows('trend:exercise:week:' + DAY, { history: history(historyDays()) }))
+  const balance = shapeOf(pageRows('trend:balance:week:' + DAY, { history: history(historyDays()) }))
+  assert.deepEqual(meals, exercise)
+  assert.deepEqual(meals, balance)
+  assert.deepEqual(shapeOf(pageRows('trend:meals:month:' + DAY, { history: history(historyDays()) })), meals)
+  assert.deepEqual(shapeOf(pageRows('trend:meals:year:' + DAY, { history: history(historyDays()) })), meals)
+  // The rows that used to come and go are now permanent: the way back is either a button or a state
+  // line, and the readout, the day's breakdown and the summary are always there.
+  const away = pageRows('trend:meals:month:2026-08-14', { history: history(historyDays()) })
+  const here = pageRows('trend:meals:month:' + DAY, { history: history(historyDays()) })
+  assert.equal(away.filter(item => item.title === '回到当前时段').length, 1)
+  assert.equal(here.filter(item => item.title === '当前时段').length, 1)
+  assert.equal(here.filter(item => item.title === '当日明细').length, 1)
+  assert.equal(here.filter(item => item.title === '这一段没有记录').length, 0)
+})
+
 // The cursor is a date, so the scale chips keep the calendar place instead of a period count, and a
 // step moves that date by exactly one unit of the scale.
 test('the scale choices keep the series and the calendar place', () => {
@@ -503,8 +601,15 @@ test('stepping moves the anchor one unit of the current scale and never past the
   assert.equal(current.next, '')
   assert.equal(current.canNext, false)
   assert.equal(current.reset, 'trend:meals:month:' + DAY)
-  assert.equal(pageRows('trend:meals:month:' + DAY, { history: history(historyDays()) }).filter(item => item.title === '回到当前时段').length, 0)
-  assert.equal(pageRows('trend:meals:month:2026-08-14', { history: history(historyDays()) }).filter(item => item.title === '回到当前时段').length, 1)
+  // The way back is a row in every period - it is never omitted, because a row that appeared only
+  // once the user stepped away would be inserted into the list. Away from the present it is a button;
+  // at the present it is the state line, and the period value in the row above resets either way.
+  const away = pageRows('trend:meals:month:2026-08-14', { history: history(historyDays()) })
+  assert.deepEqual(away.filter(item => item.title === '回到当前时段').map(item => item.action), ['trend:meals:month:' + DAY])
+  const here = pageRows('trend:meals:month:' + DAY, { history: history(historyDays()) })
+  assert.equal(here.filter(item => item.title === '回到当前时段').length, 0)
+  assert.deepEqual(here.filter(item => item.title === '当前时段').map(item => item.action), [''])
+  assert.equal(here.filter(item => item.periodText)[0].reset, 'trend:meals:month:' + DAY)
   // Weeks step by seven days, and a month step clamps to the end of a shorter month.
   assert.equal(period('trend:meals:week:2026-10-05').previous, 'trend:meals:week:2026-09-28')
   assert.equal(period('trend:meals:week:2026-10-05').next, 'trend:meals:week:2026-10-12')
@@ -658,8 +763,12 @@ test('a snapshot shaped like an empty day from the phone validates and renders',
   assert.equal(bars[2].top, 117)
   assert.equal(items.filter(item => item.title === '10/14 周三' && item.highlight)[0].body, '待补全')
   const measure = dashboard.rows(value, 'measure:weight:week:' + DAY, value.history)
+  // Nothing measured in the period: the chart slot arrives without its plot and says so, and the
+  // readout slot carries the state line. Both rows exist, so the row set never moves.
   assert.equal(measure.filter(item => item.bars).length, 0)
-  assert.equal(measure.filter(item => item.title === '这一段没有记录').length, 1)
+  assert.equal(measure.filter(item => item.title === '体重' && !item.tab)[0].body, '这一段没有记录')
+  assert.equal(measure.filter(item => item.title === '尚未记录体重').length, 1)
+  assert.equal(measure.filter(item => item.title === '这一段变化')[0].body, '—')
 })
 
 test('the page names the router accepts, including the two old ones', () => {
@@ -731,10 +840,25 @@ test('the list is wired to keep and restore its own scroll offset', () => {
   assert.match(script, /onScroll\(event\)[\s\S]*?event\.scrollY[\s\S]*?this\.runtime\.scrollY = value/)
   assert.match(script, /onScrollIndex\(event\)[\s\S]*?event\.first[\s\S]*?this\.runtime\.scrollIndex = value/)
   assert.match(script, /const keep = dashboard\.sameChart\(this\.runtime\.page, page\)/)
-  assert.match(script, /restoreScroll\(keep\)[\s\S]*?this\.runtime\.scrollY > 0[\s\S]*?String\(this\.runtime\.scrollY\)/)
-  // The fallback restores the item at the top of the view, which the list clamps to its own end.
-  assert.match(script, /this\.runtime\.scrollIndex > 0[\s\S]*?scrollTo\(\{ index: this\.runtime\.scrollIndex, behavior: 'instant' \}\)/)
+  // Both controls are applied in one pass, and neither may be the only path: a path the runtime
+  // ignores fails silently, which is how the first attempt at this looked fixed and was not.
+  const restore = script.slice(script.indexOf('restoreScroll(keep)'), script.indexOf('onScroll(event)'))
+  assert.match(restore, /this\.scrollOffset = this\.runtime\.scrollY > 0 \? String\(this\.runtime\.scrollY\) : ''/)
+  assert.match(restore, /this\.runtime\.scrollIndex > 0[\s\S]*?scrollTo\(\{ index: this\.runtime\.scrollIndex, behavior: 'instant' \}\)/)
+  const between = script.slice(script.indexOf('this.scrollOffset = this.runtime.scrollY'),
+    script.indexOf("scrollTo({ index: this.runtime.scrollIndex"))
+  assert.doesNotMatch(between, /return/, 'the offset path must not return before the index path is tried')
   assert.match(script, /if \(!keep\)[\s\S]*?this\.runtime\.scrollY = 0; this\.runtime\.scrollIndex = 0[\s\S]*?scrollTo\(\{ index: 0 \}\)/)
+  // The only row-level conditionals in the template are the page chrome - the back bar and the
+  // connection footer - and neither changes while a chart card is open. A conditional list-item inside
+  // the card loop would be an insertion/deletion on every series or scale switch, which is the reset.
+  const rows = template.match(/<list-item[^>]*>/g) || []
+  assert.equal(rows.length, 6, 'the list holds the chrome and the card loop')
+  rows.forEach(tag => {
+    if (tag.indexOf('for=') >= 0) return
+    if (tag.indexOf(' if=') < 0) return
+    assert.match(tag, /if="\{\{!?(detail|pairMode)\}\}"/, tag + ' is a row that comes and goes')
+  })
 })
 
 test('the dashboard avoids globals and syntax the watch runtime may not provide', () => {
