@@ -1,4 +1,4 @@
-# 手表直连实现（0.15.0 / 0.8.0）
+# 手表直连实现（0.15.2 / 0.9.2）
 
 本轮把手机与手表之间的蓝牙连接重写为一套独立的持久化直连实现。协议细节见
 [LINK_PROTOCOL.md](LINK_PROTOCOL.md)；本文说明代码结构、为什么这样分层、怎么构建和验证。
@@ -192,8 +192,8 @@ Android 的这条缓存有几点必须记住：
 
 输出：
 
-- `artifacts/vitality-phone-0.15.0.apk`（调试签名，沿用本机既有签名）
-- `artifacts/health-vivo-watch-0.8.0.rpk`（BlueOS debug 构建）
+- `artifacts/vitality-phone-0.15.2.apk`（调试签名，沿用本机既有签名）
+- `artifacts/health-vivo-watch-0.9.2.rpk`（BlueOS debug 构建）
 
 手表编译器即使退出码为 0 但打印 `[ERROR]`，构建脚本也会拒绝复制产物。
 
